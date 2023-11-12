@@ -1,0 +1,17 @@
+{
+  "name": "edgespec",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup ./index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.19.5",
+    "nextlove": "^2.10.0",
+    "tsup": "^7.2.0"
+  }
+}
