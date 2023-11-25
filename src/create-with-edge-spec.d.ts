@@ -7,4 +7,8 @@ export const createWithEdgeSpec = (globalSpec) => {
 
 export declare function createWithEdgeSpec(
   globalSpec: SetupParams,
-): (routeSpec: any) => (routeFn: any) => (req: STD.Request) => any
+): (
+  routeSpec: any,
+) => (
+  routeFn: (req: STD.Request) => STD.Response | Promise<STD.Response>,
+) => any
