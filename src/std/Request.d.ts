@@ -1,3 +1,2 @@
-export declare class Request {
-  json(): object
-}
+import { Request } from "@types/node"
+export { Request }

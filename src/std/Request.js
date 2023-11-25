@@ -1,5 +1,2 @@
-export class Request {
-  json() {
-    return {}
-  }
-}
+const Request = global.Request
+export { Request }

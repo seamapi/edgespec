@@ -1,3 +1,2 @@
-export declare class Response {
-  constructor(data: string) {}
-}
+export { Response } from "@types/node"
+export { Response }

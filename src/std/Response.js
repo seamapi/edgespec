@@ -1,1 +1,2 @@
-export class Response {}
+const Response = global.Response
+export { Response }
