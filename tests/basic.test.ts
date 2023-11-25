@@ -19,10 +19,7 @@ test("basic endpoint test", async (t) => {
     },
   })
 
-  console.log(serverUrl)
-
   const { data: res } = await axios.get("/health")
-  console.log(res)
 
   t.is(res.ok, true)
 })
