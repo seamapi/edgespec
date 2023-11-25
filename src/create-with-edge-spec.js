@@ -4,7 +4,7 @@ export const createWithEdgeSpec = (globalSpec) => {
     // compatible request
 
     // Execute middleware + auth middleware etc.
-    for (const auth_method of route_spec.auth ?? []) {
+    for (const auth_method of routeSpec.auth ?? []) {
       // ...
     }
 

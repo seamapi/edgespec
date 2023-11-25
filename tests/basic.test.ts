@@ -3,7 +3,7 @@ import { Response } from "src/std/Response"
 import { getTestRoute } from "./fixtures/get-test-route"
 
 test("basic endpoint test", async (t) => {
-  const { axios } = await getTestRoute(t, {
+  const { axios, serverUrl } = await getTestRoute(t, {
     globalSpec: {},
     routeSpec: {
       auth: "none",
@@ -19,7 +19,10 @@ test("basic endpoint test", async (t) => {
     },
   })
 
+  console.log(serverUrl)
+
   const { data: res } = await axios.get("/health")
+  console.log(res)
 
   t.is(res.ok, true)
 })
