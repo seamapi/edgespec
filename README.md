@@ -10,6 +10,7 @@ Using edgespec:
 - Automatically generate OpenAPI documentation and validate request/response payloads
 - Automatically validate requests and responses
 - Easily create short-lived test servers for testing
+- Typesafe Middleware
 
 ## Getting Started
 
@@ -19,13 +20,46 @@ npm install edgespec
 npx edgespec serve
 ```
 
+## Middleware System
+
+Use or release edgespec-compatible middleware with a proper type-pipeline:
+
+```typescript
+import type { Middleware } from "edgespec"
+export const someMiddleware: Middleware<{
+  deps: {
+    db: DatabaseClient
+  },
+  outputs: {
+    is_authenticated: boolean
+  }
+> = next => (req) => {
+
+  const authToken = req.headers.get("authorization")?.split("Bearer ")?.[1]
+  if (!authToken) {
+    req.is_authenticated = false
+    return next(req)
+  }
+
+  const [user] = req.db.query("SELECT * FROM users WHERE token=?", [authToken])
+
+  if (!user) {
+    req.is_authenticated = false
+    return next(req)
+  }
+
+  req.is_authenticated = true
+  return next(req)
+}
+```
+
 ## Building for Deployment
 
 You can build configurations for different frameworks so that your edgespec app
 is portable. For example:
 
-- `edgespec build next.config.js`
-- `edgespec build hono-app.ts`
+- `edgespec build next`
+- `edgespec build hono`
 
 ## File-Routing
 
