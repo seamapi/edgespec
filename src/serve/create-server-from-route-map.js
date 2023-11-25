@@ -29,8 +29,6 @@ export const createServerFromRouteMap = async (routeMap) => {
   const routeMatcher = getRouteMatcher(Object.keys(formattedRoutes))
 
   const server = createServer(async (nReq, nRes) => {
-    // TODO determine route!
-    console.log(nReq.url)
     const { matchedRoute, routeParams } = routeMatcher(nReq.url) ?? {}
     if (!matchedRoute) {
       nRes.statusCode = 404
