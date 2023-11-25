@@ -5,6 +5,7 @@ that work with different HTTP frameworks.
 
 Using edgespec:
 
+- Endpoints always look familiar and standard across http frameworks
 - Endpoints that work anywhere (Cloudflare Workers, Hono, Vercel, NextJS)
 - Generate ergonomic multi-language SDKs
 - Automatically generate OpenAPI documentation and validate request/response payloads
@@ -60,6 +61,8 @@ is portable. For example:
 
 - `edgespec build next`
 - `edgespec build hono`
+- `edgespec build bun`
+- `edgespec build deno`
 
 ## File-Routing
 

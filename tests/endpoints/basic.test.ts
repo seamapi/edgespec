@@ -1,6 +1,6 @@
 import test from "ava"
 import { Response } from "src/std/Response"
-import { getTestRoute } from "./fixtures/get-test-route"
+import { getTestRoute } from "../fixtures/get-test-route"
 
 test("basic endpoint test", async (t) => {
   const { axios, serverUrl } = await getTestRoute(t, {

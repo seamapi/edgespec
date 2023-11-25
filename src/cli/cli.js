@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const yargs = require("yargs/yargs")
-const { hideBin } = require("yargs/helpers")
+import yargs from "yargs/yargs"
+import { hideBin } from "yargs/helpers"
 
 const argv = yargs(hideBin(process.argv))
   .scriptName("edgespec")
@@ -16,12 +16,12 @@ const argv = yargs(hideBin(process.argv))
     },
   )
   .command(
-    "build [project]",
+    "build [project_type]",
     "build a project",
     (yargs) => {
-      return yargs.positional("project", {
-        describe: "name of the project to build",
-        choices: ["next", "hono"],
+      return yargs.positional("project_type", {
+        describe: "Type of project to build",
+        choices: ["routemap", "next", "hono", "deno", "bun"],
       })
     },
     (argv) => {
