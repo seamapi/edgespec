@@ -7,7 +7,8 @@
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
     "build": "tsup ./index.ts",
-    "test": "ava"
+    "test": "ava",
+    "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/api"
   },
   "bin": "./src/cli/cli.js",
   "keywords": [],
@@ -16,7 +17,6 @@
   "devDependencies": {
     "@ava/get-port": "^2.0.0",
     "@ava/typescript": "^4.1.0",
-    "@biomejs/biome": "^1.3.3",
     "@types/node": "^20.10.0",
     "ava": "^5.3.1",
     "axios": "^1.6.2",
