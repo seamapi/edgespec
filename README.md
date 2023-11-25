@@ -54,15 +54,37 @@ export const someMiddleware: Middleware<{
 }
 ```
 
+## Using as a module
+
+> Having a service compiled as a module is called the "Module Service" pattern
+
+If you use `edgespec build module`, you can compile your
+edgespec app into an easy-to-use importable module. This
+allows you to use your application as if it's a library
+without ever starting a server.
+
+```ts
+// Create module.ts using "edgespec build module"
+import * as ModuleService from "./module.ts"
+
+const myModuleService = ModuleService.create()
+
+const res = await myModuleServer.fetch("/health").then((r) => r.json())
+
+console.log(res)
+// { "ok": true }
+```
+
 ## Building for Deployment
 
 You can build configurations for different frameworks so that your edgespec app
 is portable. For example:
 
-- `edgespec build next`
-- `edgespec build hono`
-- `edgespec build bun`
-- `edgespec build deno`
+- `edgespec build next` - Creates appropriate `app` or `pages/api` directory OR modifies `next.config.js`
+- `edgespec build hono` - Creates a `hono-app.ts` file that contains all the routes
+- `edgespec build bun` - Creates a `bun-app.ts` file that contains all the routes
+- `edgespec build deno` - Creates a `deno-app.ts` file that contains all the routes
+- `edgespec build module` - Creates a `module.ts` file that contains all the routes and can be used programmatically
 
 ## File-Routing
 
