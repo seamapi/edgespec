@@ -30,5 +30,5 @@ test("json-body-01", async (t) => {
   })
 
   t.is(res.ok, true)
-  t.is(res.name, "hello")
+  t.is(res.jsonBody.name, "hello")
 })

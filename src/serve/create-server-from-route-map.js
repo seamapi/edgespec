@@ -46,6 +46,7 @@ export const createServerFromRouteMap = async (routeMap) => {
         headers: nReq.headers,
         method: nReq.method,
         body: ["GET", "HEAD"].includes(nReq.method) ? undefined : nReq,
+        duplex: "half",
       })
 
       const res = await routeFn(webReq)
