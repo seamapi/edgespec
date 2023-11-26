@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsup ./index.ts",
     "test": "ava",
-    "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/api"
+    "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
   "bin": "./src/cli/cli.js",
   "keywords": [],

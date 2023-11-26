@@ -105,6 +105,47 @@ export const someMiddleware: Middleware<{
 }
 ```
 
+## Authentication Middleware
+
+You can specify authentication middleware, this middleware can be easily invoked
+by specifying `auth` on an route specifications.
+
+```ts
+// src/use-edge-spec.ts
+import { createWithEdgeSpec } from "edgespec"
+import { withApiKey, withBrowserSession } from "src/middlewares"
+
+export const withEdgeSpec = createWithEdgeSpec({
+  apiName: "hello-world",
+
+  authMiddlewareMap: {
+    apiKey: withApiKey,
+    browserSession: withBrowserSession,
+  },
+  globalMiddlewares: [],
+
+  productionServerUrl: "https://example.com",
+})
+```
+
+```ts
+// routes/resource/list.ts
+import { withEdgeSpec } from "src/with-edge-spec"
+
+export default withEdgeSpec({
+  auth: "apiKey",
+
+  // you can also specify an array of methods, e.g. ["apiKey", "browserSession"]
+  // auth: ["apiKey", "browserSession"],
+})(async (req) => {
+  // Recommendation: Have your auth middleware add req.auth to your request,
+  // the type will carry over!
+  const { userId } = req.auth
+
+  // ...
+})
+```
+
 ## Using as a module
 
 > Having a service compiled as a module is called the "Module Service" pattern
@@ -148,12 +189,12 @@ This file is served by default at `<server-url>/openapi.json` when you run
 
 ## File-Routing
 
-By default, `edgespec` searches inside your `./api` directory for endpoints
+By default, `edgespec` searches inside your `./routes` directory for endpoints
 using the NextJS `pages/api` file routing standard. It looks a bit like this:
 
-- `/api/health.ts`
-- `/api/resource/[id].ts`
-- `/api/resource/[id]/actions/[...action].ts`
+- `/routes/health.ts`
+- `/routes/resource/[id].ts`
+- `/routes/resource/[id]/actions/[...action].ts`
 
 ## Linting
 
