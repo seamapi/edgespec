@@ -21,6 +21,57 @@ npm install edgespec
 npx edgespec serve
 ```
 
+## Usage
+
+Every edgespec project has a global configuration defined in what is normally
+called `with-edge-spec.ts` and a route specification which is inside of each
+route file and uses the `withEdgeSpec` wrapper. You can see examples of this
+inside of the [examples directory](./examples), but here's a basic version:
+
+```ts
+// src/with-edge-spec.ts
+import { createWithEdgeSpec } from "src/create-with-edge-spec"
+
+export const withEdgeSpec = createWithEdgeSpec({
+  apiName: "hello-world",
+
+  authMiddlewareMap: {},
+  globalMiddlewares: [],
+
+  productionServerUrl: "https://example.com",
+})
+```
+
+```ts
+// api/index.ts
+import { withEdgeSpec } from "../src/with-edge-spec"
+import { z } from "zod"
+
+export default withEdgeSpec({
+  auth: "none",
+  methods: ["POST"],
+  jsonBody: z.object({
+    a: z.number(),
+    b: z.number(),
+  }),
+  jsonResponse: z.object({
+    sum: z.number(),
+  }),
+})((req) => {
+  const { a, b } = await req.json()
+
+  return new Response(
+    JSON.stringify({
+      sum: a + b,
+    }),
+  )
+})
+```
+
+## Defining Routes
+
+## Defining Global Configuration
+
 ## Middleware System
 
 Use or release edgespec-compatible middleware with a proper type-pipeline:
