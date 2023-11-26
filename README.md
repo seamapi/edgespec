@@ -95,6 +95,11 @@ using the NextJS `pages/api` file routing standard. It looks a bit like this:
 - `/api/resource/[id].ts`
 - `/api/resource/[id]/actions/[...action].ts`
 
+## Linting
+
+You can use `edgespec lint` to check that all your endpoints are well-formed
+and follow a configurable naming convention (e.g. `snake_case` or `kebab-case`)
+
 ## Development
 
 The types are separated from the source javascript files in this project,

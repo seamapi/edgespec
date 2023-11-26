@@ -19,10 +19,14 @@ export const createServerFromRouteMap = async (routeMap) => {
   // )
 
   const formattedRoutes = {}
-  for (const route of Object.keys(routeMap)) {
-    formattedRoutes[`/${route.replace(/\.ts$/g, "")}`] = route
+  for (let route of Object.keys(routeMap)) {
+    let routeWithSlash = route
+    if (!route.startsWith("/")) {
+      routeWithSlash = `/${route}`
+    }
+    formattedRoutes[`${routeWithSlash.replace(/\.ts$/g, "")}`] = route
     if (route.endsWith("index.ts")) {
-      formattedRoutes[`/${route.replace(/index\.ts$/g, "")}`] = route
+      formattedRoutes[`${routeWithSlash.replace(/index\.ts$/g, "")}`] = route
     }
   }
 

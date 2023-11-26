@@ -34,6 +34,7 @@
     "make-vfs": "^1.1.0",
     "next-route-matcher": "^1.0.1",
     "redaxios": "^0.5.1",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "zod": "^3.22.4"
   }
 }

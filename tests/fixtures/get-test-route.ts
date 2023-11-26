@@ -4,6 +4,7 @@ import type { AxiosInstance } from "axios"
 import http from "node:http"
 import getPort from "@ava/get-port"
 import defaultAxios from "redaxios"
+import { createServerFromRouteMap } from "src/serve/create-server-from-route-map"
 
 export const getTestRoute = async (
   t: any,
@@ -18,35 +19,40 @@ export const getTestRoute = async (
 
   const wrappedRouteFn = withRouteSpec(opts.routeSpec)(opts.routeFn)
 
-  const app = http.createServer(async (nReq, nRes) => {
-    try {
-      const webReq = new Request(`http://localhost${nReq.url}`, {
-        headers: nReq.headers as any,
-        method: nReq.method,
-        body: ["GET", "HEAD"].includes(nReq.method!)
-          ? undefined
-          : (nReq as any),
-      })
+  const port = await getPort()
 
-      const res: Response = await wrappedRouteFn(webReq)
-      nRes.statusCode = res.status ?? 200
-      const json = res.json && (await res.json().catch((e) => null))
-      const text = res.text && (await res.text().catch((e) => null))
-      if (json) {
-        nRes.setHeader("Content-Type", "application/json")
-        nRes.end(JSON.stringify(json))
-      } else if (text) {
-        nRes.end(text)
-      } else {
-        throw new Error("Couldn't read response body")
-      }
-    } catch (e: any) {
-      nRes.statusCode = 500
-      nRes.end(e.toString())
-    }
+  const app: any = await createServerFromRouteMap({
+    [opts.routePath]: wrappedRouteFn,
   })
 
-  const port = await getPort()
+  // const app = http.createServer(async (nReq, nRes) => {
+  //   try {
+  //     const webReq = new Request(`http://localhost${nReq.url}`, {
+  //       headers: nReq.headers as any,
+  //       method: nReq.method,
+  //       body: ["GET", "HEAD"].includes(nReq.method!)
+  //         ? undefined
+  //         : (nReq as any),
+  //     })
+
+  //     const res: Response = await wrappedRouteFn(webReq)
+  //     nRes.statusCode = res.status ?? 200
+  //     const json = res.json && (await res.json().catch((e) => null))
+  //     const text = res.text && (await res.text().catch((e) => null))
+  //     if (json) {
+  //       nRes.setHeader("Content-Type", "application/json")
+  //       nRes.end(JSON.stringify(json))
+  //     } else if (text) {
+  //       nRes.end(text)
+  //     } else {
+  //       throw new Error("Couldn't read response body")
+  //     }
+  //   } catch (e: any) {
+  //     nRes.statusCode = 500
+  //     nRes.end(e.toString())
+  //   }
+  // })
+
   app.listen(port)
   const serverUrl = `http://localhost:${port}`
 
