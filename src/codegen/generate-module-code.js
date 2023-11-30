@@ -1,4 +1,4 @@
-import { getVarSafeAlias } from "./get-var-safe-alias"
+import { getVarSafeAlias } from "./get-var-safe-alias.js"
 import { getMatchingFilePaths } from "make-vfs"
 import path from "path"
 
@@ -19,7 +19,7 @@ export const generateModuleCode = async (dirPath) => {
   code.push("// Route Imports")
   for (const filePath of filePaths) {
     code.push(
-      `import ${routeVarNameMap[filePath]} from "${path.relative(
+      `import ${routeVarNameMap[filePath]} from "./${path.relative(
         process.cwd(),
         path.join(dirPath, filePath)
       )}"`

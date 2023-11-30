@@ -1,6 +1,6 @@
 import test from "ava"
-import { Response } from "src/std/Response"
-import { getTestRoute } from "../fixtures/get-test-route"
+import { Response } from "src/std/Response.js"
+import { getTestRoute } from "../fixtures/get-test-route.js"
 import { z } from "zod"
 
 test("json-body-01", async (t) => {

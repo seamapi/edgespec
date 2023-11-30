@@ -1,6 +1,6 @@
 import { getMatchingFilePaths } from "make-vfs"
 import path from "node:path"
-import { normalizeRouteMap } from "../lib/normalize-route-map"
+import { normalizeRouteMap } from "../lib/normalize-route-map.js"
 
 export const loadApiDirectoryAsRouteMap = async (dirPath) => {
   const filePaths = await getMatchingFilePaths({

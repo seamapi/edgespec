@@ -1,6 +1,6 @@
 import { createServer } from "node:http"
 import { getRouteMatcher } from "next-route-matcher"
-import { normalizeRouteMap } from "../lib/normalize-route-map"
+import { normalizeRouteMap } from "../lib/normalize-route-map.js"
 // import { buildToNodeHandler } from "@edge-runtime/node-utils"
 // import * as primitives from "@edge-runtime/primitives"
 

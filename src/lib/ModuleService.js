@@ -1,4 +1,4 @@
-import { normalizeRouteMap } from "./normalize-route-map"
+import { normalizeRouteMap } from "./normalize-route-map.js"
 import { getRouteMatcher } from "next-route-matcher"
 
 class ModuleService {

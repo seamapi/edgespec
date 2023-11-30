@@ -1,4 +1,4 @@
-import { generateModuleCode } from "src/codegen/generate-module-code"
+import { generateModuleCode } from "src/codegen/generate-module-code.js"
 import test from "ava"
 
 test("test generating module code", async (t) => {
