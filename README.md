@@ -167,6 +167,20 @@ console.log(res)
 // { "ok": true }
 ```
 
+## Proxying Requests to other Module Services
+
+```ts
+// routes/billing/[...anything].ts
+import { withEdgeSpec } from "src/with-edge-spec"
+import BillingService from "billing-service"
+
+export default withEdgeSpec({
+  auth: "apiKey",
+})(async (req) => {
+  return BillingService.create().fetch(req)
+})
+```
+
 ## Building for Deployment
 
 You can build configurations for different frameworks so that your edgespec app
