@@ -1,5 +1,6 @@
 import { createServer } from "node:http"
 import { getRouteMatcher } from "next-route-matcher"
+import { normalizeRouteMap } from "../lib/normalize-route-map"
 // import { buildToNodeHandler } from "@edge-runtime/node-utils"
 // import * as primitives from "@edge-runtime/primitives"
 
@@ -18,17 +19,7 @@ export const createServerFromRouteMap = async (routeMap) => {
   //   }),
   // )
 
-  const formattedRoutes = {}
-  for (let route of Object.keys(routeMap)) {
-    let routeWithSlash = route
-    if (!route.startsWith("/")) {
-      routeWithSlash = `/${route}`
-    }
-    formattedRoutes[`${routeWithSlash.replace(/\.ts$/g, "")}`] = route
-    if (route.endsWith("index.ts")) {
-      formattedRoutes[`${routeWithSlash.replace(/index\.ts$/g, "")}`] = route
-    }
-  }
+  const formattedRoutes = normalizeRouteMap(routeMap)
 
   const routeMatcher = getRouteMatcher(Object.keys(formattedRoutes))
 

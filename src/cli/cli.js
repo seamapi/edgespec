@@ -31,7 +31,7 @@ const argv = yargs(hideBin(process.argv))
     (yargs) => {
       return yargs.positional("project_type", {
         describe: "Type of project to build",
-        choices: ["route-map", "next", "hono", "deno", "bun"],
+        choices: ["route-map", "module", "next", "hono", "deno", "bun"],
       })
     },
     (argv) => {
