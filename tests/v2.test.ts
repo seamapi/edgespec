@@ -28,4 +28,9 @@ test("v2", async t => {
       "x-foo": "bar"
     },
   })
+
+  const getUserResponse = await axios.post(`http://localhost:${port}/users/123`)
+  t.like(getUserResponse.data, {
+    user: {}
+  })
 })

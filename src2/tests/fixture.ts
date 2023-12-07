@@ -1,6 +1,5 @@
 import { once } from "node:events"
 import http from "node:http"
-import path from "node:path"
 import { AddressInfo } from "node:net"
 import esbuild from "esbuild"
 import * as edge from "edge-runtime"
@@ -17,16 +16,11 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
   const routeMap = await createRouteMapFromDirectory(directoryPath)
 
   const server = http.createServer(async (req, res) => {
-    const routeFilePath = routeMap[req.url!]
-    if (!routeFilePath) {
-      res.statusCode = 404
-      res.end()
-      return
-    }
+    const waitForReqEnd = once(req, "end")
 
     const result = await esbuild.build({
       stdin: {
-        contents: generateWinterCGMinimalEntry(path.join(directoryPath, routeFilePath)),
+        contents: generateWinterCGMinimalEntry(routeMap),
         resolveDir: directoryPath,
         loader: "ts",
       },
@@ -38,14 +32,17 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
     const runtime = new edge.EdgeRuntime({
       initialCode: result.outputFiles[0].text,
     })
+
     const fullUrl = `http://localhost:${req.socket.localPort}${req.url}`
+
     const response = await runtime.dispatchFetch(fullUrl, {
       method: req.method,
       headers: Object.entries(req.headers) as [string, string][],
       body: await new Promise((resolve, reject) => {
         const chunks: Uint8Array[] = []
         req.on("data", (chunk) => chunks.push(chunk))
-        req.on("end", () => resolve(Buffer.concat(chunks)))
+        // req.on("end", () => resolve(Buffer.concat(chunks)))
+        waitForReqEnd.then(() => resolve(Buffer.concat(chunks)))
         req.on("error", reject)
       })
     })
