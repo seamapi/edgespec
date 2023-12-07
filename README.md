@@ -1,17 +1,16 @@
 # edgespec
 
-Edgespec is a way of writing [WinterCG-compatible](https://wintercg.org/) APIs
-that work with different HTTP frameworks.
+EdgeSpec is an opinionated HTTP framework. Out of the box, it:
 
-Using edgespec:
+- Uses filepath-based routing
+- Generates ergonomic SDKs across multiple languages
+- Generates OpenAPI documentation
+- Provides end-to-end type safety for your middleware and endpoints
+- Can serve other EdgeSpec services as an embedded module
 
-- Endpoints always look familiar and standard across http frameworks
-- Endpoints that work anywhere (Cloudflare Workers, Hono, Vercel, NextJS)
-- Generate ergonomic multi-language SDKs
-- Automatically generate OpenAPI documentation and validate request/response payloads
-- Automatically validate requests and responses
-- Easily create short-lived test servers for testing
-- Typesafe Middleware
+EdgeSpec primarily targets the [common minimum API described by WinterCG](https://github.com/wintercg/proposal-common-minimum-api), but it can also target Node.js, Bun, and Deno. Currently, the two main "edge"/WinterCG-compatible platforms targeted are Cloudflare Workers and Vercel Edge Functions.
+
+Regardless of your target, EdgeSpec provides a consistent API as well as test fixtures that simulate your target environment.
 
 ## Getting Started
 
@@ -65,6 +64,50 @@ export default withEdgeSpec({
       sum: a + b,
     }),
   )
+})
+```
+
+## Targets
+
+Specifying a target does two things:
+
+- Configures the dev server and test fixture to simulate the specified target. For example, if the target is `wintercg_compatible`, `import("node:fs")` will throw an error.
+- Changes how code is bundled for production. For example, if the target is `bun`, the entry point will use `Bun.serve()`. If the target is `node`, the entry point will use `http.createServer()`.
+
+ The target can be configured in your `edgespec.config.ts` file:
+
+```ts
+import {createEdgeSpecConfig} from "edgespec"
+
+export default createEdgeSpecConfig({
+  target: "bun"
+})
+```
+
+There are currently four targets:
+
+- [WinterCG Compatible: `wintercg_compatible`](https://wintercg.org/)
+- [Node.js: `node`](https://nodejs.org/)
+- [Deno: `deno`](https://deno.land/)
+- [Bun: `bun`](https://bun.sh/)
+
+
+Not all targets are compatible with all local development environments. For example, you can't develop with Bun and target Deno:
+
+|              | Target: WinterCG | Target: Node.js | Target: Deno | Target: Bun |
+|--------------|------------------|-----------------|--------------|-------------|
+| Dev: Node.js | ✅                | ✅               | ❌            | ❌           |
+| Dev: Deno    | ✅                | ❌               | ✅            | ❌           |
+| Dev: Bun     | ✅                | ✅               | ❌            | ✅           |
+
+We recommend targeting `wintercg_compatible` whenever possible as it's the most portable target. Similar to WASM, you can target `wintercg_compatible` but still use it in a variety of other "non-native" environments using a shim:
+
+```ts
+import { createBunFetchHandler } from "edgespec/bun"
+import entry from "./dist/bundled-edgespec-app.js"
+
+Bun.serve({
+  fetch: createBunFetchHandler(entry)
 })
 ```
 
