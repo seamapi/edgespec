@@ -71,7 +71,7 @@ export default withEdgeSpec({
 
 Specifying a target does two things:
 
-- Configures the dev server and test fixture to simulate the specified target. For example, if the target is `wintercg_minimal`, `import("node:fs")` will throw an error.
+- Configures the dev server and test fixture to simulate the specified target. For example, if the target is `wintercg-minimal`, `import("node:fs")` will throw an error.
 - Changes how code is bundled for production. For example, if the target is `bun`, the entry point will use `Bun.serve()`. If the target is `node`, the entry point will use `http.createServer()`.
 
  The target can be configured in your `edgespec.config.ts` file:
@@ -86,7 +86,7 @@ export default createEdgeSpecConfig({
 
 There are currently four targets:
 
-- [WinterCG Compatible: `wintercg_minimal`](https://wintercg.org/)
+- [WinterCG Compatible: `wintercg-minimal`](https://wintercg.org/)
 - [Node.js: `node`](https://nodejs.org/)
 - [Deno: `deno`](https://deno.land/)
 - [Bun: `bun`](https://bun.sh/)
@@ -100,7 +100,7 @@ Not all targets are compatible with all local development environments. For exam
 | Dev: Deno    | ✅                | ❌               | ✅            | ❌           |
 | Dev: Bun     | ✅                | ✅               | ❌            | ✅           |
 
-We recommend targeting `wintercg_minimal` whenever possible as it's the most portable target. Similar to WASM, you can target `wintercg_minimal` but still use it in a variety of other "non-native" environments using a shim:
+We recommend targeting `wintercg-minimal` whenever possible as it's the most portable target. Similar to WASM, you can target `wintercg-minimal` but still use it in a variety of other "non-native" environments using a shim:
 
 ```ts
 import { createBunFetchHandler } from "edgespec/bun"
@@ -109,6 +109,19 @@ import entry from "./dist/bundled-edgespec-app.js"
 Bun.serve({
   fetch: createBunFetchHandler(entry)
 })
+```
+
+## Embedding in other frameworks
+
+todo: talk about how something like this works:
+
+```ts
+import { Hono } from "hono"
+import { createHonoHandler } from "edgespec/adapters/hono"
+import entry from "./dist/bundled-edgespec-app.js"
+
+const app = new Hono()
+app.use("/foo_service/*", createHonohandler(entry))
 ```
 
 ## Defining Routes
