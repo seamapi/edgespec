@@ -3,8 +3,6 @@ import http from "node:http"
 import { AddressInfo } from "node:net"
 import esbuild from "esbuild"
 import * as edge from "edge-runtime"
-import { createRouteMapFromDirectory } from "src2/routes/create-route-map-from-directory.ts"
-import { generateWinterCGMinimalEntry } from "src2/targets/entries/wintercg-minimal"
 import { bundle } from "src2/bundle/bundle"
 import fs from "node:fs/promises"
 
@@ -15,8 +13,6 @@ interface StartTestFixtureFromDirectoryOptions {
 
 // todo: allow injecting env?
 export const startTestFixtureFromDirectory = async ({directoryPath, port}: StartTestFixtureFromDirectoryOptions) => {
-  const routeMap = await createRouteMapFromDirectory(directoryPath)
-
   const server = http.createServer(async (req, res) => {
     const chunks: Uint8Array[] = []
     req.on("data", (chunk) => chunks.push(chunk))
@@ -25,7 +21,6 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
 
     try {
       const bundled = await bundle({
-        routeMap,
         directoryPath,
         bundledAdapter: "wintercg-minimal"
       })

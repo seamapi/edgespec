@@ -1,4 +1,5 @@
 import esbuild from "esbuild"
+import { createRouteMapFromDirectory } from "src2/routes/create-route-map-from-directory";
 
 const alphabet = "zyxwvutsrqponmlkjihgfedcba"
 
@@ -10,7 +11,6 @@ const getRandomId = (length: number): string => {
 }
 
 interface BundleOptions {
-  routeMap: Record<string, string>
   directoryPath: string,
   /**
    * This should not be provided in most cases so your bundle is maximally portable.
@@ -19,7 +19,9 @@ interface BundleOptions {
 }
 
 export const bundle = async (options: BundleOptions) => {
-  const routes = Object.entries(options.routeMap).map(([route, filePath]) => {
+  const routeMap = await createRouteMapFromDirectory(options.directoryPath)
+
+  const routes = Object.entries(routeMap).map(([route, filePath]) => {
     return {
       route,
       filePath,
