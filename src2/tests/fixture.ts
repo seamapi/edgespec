@@ -16,8 +16,10 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
   const routeMap = await createRouteMapFromDirectory(directoryPath)
 
   const server = http.createServer(async (req, res) => {
-    const waitForReqEnd = once(req, "end")
-
+    const chunks: Uint8Array[] = []
+    req.on("data", (chunk) => chunks.push(chunk))
+    await once(req, "end")
+    const body = Buffer.concat(chunks)
     const result = await esbuild.build({
       stdin: {
         contents: generateWinterCGMinimalEntry(routeMap),
@@ -38,13 +40,7 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
     const response = await runtime.dispatchFetch(fullUrl, {
       method: req.method,
       headers: Object.entries(req.headers) as [string, string][],
-      body: await new Promise((resolve, reject) => {
-        const chunks: Uint8Array[] = []
-        req.on("data", (chunk) => chunks.push(chunk))
-        // req.on("end", () => resolve(Buffer.concat(chunks)))
-        waitForReqEnd.then(() => resolve(Buffer.concat(chunks)))
-        req.on("error", reject)
-      })
+      body: req.method === "GET" ? undefined : body,
     })
     await response.waitUntil()
 

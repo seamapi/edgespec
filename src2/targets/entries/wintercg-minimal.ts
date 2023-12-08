@@ -9,7 +9,6 @@ const getRandomId = (length: number): string => {
   return str;
 }
 
-
 export const generateWinterCGMinimalEntry = (routeMap: Record<string, string>): string => {
   const routes = Object.entries(routeMap).map(([route, filePath]) => {
     return {
