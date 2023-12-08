@@ -38,4 +38,11 @@ test("response passes through status and headers", async t => {
   t.is(response.headers['x-foo'], 'bar')
 })
 
-test.todo("path params as query parameters?")
+test("path params are available", async t => {
+  const {axios} = await getTestServer(t, import.meta.url)
+
+  const response = await axios.get(`/users/123`)
+  t.deepEqual(response.data, {
+    userId: "123",
+  })
+})

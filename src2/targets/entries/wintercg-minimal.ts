@@ -32,6 +32,7 @@ export const generateWinterCGMinimalEntry = (routeMap: Record<string, string>): 
     addEventListener("fetch", async (event) => {
       const {matchedRoute, routeParams} = routeMatcher(new URL(event.request.url).pathname)
       const handler = routeMapWithHandlers[matchedRoute]
+      event.request.pathParams = routeParams
       event.respondWith(await handler(event.request))
     })
   `
