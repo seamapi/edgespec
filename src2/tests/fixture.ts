@@ -1,10 +1,8 @@
 import { once } from "node:events"
 import http from "node:http"
 import { AddressInfo } from "node:net"
-import esbuild from "esbuild"
 import * as edge from "edge-runtime"
 import { bundle } from "src2/bundle/bundle"
-import fs from "node:fs/promises"
 
 interface StartTestFixtureFromDirectoryOptions {
   directoryPath: string
