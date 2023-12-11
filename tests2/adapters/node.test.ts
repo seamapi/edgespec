@@ -9,7 +9,7 @@ import pRetry from "p-retry"
 import axios from "axios"
 import { once } from "node:events"
 
-test("bundle", async t => {
+test("test bundle with Node adapter", async t => {
   const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 
   const bundled = await bundle({
