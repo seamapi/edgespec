@@ -1,15 +1,19 @@
-import { normalizeRouteMap } from "./normalize-route-map.js"
 import { getRouteMatcher } from "next-route-matcher"
+import { normalizeRouteMap } from "./normalize-route-map.js"
 
 export class ModuleService {
-  constructor(routeMap) {
+  private routeMap
+  private normalizedRouteToRoute
+  private routeMatcher
+
+  constructor(routeMap: Record<string, Function>) {
     this.routeMap = routeMap
     this.normalizedRouteToRoute = normalizeRouteMap(routeMap)
     this.routeMatcher = getRouteMatcher(
       Object.keys(this.normalizedRouteToRoute)
     )
   }
-  fetch(reqOrUrl, fetchOptions) {
+  fetch(reqOrUrl: Request | string, fetchOptions?: RequestInit) {
     if (typeof reqOrUrl === "string") {
       return this._fetchWithRequest(
         new Request(`http://example.com${reqOrUrl}`, fetchOptions)
@@ -17,7 +21,7 @@ export class ModuleService {
     }
     return this._fetchWithRequest(reqOrUrl)
   }
-  _fetchWithRequest(req) {
+  _fetchWithRequest(req: Request) {
     const pathname = new URL(req.url).pathname
     const { matchedRoute, routeParams } = this.routeMatcher(pathname) ?? {}
     if (!matchedRoute) {
