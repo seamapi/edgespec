@@ -13,7 +13,7 @@ export const generateModuleCode = async (dirPath: string) => {
     routeVarNameMap[filePath] = getVarSafeAlias(filePath)
   }
 
-  let code = []
+  let code: string[] = []
   code.push("// This file is generated. Do not edit it directly.\n")
   code.push(`import { ModuleService } from "edgespec"\n`)
   code.push("// Route Imports")
