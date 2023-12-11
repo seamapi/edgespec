@@ -67,50 +67,6 @@ export default withEdgeSpec({
 })
 ```
 
-## Targets
-
-Specifying a target does two things:
-
-- Configures the dev server and test fixture to simulate the specified target. For example, if the target is `wintercg-minimal`, `import("node:fs")` will throw an error.
-- Changes how code is bundled for production. For example, if the target is `bun`, the entry point will use `Bun.serve()`. If the target is `node`, the entry point will use `http.createServer()`.
-
- The target can be configured in your `edgespec.config.ts` file:
-
-```ts
-import {createEdgeSpecConfig} from "edgespec"
-
-export default createEdgeSpecConfig({
-  target: "bun"
-})
-```
-
-There are currently four targets:
-
-- [WinterCG Compatible: `wintercg-minimal`](https://wintercg.org/)
-- [Node.js: `node`](https://nodejs.org/)
-- [Deno: `deno`](https://deno.land/)
-- [Bun: `bun`](https://bun.sh/)
-
-
-Not all targets are compatible with all local development environments. For example, you can't develop with Bun and target Deno:
-
-|              | Target: WinterCG | Target: Node.js | Target: Deno | Target: Bun |
-|--------------|------------------|-----------------|--------------|-------------|
-| Dev: Node.js | ✅                | ✅               | ❌            | ❌           |
-| Dev: Deno    | ✅                | ❌               | ✅            | ❌           |
-| Dev: Bun     | ✅                | ✅               | ❌            | ✅           |
-
-We recommend targeting `wintercg-minimal` whenever possible as it's the most portable target. Similar to WASM, you can target `wintercg-minimal` but still use it in a variety of other "non-native" environments using a shim:
-
-```ts
-import { createBunFetchHandler } from "edgespec/bun"
-import entry from "./dist/bundled-edgespec-app.js"
-
-Bun.serve({
-  fetch: createBunFetchHandler(entry)
-})
-```
-
 ## Embedding in other frameworks
 
 todo: talk about how something like this works:
