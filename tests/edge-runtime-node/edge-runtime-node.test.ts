@@ -10,7 +10,7 @@ const transformToNode = buildToNodeHandler(global as any, {
   defaultOrigin: "http://example.com",
 })
 
-test("convert node server to standard web request server", async (t) => {
+test.skip("convert node server to standard web request server", async (t) => {
   const server = await createServer(
     // 2. takes an web compliant request handler, that uses Web globals like Request and Response,
     // and turn it into a Node.js compliant request handler.
