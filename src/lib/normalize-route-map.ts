@@ -1,5 +1,5 @@
-export const normalizeRouteMap = (routeMap) => {
-  const normalizedRoutes = {}
+export const normalizeRouteMap = (routeMap: Record<string, Function>) => {
+  const normalizedRoutes: Record<string, string> = {}
   for (let route of Object.keys(routeMap)) {
     let routeWithSlash = route
     if (!route.startsWith("/")) {

@@ -8,7 +8,9 @@ import { normalizeRouteMap } from "../lib/normalize-route-map.js"
 //   defaultOrigin: "http://example.com",
 // })
 
-export const createServerFromRouteMap = async (routeMap) => {
+export const createServerFromRouteMap = async (
+  routeMap: Record<string, Function>
+) => {
   // We should use edge runtime here but it's currently broken:
   // https://github.com/vercel/edge-runtime/issues/716
   // const server = await createServer(
@@ -24,6 +26,12 @@ export const createServerFromRouteMap = async (routeMap) => {
   const routeMatcher = getRouteMatcher(Object.keys(formattedRoutes))
 
   const server = createServer(async (nReq, nRes) => {
+    if (!nReq.url) {
+      nRes.statusCode = 400
+      nRes.end("no url provided")
+      return
+    }
+
     const { matchedRoute, routeParams } = routeMatcher(nReq.url) ?? {}
     if (!matchedRoute) {
       nRes.statusCode = 404
@@ -36,15 +44,15 @@ export const createServerFromRouteMap = async (routeMap) => {
       const webReq = new Request(`http://localhost${nReq.url}`, {
         headers: nReq.headers,
         method: nReq.method,
-        body: ["GET", "HEAD"].includes(nReq.method) ? undefined : nReq,
+        body: ["GET", "HEAD"].includes(nReq.method ?? "") ? undefined : nReq,
         duplex: "half",
-      })
+      } as any)
 
       const res = await routeFn(webReq)
 
       if (res.headers) {
         for (const [key, value] of Object.entries(res.headers)) {
-          nRes.setHeader(key, value)
+          nRes.setHeader(key, value as any)
         }
       }
 
@@ -58,7 +66,7 @@ export const createServerFromRouteMap = async (routeMap) => {
         // If body is not a stream, write it directly
         nRes.end(res.body)
       }
-    } catch (e) {
+    } catch (e: any) {
       nRes.statusCode = 500
       nRes.end(e.toString())
     }

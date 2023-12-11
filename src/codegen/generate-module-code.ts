@@ -1,14 +1,14 @@
-import { getVarSafeAlias } from "./get-var-safe-alias.js"
 import { getMatchingFilePaths } from "make-vfs"
 import path from "path"
+import { getVarSafeAlias } from "./get-var-safe-alias.js"
 
-export const generateModuleCode = async (dirPath) => {
+export const generateModuleCode = async (dirPath: string) => {
   const filePaths = await getMatchingFilePaths({
     dirPath,
     extensions: ["ts"],
   })
 
-  let routeVarNameMap = {}
+  const routeVarNameMap: Record<string, string> = {}
   for (const filePath of filePaths) {
     routeVarNameMap[filePath] = getVarSafeAlias(filePath)
   }
