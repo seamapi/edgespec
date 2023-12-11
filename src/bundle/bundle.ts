@@ -1,5 +1,5 @@
 import esbuild from "esbuild"
-import { createRouteMapFromDirectory } from "src2/routes/create-route-map-from-directory";
+import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory";
 
 const alphabet = "zyxwvutsrqponmlkjihgfedcba"
 
@@ -44,7 +44,7 @@ export const bundle = async (options: BundleOptions) => {
     }
 
     ${options.bundledAdapter === "wintercg-minimal" ? `
-    import {addFetchListener} from "src2/adapters/wintercg-minimal.ts"
+    import {addFetchListener} from "src/adapters/wintercg-minimal.ts"
     addFetchListener(edgeSpec)
     ` : "export default edgeSpec"}
   `

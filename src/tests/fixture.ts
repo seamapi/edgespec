@@ -2,7 +2,7 @@ import { once } from "node:events"
 import http from "node:http"
 import { AddressInfo } from "node:net"
 import * as edge from "edge-runtime"
-import { bundle } from "src2/bundle/bundle"
+import { bundle } from "src/bundle/bundle"
 
 interface StartTestFixtureFromDirectoryOptions {
   directoryPath: string

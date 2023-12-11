@@ -1,5 +1,5 @@
 import test from "ava"
-import { bundle } from "src2/bundle/bundle"
+import { bundle } from "src/bundle/bundle"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { fileURLToPath } from "node:url"
