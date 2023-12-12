@@ -67,49 +67,43 @@ export default withEdgeSpec({
 })
 ```
 
-## Targets
-
-Specifying a target does two things:
-
-- Configures the dev server and test fixture to simulate the specified target. For example, if the target is `wintercg-minimal`, `import("node:fs")` will throw an error.
-- Changes how code is bundled for production. For example, if the target is `bun`, the entry point will use `Bun.serve()`. If the target is `node`, the entry point will use `http.createServer()`.
-
- The target can be configured in your `edgespec.config.ts` file:
+EdgeSpec requires a config file called `edgespec.config.ts` or `edgespec.config.js` to be placed next to your routes directory:
 
 ```ts
-import {createEdgeSpecConfig} from "edgespec"
+import {defineConfig} from "edgespec"
 
-export default createEdgeSpecConfig({
-  target: "bun"
+export default defineConfig({
+  emulateWinterCGRuntimeLocally: true,
+  outDir: "dist",
 })
 ```
 
-There are currently four targets:
+## Deployment
 
-- [WinterCG Compatible: `wintercg-minimal`](https://wintercg.org/)
-- [Node.js: `node`](https://nodejs.org/)
-- [Deno: `deno`](https://deno.land/)
-- [Bun: `bun`](https://bun.sh/)
+Run `edgespec bundle`. Then, depending on your target:
 
+### Node.js
 
-Not all targets are compatible with all local development environments. For example, you can't develop with Bun and target Deno:
+Create an `entrypoint.js` file:
 
-|              | Target: WinterCG | Target: Node.js | Target: Deno | Target: Bun |
-|--------------|------------------|-----------------|--------------|-------------|
-| Dev: Node.js | ✅                | ✅               | ❌            | ❌           |
-| Dev: Deno    | ✅                | ❌               | ✅            | ❌           |
-| Dev: Bun     | ✅                | ✅               | ❌            | ✅           |
+```js
+import {startServer} from "edgespec/adapters/node"
+import bundle from "./dist"
 
-We recommend targeting `wintercg-minimal` whenever possible as it's the most portable target. Similar to WASM, you can target `wintercg-minimal` but still use it in a variety of other "non-native" environments using a shim:
-
-```ts
-import { createBunFetchHandler } from "edgespec/bun"
-import entry from "./dist/bundled-edgespec-app.js"
-
-Bun.serve({
-  fetch: createBunFetchHandler(entry)
-})
+startServer(bundle, 3000)
 ```
+
+### WinterCG (Cloudflare Workers/Vercel Edge Functions)
+
+Create an `entrypoint.js` file:
+
+```js
+import {addFetchListener} from "edgespec/adapters/wintercg-minimal"
+import bundle from "./dist"
+addFetchListener(edgeSpec)
+```
+
+Because WinterCG doesn't allow `import`s, you'll need to bundle a second time with a tool like [tsup](https://github.com/egoist/tsup): `tsup entrypoint.js`. You can bypass this step by running `edgespec bundle --entrypoint wintercg-minimal` and directly deploying `./dist/index.js` if you don't plan on embedding it into other services.
 
 ## Embedding in other frameworks
 
