@@ -1,5 +1,6 @@
 import http from "node:http"
 import {once} from "node:events"
+import type { EdgeSpecRequest } from "src/types/web-handler"
 
 export const startServer = (edgeSpec: any, port?: number) => {
   const server = http.createServer(async (req, res) => {
@@ -9,7 +10,7 @@ export const startServer = (edgeSpec: any, port?: number) => {
     const body = Buffer.concat(chunks)
 
     const fullUrl = `http://localhost:${req.socket.localPort}${req.url}`
-    const fetchRequest = new Request(fullUrl, {
+    const fetchRequest: EdgeSpecRequest = new Request(fullUrl, {
       method: req.method,
         headers: Object.entries(req.headers) as [string, string][],
         body: req.method === "GET" ? undefined : body,

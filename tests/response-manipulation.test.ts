@@ -1,5 +1,4 @@
 import test from "ava"
-import { Response } from "src/std"
 
 test("get json from response", async (t) => {
   const res = new Response(JSON.stringify({ ok: true }))

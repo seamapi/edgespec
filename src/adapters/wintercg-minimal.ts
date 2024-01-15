@@ -1,8 +1,16 @@
+import { EdgeSpecFetchEvent } from "src/types/web-handler"
+
 export const addFetchListener = (edgeSpec: any) => {
   addEventListener("fetch", async (event) => {
-    const {matchedRoute, routeParams} = edgeSpec.routeMatcher(new URL(event.request.url).pathname)
+    // TODO: find a better way to cast this
+    const fetchEvent = event as unknown as EdgeSpecFetchEvent
+
+    const { matchedRoute, routeParams } = edgeSpec.routeMatcher(
+      new URL(fetchEvent.request.url).pathname
+    )
     const handler = edgeSpec.routeMapWithHandlers[matchedRoute]
-    event.request.pathParams = routeParams
-    event.respondWith(await handler(event.request))
+    fetchEvent.request.pathParams = routeParams
+
+    fetchEvent.respondWith(await handler(fetchEvent.request))
   })
 }
