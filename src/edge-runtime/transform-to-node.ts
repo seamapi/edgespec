@@ -8,7 +8,7 @@ export interface TransformToNodeOptions extends RequestOptions {}
 
 const dependencies = {
   ...primitives,
-  Uint8Array: Uint8Array,
+  Uint8Array,
 }
 
 export const transformToNodeBuilder = (options: TransformToNodeOptions) =>
