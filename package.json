@@ -17,7 +17,7 @@
   "devDependencies": {
     "@ava/get-port": "^2.0.0",
     "@ava/typescript": "^4.1.0",
-    "@types/node": "^20.10.0",
+    "@types/node": "^18.13.0",
     "ava": "^5.3.1",
     "axios": "^1.6.2",
     "edge-runtime": "^2.5.7",
