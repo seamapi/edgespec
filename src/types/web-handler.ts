@@ -1,11 +1,10 @@
 import type { FetchEvent } from "@edge-runtime/primitives"
-import type { RouteMatcherOutput } from "next-route-matcher"
 
-// TODO: this should be exported directly from next-route-matcher
-type RouteParams = RouteMatcherOutput["routeParams"]
-
+export type EdgeSpecRouteParams = {
+  [routeParam: string]: string | string[]
+}
 export interface EdgeSpecRequestOptions {
-  pathParams?: RouteParams
+  pathParams?: EdgeSpecRouteParams
 }
 
 export type WithEdgeSpecRequestOptions<T> = T & EdgeSpecRequestOptions

@@ -1,6 +1,7 @@
+import { EdgeSpecAdapter } from "src/types/edge-spec"
 import { EdgeSpecFetchEvent } from "src/types/web-handler"
 
-export const addFetchListener = (edgeSpec: any) => {
+export const addFetchListener: EdgeSpecAdapter = (edgeSpec) => {
   addEventListener("fetch", async (event) => {
     // TODO: find a better way to cast this
     const fetchEvent = event as unknown as EdgeSpecFetchEvent
