@@ -35,7 +35,7 @@
     "@edge-runtime/node-utils": "^2.2.2",
     "@edge-runtime/primitives": "^4.0.5",
     "make-vfs": "^1.1.0",
-    "next-route-matcher": "^1.0.1",
+    "next-route-matcher": "^1.0.2",
     "redaxios": "^0.5.1",
     "yargs": "^17.7.2",
     "zod": "^3.22.4"

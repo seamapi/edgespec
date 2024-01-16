@@ -1,11 +1,10 @@
-import { RouteFn } from "./create-with-edge-spec.types.js"
 import { SetupParams } from "./types/setup-params.js"
-import { Request, Response } from "./std/index.js"
+import { EdgeSpecRouteFn } from "./types/web-handler.js"
 
 export const createWithEdgeSpec = (globalSpec: SetupParams) => {
   return (routeSpec: any) =>
-    (routeFn: RouteFn) =>
-    async (req: Request): Promise<Response> => {
+    (routeFn: EdgeSpecRouteFn): EdgeSpecRouteFn =>
+    async (req: Request) => {
       // Identify environment this is being executed in and convert to WinterCG-
       // compatible request
 

@@ -1,10 +1,9 @@
-import * as STD from "src/std/index.js"
 import { createWithEdgeSpec } from "src/create-with-edge-spec.js"
 import type { AxiosInstance } from "axios"
-import http from "node:http"
 import getPort from "@ava/get-port"
 import defaultAxios from "redaxios"
 import { createServerFromRouteMap } from "src/serve/create-server-from-route-map.js"
+import { EdgeSpecRouteFn } from "src/types/web-handler"
 
 export const getTestRoute = async (
   t: any,
@@ -12,7 +11,7 @@ export const getTestRoute = async (
     globalSpec: any
     routeSpec: any
     routePath: string
-    routeFn: (req: STD.Request) => any
+    routeFn: EdgeSpecRouteFn
   }
 ): Promise<{ serverUrl: string; axios: AxiosInstance }> => {
   const withRouteSpec = createWithEdgeSpec(opts.globalSpec)

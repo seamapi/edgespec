@@ -1,5 +1,4 @@
 import test from "ava"
-import { Response } from "src/std/Response.js"
 import { getTestRoute } from "../fixtures/get-test-route.js"
 
 test("basic-01", async (t) => {
