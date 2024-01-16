@@ -1,4 +1,3 @@
-import * as STD from "src/std/index.js"
 import { createServer } from "node:http"
 import { getRouteMatcher } from "next-route-matcher"
 import { normalizeRouteMap } from "../lib/normalize-route-map.js"
@@ -6,12 +5,10 @@ import {
   type TransformToNodeOptions,
   transformToNodeBuilder,
 } from "src/edge-runtime/transform-to-node.js"
+import { EdgeSpecRouteFn } from "src/types/web-handler.js"
 
 export const createServerFromRouteMap = async (
-  routeMap: Record<
-    string,
-    (req: STD.Request) => STD.Response | Promise<STD.Response>
-  >,
+  routeMap: Record<string, EdgeSpecRouteFn>,
   transformToNodeOptions: TransformToNodeOptions
 ) => {
   const formattedRoutes = normalizeRouteMap(routeMap)
@@ -38,7 +35,7 @@ export const createServerFromRouteMap = async (
           url: req.url,
           transformToNodeOptions,
         })
-        return new STD.Response("Not found", {
+        return new Response("Not found", {
           status: 404,
         })
       }
@@ -46,7 +43,7 @@ export const createServerFromRouteMap = async (
       try {
         return await routeFn(req)
       } catch (e: any) {
-        return new STD.Response(e.toString(), {
+        return new Response(e.toString(), {
           status: 500,
         })
       }
