@@ -20,9 +20,14 @@ export const getTestRoute = async (
 
   const port = await getPort()
 
-  const app: any = await createServerFromRouteMap({
-    [opts.routePath]: wrappedRouteFn,
-  })
+  const app: any = await createServerFromRouteMap(
+    {
+      [opts.routePath]: wrappedRouteFn,
+    },
+    {
+      defaultOrigin: `http://localhost:${port}`,
+    }
+  )
 
   // const app = http.createServer(async (nReq, nRes) => {
   //   try {
