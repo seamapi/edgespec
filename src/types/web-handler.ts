@@ -15,7 +15,7 @@ export type EdgeSpecResponse = Response
 
 export type EdgeSpecRouteFn = (
   req: EdgeSpecRequest
-) => Promise<EdgeSpecResponse>
+) => EdgeSpecResponse | Promise<EdgeSpecResponse>
 
 export type EdgeSpecFetchEvent = FetchEvent & {
   request: EdgeSpecRequest
