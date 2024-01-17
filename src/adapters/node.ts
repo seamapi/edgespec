@@ -1,8 +1,9 @@
 import http from "node:http"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
+import { EdgeSpecAdapter } from "src/types/edge-spec"
 import { EdgeSpecRequest } from "src/types/web-handler"
 
-export const startServer = (edgeSpec: any, port?: number) => {
+export const startServer: EdgeSpecAdapter = (edgeSpec, port) => {
   const transformToNode = transformToNodeBuilder({
     defaultOrigin: `http://localhost${port ? `:${port}` : ""}`,
   })
