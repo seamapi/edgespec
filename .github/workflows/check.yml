@@ -1,0 +1,156 @@
+---
+  name: Check
+
+  on:
+    push:
+      branches:
+        - "**"
+
+  jobs:
+    test:
+      name: Test (Node.js v${{ matrix.node }} on ${{ matrix.os_name }})
+      runs-on: ${{ matrix.os }}
+      timeout-minutes: 30
+      strategy:
+        fail-fast: false
+        matrix:
+          os:
+            - ubuntu-latest
+          node:
+            - "18"
+            - "20"
+          include:
+            - os: ubuntu-latest
+              os_name: Linux
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+        - name: Setup
+          uses: ./.github/actions/setup
+          with:
+            node_version: ${{ matrix.node }}
+            node_auth_token: ${{ secrets.GH_TOKEN }}
+        - name: Test
+          run: npm test
+    lint:
+      name: Lint (Node.js v${{ matrix.node }})
+      runs-on: ubuntu-latest
+      timeout-minutes: 30
+      strategy:
+        fail-fast: false
+        matrix:
+          node:
+            - "18"
+            - "20"
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+        - name: Setup
+          uses: ./.github/actions/setup
+          with:
+            node_version: ${{ matrix.node }}
+            node_auth_token: ${{ secrets.GH_TOKEN }}
+        - name: Lint
+          run: npm run lint
+    build:
+      name: Build
+      uses: ./.github/workflows/_build.yml
+      secrets:
+        node_auth_token: ${{ secrets.GH_TOKEN }}
+    install:
+      name: Install (Node.js v${{ matrix.node }} on ${{ matrix.os_name }})
+      runs-on: ${{ matrix.os }}
+      timeout-minutes: 30
+      needs: build
+      strategy:
+        fail-fast: false
+        matrix:
+          os:
+            - ubuntu-latest
+          node:
+            - "18"
+            - "20"
+          include:
+            - os: ubuntu-latest
+              os_name: Linux
+      steps:
+        - name: Setup Node.js
+          uses: actions/setup-node@v3
+          with:
+            node-version: ${{ matrix.node }}
+        - name: Download artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: ${{ needs.build.outputs.artifact_name }}
+            path: .
+        - name: Find packages
+          uses: tj-actions/glob@v16
+          id: packages
+          with:
+            files: "*.tgz"
+        - name: Create package.json
+          uses: DamianReeves/write-file-action@v1.2
+          with:
+            write-mode: overwrite
+            path: package.json
+            contents: |
+              {"type":"module"}
+        - name: Create index.js
+          uses: DamianReeves/write-file-action@v1.2
+          with:
+            write-mode: overwrite
+            path: index.js
+            contents: |
+              import '@seamapi/fake-template'
+        - name: Install
+          run: npm install --ignore-scripts --save ${{ steps.packages.outputs.paths }}
+          env:
+            NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+        - name: Rebuild Node.js modules
+          shell: bash
+          run: npm rebuild
+        - name: Run postinstall script
+          shell: bash
+          run: npm run postinstall --if-present
+        - name: Run prepare script
+          shell: bash
+          run: npm run prepare --if-present
+        - name: Run
+          run: node index.js
+    typecheck:
+      name: Typecheck (Node.js v${{ matrix.node }})
+      runs-on: ubuntu-latest
+      timeout-minutes: 30
+      strategy:
+        fail-fast: false
+        matrix:
+          node:
+            - "18"
+            - "20"
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+        - name: Setup
+          uses: ./.github/actions/setup
+          with:
+            node_version: ${{ matrix.node }}
+            node_auth_token: ${{ secrets.GH_TOKEN }}
+        - name: Check types
+          run: npm run typecheck
+    dependencies:
+      name: Dependencies
+      runs-on: ubuntu-latest
+      timeout-minutes: 30
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+        - name: Setup
+          uses: ./.github/actions/setup
+          with:
+            node_auth_token: ${{ secrets.GH_TOKEN }}
+        - name: Check for dependencies
+          run: |
+            if [[ "$(jq -j .dependencies < package.json)" != "null" ]]; then
+              echo "No direct dependencies allowed, only devDependencies"
+              exit 1
+            fi
