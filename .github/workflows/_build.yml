@@ -9,10 +9,6 @@
           type: string
           required: false
           default: "20"
-      secrets:
-        node_auth_token:
-          description: The Node.js auth token.
-          required: true
       outputs:
         artifact_name:
           description: The artifact name.
@@ -30,7 +26,6 @@
           uses: ./.github/actions/setup
           with:
             node_version: ${{ inputs.node_version }}
-            node_auth_token: ${{ secrets.node_auth_token }}
         - name: Build
           run: npm run build
         - name: Package
