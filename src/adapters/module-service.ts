@@ -1,6 +1,6 @@
 import {
   type EdgeSpecAdapter,
-  type EdgeSpec,
+  type EdgeSpecRouteBundle,
   handleRequestWithEdgeSpec,
 } from "src/types/edge-spec"
 import { EdgeSpecRequest, EdgeSpecRouteFn } from "src/types/web-handler"
@@ -18,7 +18,7 @@ export const createModuleService: EdgeSpecAdapter<[], ModuleService> = (
 ) => {
   return (options) => async (request) => {
     // cascade options down the edge spec chain
-    const edgeSpec: EdgeSpec = {
+    const edgeSpec: EdgeSpecRouteBundle = {
       ...request.edgeSpec,
       ...moduleServiceEdgeSpec,
       ...(options?.handleRouteParamNotFound && {

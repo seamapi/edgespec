@@ -1,11 +1,11 @@
 import type { FetchEvent } from "@edge-runtime/primitives"
-import { EdgeSpec } from "./edge-spec"
+import { EdgeSpecRouteBundle } from "./edge-spec"
 
 export type EdgeSpecRouteParams = {
   [routeParam: string]: string | string[]
 }
 export interface EdgeSpecRequestOptions {
-  edgeSpec: EdgeSpec
+  edgeSpec: EdgeSpecRouteBundle
   pathParams?: EdgeSpecRouteParams
 }
 

@@ -7,7 +7,7 @@ import {
 } from "src/edge-runtime/transform-to-node.js"
 import { EdgeSpecRouteFn } from "src/types/web-handler.js"
 import {
-  EdgeSpec,
+  EdgeSpecRouteBundle,
   EdgeSpecOptions,
   handleRequestWithEdgeSpec,
 } from "src/types/edge-spec.js"
@@ -15,7 +15,7 @@ import {
 export const createEdgeSpecFromRouteMap = (
   routeMap: Record<string, EdgeSpecRouteFn>,
   edgeSpecOptions?: Partial<EdgeSpecOptions>
-): EdgeSpec => {
+): EdgeSpecRouteBundle => {
   const formattedRoutes = normalizeRouteMap(routeMap)
   const routeMatcher = getRouteMatcher(Object.keys(formattedRoutes))
 

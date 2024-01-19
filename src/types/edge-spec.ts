@@ -25,15 +25,15 @@ export interface EdgeSpecOptions {
 }
 
 // make this deeply immutable to force usage through helper functions
-export type EdgeSpec = ReadonlyDeep<EdgeSpecOptions>
+export type EdgeSpecRouteBundle = ReadonlyDeep<EdgeSpecOptions>
 
 export type EdgeSpecAdapter<
   Options extends Array<unknown> = [],
   ReturnValue = void,
-> = (edgeSpec: EdgeSpec, ...options: Options) => ReturnValue
+> = (edgeSpec: EdgeSpecRouteBundle, ...options: Options) => ReturnValue
 
 export async function handleRequestWithEdgeSpec(
-  edgeSpec: EdgeSpec,
+  edgeSpec: EdgeSpecRouteBundle,
   request: Request,
   pathnameOverride?: string
 ): Promise<Response> {
