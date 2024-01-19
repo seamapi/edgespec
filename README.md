@@ -62,7 +62,7 @@ export default withEdgeSpec({
   return new Response(
     JSON.stringify({
       sum: a + b,
-    }),
+    })
   )
 })
 ```
@@ -70,7 +70,7 @@ export default withEdgeSpec({
 EdgeSpec requires a config file called `edgespec.config.ts` or `edgespec.config.js` to be placed next to your routes directory:
 
 ```ts
-import {defineConfig} from "edgespec"
+import { defineConfig } from "edgespec"
 
 export default defineConfig({
   emulateWinterCGRuntimeLocally: true,
@@ -87,7 +87,7 @@ Run `edgespec bundle`. Then, depending on your target:
 Create an `entrypoint.js` file:
 
 ```js
-import {startServer} from "edgespec/adapters/node"
+import { startServer } from "edgespec/adapters/node"
 import bundle from "./dist"
 
 startServer(bundle, 3000)
@@ -98,7 +98,7 @@ startServer(bundle, 3000)
 Create an `entrypoint.js` file:
 
 ```js
-import {addFetchListener} from "edgespec/adapters/wintercg-minimal"
+import { addFetchListener } from "edgespec/adapters/wintercg-minimal"
 import bundle from "./dist"
 addFetchListener(edgeSpec)
 ```

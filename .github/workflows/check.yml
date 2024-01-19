@@ -1,133 +1,133 @@
 ---
-  name: Check
+name: Check
 
-  on:
-    push:
-      branches:
-        - "**"
+on:
+  push:
+    branches:
+      - "**"
 
-  jobs:
-    test:
-      name: Test (Node.js v${{ matrix.node }} on ${{ matrix.os_name }})
-      runs-on: ${{ matrix.os }}
-      timeout-minutes: 30
-      strategy:
-        fail-fast: false
-        matrix:
-          os:
-            - ubuntu-latest
-          node:
-            - "18"
-            - "20"
-          include:
-            - os: ubuntu-latest
-              os_name: Linux
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Setup
-          uses: ./.github/actions/setup
-          with:
-            node_version: ${{ matrix.node }}
-        - name: Test
-          run: npm test
-    lint:
-      name: Lint (Node.js v${{ matrix.node }})
-      runs-on: ubuntu-latest
-      timeout-minutes: 30
-      strategy:
-        fail-fast: false
-        matrix:
-          node:
-            - "18"
-            - "20"
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Setup
-          uses: ./.github/actions/setup
-          with:
-            node_version: ${{ matrix.node }}
-            node_auth_token: ${{ secrets.GH_TOKEN }}
-        - name: Lint
-          run: npm run lint
-    build:
-      name: Build
-      uses: ./.github/workflows/_build.yml
-    install:
-      name: Install (Node.js v${{ matrix.node }} on ${{ matrix.os_name }})
-      runs-on: ${{ matrix.os }}
-      timeout-minutes: 30
-      needs: build
-      strategy:
-        fail-fast: false
-        matrix:
-          os:
-            - ubuntu-latest
-          node:
-            - "18"
-            - "20"
-          include:
-            - os: ubuntu-latest
-              os_name: Linux
-      steps:
-        - name: Setup Node.js
-          uses: actions/setup-node@v3
-          with:
-            node-version: ${{ matrix.node }}
-        - name: Download artifact
-          uses: actions/download-artifact@v3
-          with:
-            name: ${{ needs.build.outputs.artifact_name }}
-            path: .
-        - name: Find packages
-          uses: tj-actions/glob@v16
-          id: packages
-          with:
-            files: "*.tgz"
-        - name: Create package.json
-          uses: DamianReeves/write-file-action@v1.2
-          with:
-            write-mode: overwrite
-            path: package.json
-            contents: |
-              {"type":"module"}
-        - name: Create index.js
-          uses: DamianReeves/write-file-action@v1.2
-          with:
-            write-mode: overwrite
-            path: index.js
-            contents: |
-              import 'edgespec'
-        - name: Install
-          run: npm install --ignore-scripts --save ${{ steps.packages.outputs.paths }}
-        - name: Rebuild Node.js modules
-          shell: bash
-          run: npm rebuild
-        - name: Run postinstall script
-          shell: bash
-          run: npm run postinstall --if-present
-        - name: Run prepare script
-          shell: bash
-          run: npm run prepare --if-present
-        - name: Run
-          run: node index.js
-    typecheck:
-      name: Typecheck (Node.js v${{ matrix.node }})
-      runs-on: ubuntu-latest
-      timeout-minutes: 30
-      strategy:
-        fail-fast: false
-        matrix:
-          node:
-            - "18"
-            - "20"
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Setup
-          uses: ./.github/actions/setup
-          with:
-            node_version: ${{ matrix.node }}
-        - name: Check types
-          run: npm run typecheck
+jobs:
+  test:
+    name: Test (Node.js v${{ matrix.node }} on ${{ matrix.os_name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        node:
+          - "18"
+          - "20"
+        include:
+          - os: ubuntu-latest
+            os_name: Linux
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node_version: ${{ matrix.node }}
+      - name: Test
+        run: npm test
+  lint:
+    name: Lint (Node.js v${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - "18"
+          - "20"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node_version: ${{ matrix.node }}
+          node_auth_token: ${{ secrets.GH_TOKEN }}
+      - name: Lint
+        run: npm run lint
+  build:
+    name: Build
+    uses: ./.github/workflows/_build.yml
+  install:
+    name: Install (Node.js v${{ matrix.node }} on ${{ matrix.os_name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        node:
+          - "18"
+          - "20"
+        include:
+          - os: ubuntu-latest
+            os_name: Linux
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: .
+      - name: Find packages
+        uses: tj-actions/glob@v16
+        id: packages
+        with:
+          files: "*.tgz"
+      - name: Create package.json
+        uses: DamianReeves/write-file-action@v1.2
+        with:
+          write-mode: overwrite
+          path: package.json
+          contents: |
+            {"type":"module"}
+      - name: Create index.js
+        uses: DamianReeves/write-file-action@v1.2
+        with:
+          write-mode: overwrite
+          path: index.js
+          contents: |
+            import 'edgespec'
+      - name: Install
+        run: npm install --ignore-scripts --save ${{ steps.packages.outputs.paths }}
+      - name: Rebuild Node.js modules
+        shell: bash
+        run: npm rebuild
+      - name: Run postinstall script
+        shell: bash
+        run: npm run postinstall --if-present
+      - name: Run prepare script
+        shell: bash
+        run: npm run prepare --if-present
+      - name: Run
+        run: node index.js
+  typecheck:
+    name: Typecheck (Node.js v${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - "18"
+          - "20"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node_version: ${{ matrix.node }}
+      - name: Check types
+        run: npm run typecheck
