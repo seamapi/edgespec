@@ -4,6 +4,7 @@
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
     "build": "tsup",
