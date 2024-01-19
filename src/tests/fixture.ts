@@ -55,6 +55,10 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
 
   return {
     port: (server.address() as AddressInfo).port,
-    stop: async () => {},
+    stop: async () => {
+      const closePromise = once(server, "close")
+      server.close()
+      await closePromise
+    },
   }
 }
