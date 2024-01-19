@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsup",
     "test": "ava",
+    "typecheck": "tsc --noEmit",
     "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
   "bin": "./src/cli/cli.js",
