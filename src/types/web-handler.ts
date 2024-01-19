@@ -25,7 +25,7 @@ export type EdgeSpecFetchEvent = FetchEvent & {
 
 export function createEdgeSpecRequest(
   request: Request,
-  options: EdgeSpecRequestOptions & { url?: URL }
+  options: EdgeSpecRequestOptions
 ): EdgeSpecRequest {
   return Object.assign(request, options)
 }
