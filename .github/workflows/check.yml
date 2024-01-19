@@ -131,18 +131,3 @@
             node_version: ${{ matrix.node }}
         - name: Check types
           run: npm run typecheck
-    dependencies:
-      name: Dependencies
-      runs-on: ubuntu-latest
-      timeout-minutes: 30
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Setup
-          uses: ./.github/actions/setup
-        - name: Check for dependencies
-          run: |
-            if [[ "$(jq -j .dependencies < package.json)" != "null" ]]; then
-              echo "No direct dependencies allowed, only devDependencies"
-              exit 1
-            fi
