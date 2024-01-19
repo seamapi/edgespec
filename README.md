@@ -90,7 +90,7 @@ Create an `entrypoint.js` file:
 import { startServer } from "edgespec/adapters/node"
 import bundle from "./dist"
 
-startServer(bundle, 3000)
+startServer(bundle, { port: 3000 })
 ```
 
 ### WinterCG (Cloudflare Workers/Vercel Edge Functions)

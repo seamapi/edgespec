@@ -1,25 +1,21 @@
 import http from "node:http"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
-import { EdgeSpecAdapter } from "src/types/edge-spec"
-import { EdgeSpecRequest } from "src/types/web-handler"
+import { EdgeSpecAdapter, handleRequestWithEdgeSpec } from "src/types/edge-spec"
 
-export const startServer: EdgeSpecAdapter = (edgeSpec, port) => {
+export interface EdgeSpecNodeAdapterOptions {
+  port?: number
+}
+
+export const startServer: EdgeSpecAdapter<[EdgeSpecNodeAdapterOptions]> = (
+  edgeSpec,
+  { port }
+) => {
   const transformToNode = transformToNodeBuilder({
     defaultOrigin: `http://localhost${port ? `:${port}` : ""}`,
   })
 
   const server = http.createServer(
-    transformToNode(async (fetchRequest: EdgeSpecRequest) => {
-      const { matchedRoute, routeParams } = edgeSpec.routeMatcher(
-        new URL(fetchRequest.url).pathname
-      )
-      const handler = edgeSpec.routeMapWithHandlers[matchedRoute]
-      fetchRequest.pathParams = routeParams
-
-      const fetchResponse: Response = await handler(fetchRequest)
-
-      return fetchResponse
-    })
+    transformToNode(handleRequestWithEdgeSpec(edgeSpec))
   )
   server.listen(port)
 
