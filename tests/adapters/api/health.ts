@@ -1,6 +1,6 @@
 const health = async (request: Request) => {
   return Response.json({
-    ok: true
+    ok: true,
   })
 }
 
