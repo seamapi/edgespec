@@ -4,9 +4,11 @@ import getPort from "@ava/get-port"
 import defaultAxios from "redaxios"
 import { createServerFromRouteMap } from "src/serve/create-server-from-route-map.js"
 import { EdgeSpecRouteFn } from "src/types/web-handler"
+import { ExecutionContext } from "ava"
+import { once } from "events"
 
 export const getTestRoute = async (
-  t: any,
+  t: ExecutionContext,
   opts: {
     globalSpec: any
     routeSpec: any
@@ -20,7 +22,7 @@ export const getTestRoute = async (
 
   const port = await getPort()
 
-  const app: any = await createServerFromRouteMap(
+  const app = await createServerFromRouteMap(
     {
       [opts.routePath]: wrappedRouteFn,
     },
@@ -58,6 +60,11 @@ export const getTestRoute = async (
   // })
 
   app.listen(port)
+  t.teardown(async () => {
+    const closePromise = once(app, "close")
+    app.close()
+    return closePromise
+  })
   const serverUrl = `http://localhost:${port}`
 
   const axios: any = defaultAxios.create({

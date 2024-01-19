@@ -4,10 +4,15 @@
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
     "build": "tsup",
+    "pretest": "npm run build",
     "test": "ava",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "lint": "prettier --check .",
     "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
   "bin": "./src/cli/cli.js",
@@ -18,7 +23,7 @@
     "@ava/get-port": "^2.0.0",
     "@ava/typescript": "^4.1.0",
     "@types/node": "^18.13.0",
-    "ava": "^5.3.1",
+    "ava": "^6.0.1",
     "axios": "^1.6.2",
     "edge-runtime": "^2.5.7",
     "esbuild": "^0.19.8",
@@ -39,5 +44,8 @@
     "redaxios": "^0.5.1",
     "yargs": "^17.7.2",
     "zod": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
