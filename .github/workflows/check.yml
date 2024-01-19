@@ -98,7 +98,7 @@
             write-mode: overwrite
             path: index.js
             contents: |
-              import '@seamapi/fake-template'
+              import 'edgespec'
         - name: Install
           run: npm install --ignore-scripts --save ${{ steps.packages.outputs.paths }}
         - name: Rebuild Node.js modules
