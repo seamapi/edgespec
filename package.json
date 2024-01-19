@@ -9,6 +9,8 @@
     "build": "tsup",
     "test": "ava",
     "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "lint": "prettier --check .",
     "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
   "bin": "./src/cli/cli.js",
