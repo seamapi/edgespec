@@ -1,18 +1,66 @@
-import type { EdgeSpecRouteFn, EdgeSpecRouteParams } from "./web-handler"
+import {
+  createEdgeSpecRequest,
+  type EdgeSpecRouteFn,
+  type EdgeSpecRouteParams,
+} from "./web-handler.js"
 
-export type EdgeSpecRouteMatcher = (pathname: string) => {
-  matchedRoute: string
-  routeParams: EdgeSpecRouteParams
-}
+import type { ReadonlyDeep } from "type-fest"
 
-export interface EdgeSpec {
+export type EdgeSpecRouteMatcher = (pathname: string) =>
+  | {
+      matchedRoute: string
+      routeParams: EdgeSpecRouteParams
+    }
+  | undefined
+  | null
+
+export type EdgeSpecRouteMap = Record<string, EdgeSpecRouteFn>
+
+export interface EdgeSpecOptions {
   routeMatcher: EdgeSpecRouteMatcher
-  routeMapWithHandlers: {
-    [route: string]: EdgeSpecRouteFn
-  }
+  routeMapWithHandlers: EdgeSpecRouteMap
+
+  handleModuleServiceRouteNotFound?: EdgeSpecRouteFn
+  handle404?: EdgeSpecRouteFn
 }
 
-export type EdgeSpecAdapter<ReturnValue = void> = (
+// make this deeply immutable to force usage through helper functions
+export type EdgeSpec = ReadonlyDeep<EdgeSpecOptions>
+
+export type EdgeSpecAdapter<
+  Options extends Array<unknown> = [],
+  ReturnValue = void,
+> = (edgeSpec: EdgeSpec, ...options: Options) => ReturnValue
+
+export async function handleRequestWithEdgeSpec(
   edgeSpec: EdgeSpec,
-  port?: number
-) => ReturnValue
+  request: Request,
+  pathnameOverride?: string
+): Promise<Response> {
+  const {
+    routeMatcher,
+    routeMapWithHandlers,
+    handle404 = () =>
+      new Response("Not found", {
+        status: 404,
+      }),
+  } = edgeSpec
+
+  const pathname = pathnameOverride ?? new URL(request.url).pathname
+  const { matchedRoute, routeParams } = routeMatcher(pathname) ?? {}
+
+  const routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]
+
+  const edgeSpecRequest = createEdgeSpecRequest(request, {
+    edgeSpec,
+    pathParams: routeParams,
+  })
+
+  if (!routeFn) {
+    return await handle404(edgeSpecRequest)
+  }
+
+  const response: Response = await routeFn(edgeSpecRequest)
+
+  return response
+}

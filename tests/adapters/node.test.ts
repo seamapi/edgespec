@@ -30,7 +30,7 @@ test("test bundle with Node adapter", async (t) => {
     import {startServer} from "../../dist/adapters/node.js"
     import bundle from "./bundled.js"
 
-    startServer(bundle, ${port})
+    startServer(bundle, { port: ${port} })
   `,
     "utf-8"
   )
