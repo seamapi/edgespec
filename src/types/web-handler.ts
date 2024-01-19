@@ -1,8 +1,4 @@
 import type { FetchEvent } from "@edge-runtime/primitives"
-import {
-  ModuleService,
-  ModuleServiceOptions,
-} from "src/adapters/module-service"
 import { EdgeSpec } from "./edge-spec"
 
 export type EdgeSpecRouteParams = {
