@@ -10,6 +10,7 @@ interface StartTestFixtureFromDirectoryOptions {
 }
 
 // todo: allow injecting env?
+// todo: should use transformToNodeBuilder()
 export const startTestFixtureFromDirectory = async ({directoryPath, port}: StartTestFixtureFromDirectoryOptions) => {
   const server = http.createServer(async (req, res) => {
     const chunks: Uint8Array[] = []
