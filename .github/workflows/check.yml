@@ -110,8 +110,6 @@
         - name: Run prepare script
           shell: bash
           run: npm run prepare --if-present
-        - name: debug
-          run: ls node_modules
         - name: Run
           run: node index.js
     typecheck:
