@@ -1,6 +1,8 @@
 import { getMatchingFilePaths } from "make-vfs"
 
-export const createRouteMapFromDirectory = async (directoryPath: string): Promise<Record<string, string>> => {
+export const createRouteMapFromDirectory = async (
+  directoryPath: string
+): Promise<Record<string, string>> => {
   const filePaths = await getMatchingFilePaths({
     dirPath: directoryPath,
     extensions: ["ts"],

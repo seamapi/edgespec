@@ -1,17 +1,17 @@
 import esbuild from "esbuild"
-import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory";
+import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
 
 const alphabet = "zyxwvutsrqponmlkjihgfedcba"
 
 const getRandomId = (length: number): string => {
-  let str = '';
-  let num = length;
-  while (num--) str += alphabet[Math.random() * alphabet.length | 0];
-  return str;
+  let str = ""
+  let num = length
+  while (num--) str += alphabet[(Math.random() * alphabet.length) | 0]
+  return str
 }
 
 interface BundleOptions {
-  directoryPath: string,
+  directoryPath: string
   /**
    * This should not be provided in most cases so your bundle is maximally portable.
    */
@@ -25,17 +25,19 @@ export const bundle = async (options: BundleOptions) => {
     return {
       route,
       filePath,
-      id: getRandomId(16)
+      id: getRandomId(16),
     }
   })
 
   const entrypoint = `
     import {getRouteMatcher} from "next-route-matcher"
 
-    ${routes.map(({id, filePath}) => `import * as ${id} from "./${filePath}"`).join("\n")}
+    ${routes
+      .map(({ id, filePath }) => `import * as ${id} from "./${filePath}"`)
+      .join("\n")}
 
     const routeMapWithHandlers = {
-      ${routes.map(({id, route}) => `"${route}": ${id}.default`).join(",")}
+      ${routes.map(({ id, route }) => `"${route}": ${id}.default`).join(",")}
     }
 
     const edgeSpec = {
@@ -43,10 +45,14 @@ export const bundle = async (options: BundleOptions) => {
       routeMapWithHandlers
     }
 
-    ${options.bundledAdapter === "wintercg-minimal" ? `
+    ${
+      options.bundledAdapter === "wintercg-minimal"
+        ? `
     import {addFetchListener} from "src/adapters/wintercg-minimal.ts"
     addFetchListener(edgeSpec)
-    ` : "export default edgeSpec"}
+    `
+        : "export default edgeSpec"
+    }
   `
 
   const result = await esbuild.build({
@@ -57,7 +63,7 @@ export const bundle = async (options: BundleOptions) => {
     },
     bundle: true,
     format: "esm",
-    write: false
+    write: false,
   })
 
   return result.outputFiles![0].text

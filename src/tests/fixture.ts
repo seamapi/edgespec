@@ -11,7 +11,10 @@ interface StartTestFixtureFromDirectoryOptions {
 
 // todo: allow injecting env?
 // todo: should use transformToNodeBuilder()
-export const startTestFixtureFromDirectory = async ({directoryPath, port}: StartTestFixtureFromDirectoryOptions) => {
+export const startTestFixtureFromDirectory = async ({
+  directoryPath,
+  port,
+}: StartTestFixtureFromDirectoryOptions) => {
   const server = http.createServer(async (req, res) => {
     const chunks: Uint8Array[] = []
     req.on("data", (chunk) => chunks.push(chunk))
@@ -21,7 +24,7 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
     try {
       const bundled = await bundle({
         directoryPath,
-        bundledAdapter: "wintercg-minimal"
+        bundledAdapter: "wintercg-minimal",
       })
 
       const runtime = new edge.EdgeRuntime({
@@ -44,11 +47,13 @@ export const startTestFixtureFromDirectory = async ({directoryPath, port}: Start
       res.end(await response.text())
     } catch (error) {
       res.statusCode = 500
-      res.end(JSON.stringify({
-        errorType: "emulated_wintercg_runtime_error",
-        errorMessage: (error as Error).message,
-        errorStack: (error as Error).stack,
-      }))
+      res.end(
+        JSON.stringify({
+          errorType: "emulated_wintercg_runtime_error",
+          errorMessage: (error as Error).message,
+          errorStack: (error as Error).stack,
+        })
+      )
     }
   })
   server.listen(port)
