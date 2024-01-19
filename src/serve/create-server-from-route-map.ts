@@ -43,7 +43,7 @@ export const createNodeServerFromRouteMap = async (
   const transformToNode = transformToNodeBuilder(transformToNodeOptions)
 
   const server = createServer(
-    transformToNode((req) => handleRequestWithEdgeSpec(edgeSpec, req))
+    transformToNode(handleRequestWithEdgeSpec(edgeSpec))
   )
 
   return server

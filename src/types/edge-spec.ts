@@ -32,35 +32,36 @@ export type EdgeSpecAdapter<
   ReturnValue = void,
 > = (edgeSpec: EdgeSpecRouteBundle, ...options: Options) => ReturnValue
 
-export async function handleRequestWithEdgeSpec(
+export function handleRequestWithEdgeSpec(
   edgeSpec: EdgeSpecRouteBundle,
-  request: Request,
   pathnameOverride?: string
-): Promise<Response> {
-  const {
-    routeMatcher,
-    routeMapWithHandlers,
-    handle404 = () =>
-      new Response("Not found", {
-        status: 404,
-      }),
-  } = edgeSpec
+): (request: Request) => Promise<Response> {
+  return async (request: Request) => {
+    const {
+      routeMatcher,
+      routeMapWithHandlers,
+      handle404 = () =>
+        new Response("Not found", {
+          status: 404,
+        }),
+    } = edgeSpec
 
-  const pathname = pathnameOverride ?? new URL(request.url).pathname
-  const { matchedRoute, routeParams } = routeMatcher(pathname) ?? {}
+    const pathname = pathnameOverride ?? new URL(request.url).pathname
+    const { matchedRoute, routeParams } = routeMatcher(pathname) ?? {}
 
-  const routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]
+    const routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]
 
-  const edgeSpecRequest = createEdgeSpecRequest(request, {
-    edgeSpec,
-    pathParams: routeParams,
-  })
+    const edgeSpecRequest = createEdgeSpecRequest(request, {
+      edgeSpec,
+      pathParams: routeParams,
+    })
 
-  if (!routeFn) {
-    return await handle404(edgeSpecRequest)
+    if (!routeFn) {
+      return await handle404(edgeSpecRequest)
+    }
+
+    const response: Response = await routeFn(edgeSpecRequest)
+
+    return response
   }
-
-  const response: Response = await routeFn(edgeSpecRequest)
-
-  return response
 }

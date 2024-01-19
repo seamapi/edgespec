@@ -6,7 +6,9 @@ import { createEdgeSpecFromRouteMap } from "src/serve/create-server-from-route-m
 test("module service with simple endpoint", async (t) => {
   const ModuleService = createModuleService(
     createEdgeSpecFromRouteMap({
-      "/health": async () => {
+      "/health": async (req) => {
+        console.log(req.url)
+
         return new Response(
           JSON.stringify({
             ok: true,

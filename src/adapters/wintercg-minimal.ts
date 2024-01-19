@@ -7,7 +7,7 @@ export const addFetchListener: EdgeSpecAdapter = (edgeSpec) => {
     const fetchEvent = event as unknown as EdgeSpecFetchEvent
 
     fetchEvent.respondWith(
-      await handleRequestWithEdgeSpec(edgeSpec, fetchEvent.request)
+      await handleRequestWithEdgeSpec(edgeSpec)(fetchEvent.request)
     )
   })
 }

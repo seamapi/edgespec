@@ -15,7 +15,7 @@ export const startServer: EdgeSpecAdapter<[EdgeSpecNodeAdapterOptions]> = (
   })
 
   const server = http.createServer(
-    transformToNode((req) => handleRequestWithEdgeSpec(edgeSpec, req))
+    transformToNode(handleRequestWithEdgeSpec(edgeSpec))
   )
   server.listen(port)
 
