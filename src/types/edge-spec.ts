@@ -17,15 +17,17 @@ export type EdgeSpecRouteMatcher = (pathname: string) =>
 export type EdgeSpecRouteMap = Record<string, EdgeSpecRouteFn>
 
 export interface EdgeSpecOptions {
-  routeMatcher: EdgeSpecRouteMatcher
-  routeMapWithHandlers: EdgeSpecRouteMap
-
   handleModuleServiceRouteNotFound?: EdgeSpecRouteFn
   handle404?: EdgeSpecRouteFn
 }
 
 // make this deeply immutable to force usage through helper functions
-export type EdgeSpecRouteBundle = ReadonlyDeep<EdgeSpecOptions>
+export type EdgeSpecRouteBundle = ReadonlyDeep<
+  EdgeSpecOptions & {
+    routeMatcher: EdgeSpecRouteMatcher
+    routeMapWithHandlers: EdgeSpecRouteMap
+  }
+>
 
 export type EdgeSpecAdapter<
   Options extends Array<unknown> = [],
