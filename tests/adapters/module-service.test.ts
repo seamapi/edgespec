@@ -1,7 +1,7 @@
 import test from "ava"
 import { getTestRoute } from "../fixtures/get-test-route.js"
 import { createModuleService } from "src/adapters/module-service.js"
-import { createEdgeSpecFromRouteMap } from "src/serve/create-server-from-route-map.js"
+import { createEdgeSpecFromRouteMap } from "src/serve/create-node-server-from-route-map.js"
 
 test("module service with simple endpoint", async (t) => {
   const ModuleService = createModuleService(
