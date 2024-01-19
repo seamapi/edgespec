@@ -2,7 +2,7 @@ import { createWithEdgeSpec } from "src/create-with-edge-spec.js"
 import type { AxiosInstance } from "axios"
 import getPort from "@ava/get-port"
 import defaultAxios from "redaxios"
-import { createServerFromRouteMap } from "src/serve/create-server-from-route-map.js"
+import { createNodeServerFromRouteMap } from "src/serve/create-server-from-route-map.js"
 import { EdgeSpecRouteFn } from "src/types/web-handler"
 import { ExecutionContext } from "ava"
 import { once } from "events"
@@ -24,7 +24,7 @@ export const getTestRoute = async (
 
   const port = await getPort()
 
-  const app = await createServerFromRouteMap(
+  const app = await createNodeServerFromRouteMap(
     {
       [opts.routePath]: wrappedRouteFn,
     },

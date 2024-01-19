@@ -33,7 +33,7 @@ export const createEdgeSpecFromRouteMap = (
   }
 }
 
-export const createServerFromRouteMap = async (
+export const createNodeServerFromRouteMap = async (
   routeMap: Record<string, EdgeSpecRouteFn>,
   transformToNodeOptions: TransformToNodeOptions,
   edgeSpecOptions?: Partial<EdgeSpecOptions>
