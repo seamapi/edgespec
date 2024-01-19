@@ -38,7 +38,11 @@ test("test bundle with Node adapter", async (t) => {
   const cmd = execa("node", [bundleEntrypointPath])
 
   cmd.stderr!.on("data", (data) => {
-    t.log(data.toString())
+    console.error("From child process: " + data.toString())
+  })
+
+  cmd.stdout!.on("data", (data) => {
+    console.log("From child process: " + data.toString())
   })
 
   cmd.addListener("close", (code) => {
