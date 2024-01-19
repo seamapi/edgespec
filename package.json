@@ -7,6 +7,7 @@
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
     "build": "tsup",
+    "pretest": "npm run build",
     "test": "ava",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
