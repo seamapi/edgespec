@@ -15,6 +15,7 @@ interface BundleOptions {
   /**
    * This should not be provided in most cases so your bundle is maximally portable.
    */
+  // todo: should this be an internal-only option?
   bundledAdapter?: "wintercg-minimal"
 }
 
