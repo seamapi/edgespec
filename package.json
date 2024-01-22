@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "lint": "prettier --check .",
+    "cli:dev": "tsx src/cli/cli.ts",
     "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
   "bin": "./src/cli/cli.js",
@@ -40,8 +41,10 @@
   "dependencies": {
     "@edge-runtime/node-utils": "^2.2.2",
     "@edge-runtime/primitives": "^4.0.5",
+    "clipanion": "^4.0.0-rc.3",
     "make-vfs": "^1.1.0",
     "next-route-matcher": "^1.0.2",
+    "pretty-bytes": "^6.1.1",
     "redaxios": "^0.5.1",
     "yargs": "^17.7.2",
     "zod": "^3.22.4"
