@@ -2,7 +2,8 @@ import { Command, Option } from "clipanion"
 import { createServer } from "node:http"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
 import { EdgeRuntime } from "edge-runtime"
-import { bundle } from "src/bundle/bundle"
+import { watchAndBundle } from "src/bundle/watch"
+import { durationFormatter } from "human-readable"
 
 export class DevCommand extends Command {
   static paths = [[`dev`]]
@@ -20,14 +21,43 @@ export class DevCommand extends Command {
   })
 
   async execute() {
-    const bundled = await bundle({
+    let runtime: EdgeRuntime
+
+    const command = this
+    await watchAndBundle({
       directoryPath: this.appDirectory,
       // todo: allow running in the same Node.js process/context to access system APIs
       bundledAdapter: "wintercg-minimal",
-    })
+      esbuild: {
+        plugins: [
+          {
+            name: "watch",
+            setup(build) {
+              let buildStartedAt: number
+              build.onStart(() => {
+                buildStartedAt = performance.now()
+              })
 
-    const runtime = new EdgeRuntime({
-      initialCode: bundled,
+              const timeFormatter = durationFormatter({
+                allowMultiples: ["m", "s", "ms"],
+              })
+
+              build.onEnd((result) => {
+                const durationMs = performance.now() - buildStartedAt
+                command.context.stdout.write(
+                  `Built in ${timeFormatter(durationMs)}\n`
+                )
+
+                if (!result.outputFiles) throw new Error("no output files")
+
+                runtime = new EdgeRuntime({
+                  initialCode: result.outputFiles[0].text,
+                })
+              })
+            },
+          },
+        ],
+      },
     })
 
     const server = createServer(

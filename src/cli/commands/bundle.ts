@@ -1,7 +1,7 @@
 import { Command, Option } from "clipanion"
 import { bundle } from "src/bundle/bundle"
 import fs from "node:fs/promises"
-import prettyBytes from "pretty-bytes"
+import { sizeFormatter } from "human-readable"
 
 export class BundleCommand extends Command {
   static paths = [[`bundle`]]
@@ -38,7 +38,7 @@ export class BundleCommand extends Command {
 
     await fs.writeFile(this.outputPath, output)
     this.context.stdout.write(
-      `Wrote bundle to ${this.outputPath} (${prettyBytes(output.length)})\n`
+      `Wrote bundle to ${this.outputPath} (${sizeFormatter()(output.length)})\n`
     )
   }
 }
