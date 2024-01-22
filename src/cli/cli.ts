@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { runExit } from "clipanion"
 import { BundleCommand } from "./commands/bundle"
+import { DevCommand } from "./commands/dev"
 import { version } from "../../package.json"
 
 runExit(
@@ -9,5 +10,5 @@ runExit(
     binaryName: "edgespec",
     binaryVersion: version,
   },
-  [BundleCommand]
+  [BundleCommand, DevCommand]
 )

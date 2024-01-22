@@ -22,10 +22,10 @@ interface BundleOptions {
 export const bundle = async (options: BundleOptions) => {
   const routeMap = await createRouteMapFromDirectory(options.directoryPath)
 
-  const routes = Object.entries(routeMap).map(([route, filePath]) => {
+  const routes = Object.entries(routeMap).map(([route, { relativePath }]) => {
     return {
       route,
-      filePath,
+      relativePath,
       id: getRandomId(16),
     }
   })
@@ -34,7 +34,9 @@ export const bundle = async (options: BundleOptions) => {
     import {getRouteMatcher} from "next-route-matcher"
 
     ${routes
-      .map(({ id, filePath }) => `import * as ${id} from "./${filePath}"`)
+      .map(
+        ({ id, relativePath }) => `import * as ${id} from "./${relativePath}"`
+      )
       .join("\n")}
 
     const routeMapWithHandlers = {
