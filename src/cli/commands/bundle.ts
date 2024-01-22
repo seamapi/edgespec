@@ -9,7 +9,7 @@ export class BundleCommand extends Command {
   static usage = Command.Usage({
     description: "Bundle your app for distribution",
     details: `
-      This command bundles your app for distribution. It outputs a single file that can be run in a variety of environments.
+      This command bundles your app for distribution. It outputs a zero-dependency file that can be run in a variety of environments.
     `,
     examples: [[`Bundle your app`, `$0 bundle --output bundled.js`]],
   })
