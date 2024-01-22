@@ -16,7 +16,9 @@
     "cli:dev": "tsx src/cli/cli.ts",
     "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
-  "bin": "./src/cli/cli.js",
+  "bin": {
+    "edgespec": "./dist/cli.js"
+  },
   "keywords": [],
   "author": "Seam Labs Inc.",
   "license": "ISC",
@@ -27,7 +29,6 @@
     "ava": "^6.0.1",
     "axios": "^1.6.2",
     "edge-runtime": "^2.5.7",
-    "esbuild": "^0.19.8",
     "esbuild-register": "^3.5.0",
     "execa": "^8.0.1",
     "p-retry": "^6.1.0",
@@ -42,6 +43,7 @@
     "@edge-runtime/node-utils": "^2.2.2",
     "@edge-runtime/primitives": "^4.0.5",
     "clipanion": "^4.0.0-rc.3",
+    "esbuild": "^0.19.11",
     "make-vfs": "^1.1.0",
     "next-route-matcher": "^1.0.2",
     "pretty-bytes": "^6.1.1",

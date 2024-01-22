@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { runExit } from "clipanion"
 import { BundleCommand } from "./commands/bundle"
 import { version } from "../../package.json"
