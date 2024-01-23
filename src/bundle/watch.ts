@@ -1,6 +1,8 @@
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
 import Watcher from "watcher"
 import * as esbuild from "esbuild"
+import fs from "node:fs/promises"
+import path from "node:path"
 
 const alphabet = "zyxwvutsrqponmlkjihgfedcba"
 
@@ -37,7 +39,10 @@ const constructEntrypoint = async (options: BundleOptions) => {
 
     ${routes
       .map(
-        ({ id, relativePath }) => `import * as ${id} from "./${relativePath}"`
+        ({ id, relativePath }) =>
+          `import * as ${id} from "${path.resolve(
+            path.join(options.directoryPath, relativePath)
+          )}"`
       )
       .join("\n")}
 
@@ -51,6 +56,7 @@ const constructEntrypoint = async (options: BundleOptions) => {
     }
 
     ${
+      // todo: should import from the edgespec package instead of an internal import
       options.bundledAdapter === "wintercg-minimal"
         ? `
     import {addFetchListener} from "src/adapters/wintercg-minimal.ts"
@@ -69,24 +75,26 @@ export const watchAndBundle = async (options: BundleOptions) => {
     ignoreInitial: true,
   })
 
-  let ctx: esbuild.BuildContext
+  await fs.mkdir(".edgespec", { recursive: true })
+  const manifestPath = path.resolve(".edgespec/dev-manifest.ts")
 
   const invalidateEntrypoint = async () => {
-    await ctx?.dispose()
-    ctx = await esbuild.context({
-      stdin: {
-        contents: await constructEntrypoint(options),
-        resolveDir: options.directoryPath,
-        loader: "ts",
-      },
-      bundle: true,
-      format: "esm",
-      write: false,
-      sourcemap: "inline",
-      ...options.esbuild,
-    })
-    await ctx.rebuild()
+    await fs.writeFile(
+      manifestPath,
+      await constructEntrypoint(options),
+      "utf-8"
+    )
+    await ctx?.rebuild()
   }
+
+  const ctx = await esbuild.context({
+    entryPoints: [manifestPath],
+    bundle: true,
+    format: "esm",
+    write: false,
+    sourcemap: "inline",
+    ...options.esbuild,
+  })
 
   await invalidateEntrypoint()
 
