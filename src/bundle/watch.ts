@@ -64,6 +64,7 @@ const constructEntrypoint = async (options: BundleOptions) => {
 export const watchAndBundle = async (options: BundleOptions) => {
   const watcher = new Watcher(options.directoryPath, {
     recursive: true,
+    ignoreInitial: true,
   })
 
   let ctx: esbuild.BuildContext
