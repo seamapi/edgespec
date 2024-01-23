@@ -8,6 +8,7 @@ import ora from "ora"
 import { handleRequestWithEdgeSpec } from "src"
 import path from "node:path"
 import chalk from "chalk"
+import { getTempPathInApp } from "src/bundle/get-temp-path-in-app"
 
 export class DevCommand extends Command {
   static paths = [[`dev`]]
@@ -80,12 +81,15 @@ export class DevCommand extends Command {
     })
 
     const command = this
+    const tempDir = await getTempPathInApp(this.appDirectory)
+    const devBundlePathForNode = path.join(tempDir, "dev-bundle.js")
+
     await bundleAndWatch({
       directoryPath: this.appDirectory,
       bundledAdapter: this.emulateWinterCG ? "wintercg-minimal" : undefined,
       esbuild: {
         platform: this.emulateWinterCG ? "browser" : "node",
-        outfile: this.emulateWinterCG ? undefined : ".edgespec/dev-bundle.js",
+        outfile: this.emulateWinterCG ? undefined : devBundlePathForNode,
         write: this.emulateWinterCG ? false : true,
         plugins: [
           {
@@ -117,11 +121,9 @@ export class DevCommand extends Command {
                     initialCode: result.outputFiles[0].text,
                   })
                 } else {
+                  // We append the timestamp to the path to bust the cache
                   const edgeSpecModule = await import(
-                    `file:${path.resolve(
-                      ".edgespec/dev-bundle.js"
-                      // We append the timestamp to the path to bust the cache
-                    )}#${Date.now()}`
+                    `file:${devBundlePathForNode}#${Date.now()}`
                   )
                   nonWinterCGHandler = handleRequestWithEdgeSpec(
                     edgeSpecModule.default

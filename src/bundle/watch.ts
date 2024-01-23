@@ -4,6 +4,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { constructManifest } from "./construct-manifest"
 import { BundleOptions } from "./types"
+import { getTempPathInApp } from "./get-temp-path-in-app"
 
 /**
  * This does not directly provide a way to retrive the contents or path of the bundle. You should provide a plugin in the `esbuild` option to do so.
@@ -15,8 +16,8 @@ export const bundleAndWatch = async (options: BundleOptions) => {
     ignoreInitial: true,
   })
 
-  await fs.mkdir(".edgespec", { recursive: true })
-  const manifestPath = path.resolve(".edgespec/dev-manifest.ts")
+  const tempDir = await getTempPathInApp(options.directoryPath)
+  const manifestPath = path.join(tempDir, "dev-manifest.ts")
 
   const invalidateManifest = async () => {
     await fs.writeFile(manifestPath, await constructManifest(options), "utf-8")
