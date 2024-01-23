@@ -5,7 +5,9 @@ import { fileURLToPath } from "node:url"
 import { getTestServer } from "tests/fixtures/get-test-server"
 import pRetry from "p-retry"
 
-test("dev server rebuilds upon change to existing route", async (t) => {
+test("dev server rebuilds when a route is added", async (t) => {
+  const { axios } = await getTestServer(t, import.meta.url)
+
   const routePath = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
     "api",
@@ -24,29 +26,11 @@ test("dev server rebuilds upon change to existing route", async (t) => {
     await fs.unlink(routePath)
   })
 
-  const { axios } = await getTestServer(t, import.meta.url)
-
-  {
-    const response = await axios.get("/health")
-    t.is(response.status, 200)
-    t.is(response.data, "ok")
-  }
-
-  // Change the route
-  await fs.writeFile(
-    routePath,
-    `
-    export default () => {
-      return new Response("foo")
-    }
-  `
-  )
-
   await t.notThrowsAsync(async () => {
     // The watcher waits a little bit to debounce
     await pRetry(async () => {
       const response = await axios.get("/health")
-      if (response.data !== "foo") {
+      if (response.data !== "ok") {
         throw new Error("Server has not rebuilt yet")
       }
     })
