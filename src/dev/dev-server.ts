@@ -2,6 +2,7 @@ import chalk from "chalk"
 import { EdgeRuntime } from "edge-runtime"
 import { once } from "node:events"
 import { createServer } from "node:http"
+import { AddressInfo } from "node:net"
 import path from "node:path"
 import { handleRequestWithEdgeSpec } from "src"
 import { getTempPathInApp } from "src/bundle/get-temp-path-in-app"
@@ -11,7 +12,7 @@ import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
 interface StartDevServerOptions {
   appDirectory: string
   emulateWinterCG: boolean
-  port: string
+  port?: string
   onListening?: (port: string) => void
   onBuildStart?: () => void
   onBuildEnd?: () => void
@@ -60,7 +61,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
 
   server.listen(options.port, () => {
     const address = server.address()
-    options.onListening?.(options.port)
+    options.onListening?.((address as AddressInfo).port.toString())
   })
 
   const tempDir = await getTempPathInApp(options.appDirectory)
@@ -107,6 +108,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
   })
 
   return {
+    port: (server.address() as AddressInfo).port.toString(),
     stop: async () => {
       await stop()
       const closePromise = once(server, "close")
