@@ -120,6 +120,7 @@ export class DevCommand extends Command {
                   const edgeSpecModule = await import(
                     `file:${path.resolve(
                       ".edgespec/dev-bundle.js"
+                      // We append the timestamp to the path to bust the cache
                     )}#${Date.now()}`
                   )
                   nonWinterCGHandler = handleRequestWithEdgeSpec(
