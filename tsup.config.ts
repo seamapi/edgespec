@@ -6,6 +6,7 @@ export default defineConfig({
     "adapters/node": "src/adapters/node.ts",
     "adapters/wintercg-minimal": "src/adapters/wintercg-minimal.ts",
     cli: "src/cli/cli.ts",
+    dev: "src/dev/dev-server.ts",
   },
   format: "esm",
   treeshake: true,

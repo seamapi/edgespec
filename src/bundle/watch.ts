@@ -11,6 +11,7 @@ import { getTempPathInApp } from "./get-temp-path-in-app"
  */
 export const bundleAndWatch = async (options: BundleOptions) => {
   // todo: this should watch all relevant paths from a tsconfig.json, not just the ./api directory
+  // todo: should ignore files in nearest .gitignore
   const watcher = new Watcher(options.directoryPath, {
     recursive: true,
     ignoreInitial: true,

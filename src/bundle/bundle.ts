@@ -12,6 +12,7 @@ export const bundle = async (options: BundleOptions) => {
     bundle: true,
     format: "esm",
     write: false,
+    sourcemap: "inline",
     ...options.esbuild,
   })
 
