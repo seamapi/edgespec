@@ -13,7 +13,7 @@ export class DevCommand extends Command {
     description: `Start a development server`,
   })
 
-  port = Option.String("--port", "3000", {
+  port = Option.String("--port,-p", "3000", {
     description: "The port to serve your app on",
   })
 
@@ -47,7 +47,6 @@ export class DevCommand extends Command {
       })
     })
 
-    const command = this
     await watchAndBundle({
       directoryPath: this.appDirectory,
       // todo: allow running in the same Node.js process/context to access system APIs
