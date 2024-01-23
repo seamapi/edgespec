@@ -61,7 +61,9 @@ const constructEntrypoint = async (options: BundleOptions) => {
   `
 }
 
+// todo: combine with bundle.ts
 export const watchAndBundle = async (options: BundleOptions) => {
+  // todo: this should watch all relevant paths from a tsconfig.json, not just the ./api directory
   const watcher = new Watcher(options.directoryPath, {
     recursive: true,
     ignoreInitial: true,
@@ -80,6 +82,7 @@ export const watchAndBundle = async (options: BundleOptions) => {
       bundle: true,
       format: "esm",
       write: false,
+      sourcemap: "inline",
       ...options.esbuild,
     })
     await ctx.rebuild()
