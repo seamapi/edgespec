@@ -65,7 +65,7 @@ test("test bundle with Node adapter", async (t) => {
           ok: true,
         })
       } catch (e: any) {
-        t.log("axios failed: " + e.message)
+        t.log("axios failed (a few failures expected): " + e.message)
         throw e
       }
     },
