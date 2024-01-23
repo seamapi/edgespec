@@ -1,7 +1,8 @@
 import { Command, Option } from "clipanion"
 import { bundle } from "src/bundle/bundle"
 import fs from "node:fs/promises"
-import { sizeFormatter } from "human-readable"
+import { durationFormatter, sizeFormatter } from "human-readable"
+import ora from "ora"
 
 export class BundleCommand extends Command {
   static paths = [[`bundle`]]
@@ -32,13 +33,22 @@ export class BundleCommand extends Command {
       return 1
     }
 
+    const spinner = ora("Bundling...").start()
+    const buildStartedAt = performance.now()
+
     const output = await bundle({
       directoryPath: this.appDirectory,
     })
 
     await fs.writeFile(this.outputPath, output)
-    this.context.stdout.write(
-      `Wrote bundle to ${this.outputPath} (${sizeFormatter()(output.length)})\n`
-    )
+
+    spinner.stopAndPersist({
+      symbol: "☃️",
+      text: ` brr... bundled in ${durationFormatter({
+        allowMultiples: ["m", "s", "ms"],
+      })(performance.now() - buildStartedAt)} (${sizeFormatter()(
+        output.length
+      )})`,
+    })
   }
 }
