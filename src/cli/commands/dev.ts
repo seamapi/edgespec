@@ -7,7 +7,7 @@ export class DevCommand extends Command {
   static paths = [[`dev`]]
 
   static usage = Command.Usage({
-    description: `Start a development server`,
+    description: `Start a development server. It watches your source code and will automatically rebuild upon changes.`,
   })
 
   port = Option.String("--port,-p", "3000", {
