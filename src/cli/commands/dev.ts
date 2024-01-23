@@ -4,6 +4,7 @@ import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
 import { EdgeRuntime } from "edge-runtime"
 import { watchAndBundle } from "src/bundle/watch"
 import { durationFormatter } from "human-readable"
+import ora from "ora"
 
 export class DevCommand extends Command {
   static paths = [[`dev`]]
@@ -21,44 +22,13 @@ export class DevCommand extends Command {
   })
 
   async execute() {
+    const listenSpinner = ora({
+      text: "Starting server...",
+      hideCursor: false,
+      discardStdin: false,
+    }).start()
+
     let runtime: EdgeRuntime
-
-    const command = this
-    await watchAndBundle({
-      directoryPath: this.appDirectory,
-      // todo: allow running in the same Node.js process/context to access system APIs
-      bundledAdapter: "wintercg-minimal",
-      esbuild: {
-        plugins: [
-          {
-            name: "watch",
-            setup(build) {
-              let buildStartedAt: number
-              build.onStart(() => {
-                buildStartedAt = performance.now()
-              })
-
-              const timeFormatter = durationFormatter({
-                allowMultiples: ["m", "s", "ms"],
-              })
-
-              build.onEnd((result) => {
-                const durationMs = performance.now() - buildStartedAt
-                command.context.stdout.write(
-                  `Built in ${timeFormatter(durationMs)}\n`
-                )
-
-                if (!result.outputFiles) throw new Error("no output files")
-
-                runtime = new EdgeRuntime({
-                  initialCode: result.outputFiles[0].text,
-                })
-              })
-            },
-          },
-        ],
-      },
-    })
 
     const server = createServer(
       transformToNodeBuilder({
@@ -71,7 +41,51 @@ export class DevCommand extends Command {
     )
 
     server.listen(this.port, () => {
-      this.context.stdout.write(`Listening on port ${this.port}\n`)
+      listenSpinner.stopAndPersist({
+        symbol: "☃️",
+        text: ` listening on port ${this.port}: http://localhost:${this.port}\n`,
+      })
+    })
+
+    const command = this
+    await watchAndBundle({
+      directoryPath: this.appDirectory,
+      // todo: allow running in the same Node.js process/context to access system APIs
+      bundledAdapter: "wintercg-minimal",
+      esbuild: {
+        plugins: [
+          {
+            name: "watch",
+            setup(build) {
+              let buildStartedAt: number
+              let spinner = ora({
+                hideCursor: false,
+                discardStdin: false,
+                text: "Building...",
+              }).start()
+              build.onStart(() => {
+                spinner.start("Building...")
+                buildStartedAt = performance.now()
+              })
+
+              const timeFormatter = durationFormatter({
+                allowMultiples: ["m", "s", "ms"],
+              })
+
+              build.onEnd((result) => {
+                const durationMs = performance.now() - buildStartedAt
+                spinner.succeed(`Built in ${timeFormatter(durationMs)}`)
+
+                if (!result.outputFiles) throw new Error("no output files")
+
+                runtime = new EdgeRuntime({
+                  initialCode: result.outputFiles[0].text,
+                })
+              })
+            },
+          },
+        ],
+      },
     })
   }
 }
