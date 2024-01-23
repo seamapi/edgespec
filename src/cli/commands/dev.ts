@@ -1,14 +1,7 @@
 import { Command, Option } from "clipanion"
-import { createServer } from "node:http"
-import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
-import { EdgeRuntime } from "edge-runtime"
-import { bundleAndWatch } from "src/bundle/watch"
 import { durationFormatter } from "human-readable"
 import ora from "ora"
-import { handleRequestWithEdgeSpec } from "src"
-import path from "node:path"
-import chalk from "chalk"
-import { getTempPathInApp } from "src/bundle/get-temp-path-in-app"
+import { startDevServer } from "src/dev/dev-server"
 
 export class DevCommand extends Command {
   static paths = [[`dev`]]
@@ -38,101 +31,35 @@ export class DevCommand extends Command {
       discardStdin: false,
     }).start()
 
-    let runtime: EdgeRuntime
-    let nonWinterCGHandler: ReturnType<typeof handleRequestWithEdgeSpec>
+    let buildStartedAt: number
+    const spinner = ora({
+      hideCursor: false,
+      discardStdin: false,
+      text: "Building...",
+    }).start()
 
-    const server = createServer(
-      transformToNodeBuilder({
-        defaultOrigin: `http://localhost:${this.port}`,
-      })(async (req) => {
-        if (this.emulateWinterCG) {
-          const response = await runtime.dispatchFetch(req.url, req)
-          await response.waitUntil()
-          return response
-        }
-
-        try {
-          return await nonWinterCGHandler(req)
-        } catch (error) {
-          if (error instanceof Error) {
-            this.context.stderr.write(
-              chalk.bgRed("\nUnhandled exception:\n") +
-                (error.stack ?? error.message) +
-                "\n"
-            )
-          } else {
-            this.context.stderr.write(
-              "Unhandled exception:\n" + JSON.stringify(error) + "\n"
-            )
-          }
-
-          return new Response("Internal server error", {
-            status: 500,
-          })
-        }
-      })
-    )
-
-    server.listen(this.port, () => {
-      listenSpinner.stopAndPersist({
-        symbol: "☃️",
-        text: ` listening on port ${this.port}: http://localhost:${this.port}\n`,
-      })
+    const timeFormatter = durationFormatter({
+      allowMultiples: ["m", "s", "ms"],
     })
 
-    const command = this
-    const tempDir = await getTempPathInApp(this.appDirectory)
-    const devBundlePathForNode = path.join(tempDir, "dev-bundle.js")
-
-    await bundleAndWatch({
-      directoryPath: this.appDirectory,
-      bundledAdapter: this.emulateWinterCG ? "wintercg-minimal" : undefined,
-      esbuild: {
-        platform: this.emulateWinterCG ? "browser" : "node",
-        outfile: this.emulateWinterCG ? undefined : devBundlePathForNode,
-        write: this.emulateWinterCG ? false : true,
-        plugins: [
-          {
-            name: "watch",
-            setup(build) {
-              let buildStartedAt: number
-              let spinner = ora({
-                hideCursor: false,
-                discardStdin: false,
-                text: "Building...",
-              }).start()
-              build.onStart(() => {
-                spinner.start("Building...")
-                buildStartedAt = performance.now()
-              })
-
-              const timeFormatter = durationFormatter({
-                allowMultiples: ["m", "s", "ms"],
-              })
-
-              build.onEnd(async (result) => {
-                const durationMs = performance.now() - buildStartedAt
-                spinner.succeed(`Built in ${timeFormatter(durationMs)}`)
-
-                if (command.emulateWinterCG) {
-                  if (!result.outputFiles) throw new Error("no output files")
-
-                  runtime = new EdgeRuntime({
-                    initialCode: result.outputFiles[0].text,
-                  })
-                } else {
-                  // We append the timestamp to the path to bust the cache
-                  const edgeSpecModule = await import(
-                    `file:${devBundlePathForNode}#${Date.now()}`
-                  )
-                  nonWinterCGHandler = handleRequestWithEdgeSpec(
-                    edgeSpecModule.default
-                  )
-                }
-              })
-            },
-          },
-        ],
+    await startDevServer({
+      port: this.port,
+      appDirectory: this.appDirectory,
+      emulateWinterCG: this.emulateWinterCG,
+      stderr: this.context.stderr,
+      onListening(port) {
+        listenSpinner.stopAndPersist({
+          symbol: "☃️",
+          text: ` listening on port ${port}: http://localhost:${port}\n`,
+        })
+      },
+      onBuildStart() {
+        spinner.start("Building...")
+        buildStartedAt = performance.now()
+      },
+      onBuildEnd() {
+        const durationMs = performance.now() - buildStartedAt
+        spinner.succeed(`Built in ${timeFormatter(durationMs)}`)
       },
     })
   }
