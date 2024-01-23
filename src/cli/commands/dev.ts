@@ -2,7 +2,7 @@ import { Command, Option } from "clipanion"
 import { createServer } from "node:http"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
 import { EdgeRuntime } from "edge-runtime"
-import { watchAndBundle } from "src/bundle/watch"
+import { bundleAndWatch } from "src/bundle/watch"
 import { durationFormatter } from "human-readable"
 import ora from "ora"
 import { handleRequestWithEdgeSpec } from "src"
@@ -80,7 +80,7 @@ export class DevCommand extends Command {
     })
 
     const command = this
-    await watchAndBundle({
+    await bundleAndWatch({
       directoryPath: this.appDirectory,
       bundledAdapter: this.emulateWinterCG ? "wintercg-minimal" : undefined,
       esbuild: {
