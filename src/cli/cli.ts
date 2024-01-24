@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { runExit } from "clipanion"
+import { version } from "../../package.json"
 import { BundleCommand } from "./commands/bundle"
 import { DevCommand } from "./commands/dev"
-import { version } from "../../package.json"
+import { CodeGenRouteTypes } from "./commands/codegen/route-types"
 
 runExit(
   {
@@ -10,5 +11,5 @@ runExit(
     binaryName: "edgespec",
     binaryVersion: version,
   },
-  [BundleCommand, DevCommand]
+  [BundleCommand, DevCommand, CodeGenRouteTypes]
 )
