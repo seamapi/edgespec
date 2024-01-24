@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url"
 test("CLI bundle command requires an output path", async (t) => {
   const cli = await getTestCLI(t)
 
-  const result = await cli.executeCommand(["bundle"])
+  const execution = cli.executeCommand(["bundle"])
+  const result = await execution.waitUntilExit()
   t.is(result.exitCode, 1)
 })
 
@@ -20,13 +21,14 @@ test("CLI bundle command produces a bundle", async (t) => {
     path.dirname(fileURLToPath(import.meta.url)),
     "../smoke/api"
   )
-  const result = await cli.executeCommand([
+  const execution = cli.executeCommand([
     "bundle",
     "-o",
     tempPath,
     "--app-directory",
     appDirectoryPath,
   ])
+  const result = await execution.waitUntilExit()
   t.is(result.exitCode, 0)
 
   const bundle = await import(tempPath)
