@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 const echo = async (request: Request) => {
   const url = new URL(request.url)
   return new Response("", {
@@ -6,4 +8,7 @@ const echo = async (request: Request) => {
   })
 }
 
-export default echo
+// export default echo
+const input = z.object({foo: z.string()})
+const spec = <T>(input: z.ZodType<T>) => input
+export default spec(input)

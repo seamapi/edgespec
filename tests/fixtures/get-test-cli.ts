@@ -6,8 +6,11 @@ export const getTestCLI = async (t: ExecutionContext) => {
   return {
     executeCommand: (args: string[]) => {
       const logStream = new Writable({
-        write(chunk) {
-          t.log(chunk.toString())
+        write(chunk, _, done) {
+          for (const line of chunk.toString().split("\n")) {
+            t.log(line)
+          }
+          done()
         },
       })
 
