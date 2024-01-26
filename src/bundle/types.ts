@@ -1,7 +1,7 @@
 import type { BuildOptions } from "esbuild"
 
 export interface BundleOptions {
-  directoryPath: string
+  routesDirectory: string
   esbuild?: BuildOptions
   /**
    * This should not be provided in most cases so your bundle is maximally portable.

@@ -13,7 +13,7 @@ test("test bundle with Node adapter", async (t) => {
   const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 
   const bundled = await bundle({
-    directoryPath: path.join(currentDirectory, "api"),
+    routesDirectory: path.join(currentDirectory, "api"),
   })
 
   const port = await getPort()

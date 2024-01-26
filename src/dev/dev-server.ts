@@ -68,7 +68,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
   const devBundlePathForNode = path.join(tempDir, "dev-bundle.js")
 
   const { stop } = await bundleAndWatch({
-    directoryPath: options.appDirectory,
+    routesDirectory: options.appDirectory,
     bundledAdapter: options.emulateWinterCG ? "wintercg-minimal" : undefined,
     esbuild: {
       platform: options.emulateWinterCG ? "browser" : "node",

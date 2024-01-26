@@ -37,7 +37,7 @@ export class BundleCommand extends Command {
     const buildStartedAt = performance.now()
 
     const output = await bundle({
-      directoryPath: this.appDirectory,
+      routesDirectory: config.routesDirectory,
     })
 
     await fs.writeFile(this.outputPath, output)
