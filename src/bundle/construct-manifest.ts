@@ -48,10 +48,9 @@ const edgeSpec = {
 }
 
 ${
-  // todo: should import from the edgespec package instead of an internal import
   options.bundledAdapter === "wintercg-minimal"
     ? `
-import {addFetchListener} from "src/adapters/wintercg-minimal.ts"
+import {addFetchListener} from "edgespec/adapters/wintercg-minimal"
 addFetchListener(edgeSpec)
 `
     : "export default edgeSpec"

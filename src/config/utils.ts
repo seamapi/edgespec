@@ -15,18 +15,41 @@ const cloneObjectAndDeleteUndefinedKeys = <T extends Record<string, any>>(
   return clone
 }
 
+const resolvePossibleRelativePath = (
+  possibleRelativePath: string,
+  configDirectory: string
+) => {
+  if (path.isAbsolute(possibleRelativePath)) {
+    return possibleRelativePath
+  }
+
+  return path.resolve(configDirectory, possibleRelativePath)
+}
+
 export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
   tsconfigPath: string
   routesDirectory: string
 }
 
 export const resolveConfig = (
-  config: EdgeSpecConfig
+  config: EdgeSpecConfig,
+  configPath?: string
 ): ResolvedEdgeSpecConfig => {
+  const configDirectory = configPath ? path.dirname(configPath) : process.cwd()
+
+  const { tsconfigPath, routesDirectory, ...rest } =
+    cloneObjectAndDeleteUndefinedKeys(config)
+
   return {
-    tsconfigPath: path.resolve(process.cwd(), "tsconfig.json"),
-    routesDirectory: path.resolve(process.cwd(), "api"),
-    ...cloneObjectAndDeleteUndefinedKeys(config),
+    tsconfigPath: resolvePossibleRelativePath(
+      tsconfigPath ?? "tsconfig.json",
+      configDirectory
+    ),
+    routesDirectory: resolvePossibleRelativePath(
+      routesDirectory ?? "api",
+      configDirectory
+    ),
+    ...rest,
   }
 }
 
@@ -66,9 +89,12 @@ export const loadConfig = async (
   }
 
   return await validateConfig(
-    resolveConfig({
-      ...loadedConfig,
-      ...cloneObjectAndDeleteUndefinedKeys(overrides ?? {}),
-    })
+    resolveConfig(
+      {
+        ...loadedConfig,
+        ...cloneObjectAndDeleteUndefinedKeys(overrides ?? {}),
+      },
+      configPath
+    )
   )
 }

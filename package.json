@@ -20,6 +20,11 @@
       "import": "./dist/adapters/node.js",
       "require": "./dist/adapters/node.js",
       "types": "./dist/adapters/node.d.ts"
+    },
+    "./adapters/wintercg-minimal": {
+      "import": "./dist/adapters/wintercg-minimal.js",
+      "require": "./dist/adapters/wintercg-minimal.js",
+      "types": "./dist/adapters/wintercg-minimal.d.ts"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",

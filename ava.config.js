@@ -8,6 +8,8 @@ export default () => {
         "**/bundled*.*s",
         "**/api/**",
         "**/.edgespec/**",
+        // Temporary file created by bundle-require
+        "**/edgespec.config.bundled*",
       ],
     },
     nodeArguments: ["--import=tsx"],
