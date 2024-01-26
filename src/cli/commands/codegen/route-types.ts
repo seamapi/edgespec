@@ -1,6 +1,7 @@
 import { Command, Option } from "clipanion"
-import { Project, ts } from "ts-morph"
+import { Project, Type, ts } from "ts-morph"
 import path from "node:path"
+import fs from "node:fs/promises"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
 
 export class CodeGenRouteTypes extends Command {
@@ -13,6 +14,7 @@ export class CodeGenRouteTypes extends Command {
       description: "The directory to bundle",
     }
   )
+
   tsconfigPath = Option.String(
     "--tsconfig",
     path.join(process.cwd(), "tsconfig.json"),
@@ -21,6 +23,11 @@ export class CodeGenRouteTypes extends Command {
     }
   )
 
+  outputPath = Option.String("--output,-o", {
+    description: "Path to the output file",
+    required: true,
+  })
+
   async execute() {
     const project = new Project({
       compilerOptions: { declaration: true },
@@ -28,7 +35,8 @@ export class CodeGenRouteTypes extends Command {
     })
 
     const routeMap = await createRouteMapFromDirectory(this.apiDirectory)
-    for (const { relativePath } of Object.values(routeMap)) {
+
+    const nodes = Object.entries(routeMap).map(([route, { relativePath }]) => {
       const source = project.getSourceFileOrThrow(
         path.join(this.apiDirectory, relativePath)
       )
@@ -37,119 +45,108 @@ export class CodeGenRouteTypes extends Command {
         .getExportedDeclarations()
         .get("default")?.[0]
       if (!defaultExportDeclaration) {
-        continue
+        return
       }
 
       const callExpression = defaultExportDeclaration?.getChildrenOfKind(
         ts.SyntaxKind.CallExpression
       )[0]
       if (!callExpression) {
-        continue
+        return
       }
 
       const callSignature = project
         .getTypeChecker()
-        .compilerObject.getResolvedSignature(callExpression.compilerNode)
+        .getResolvedSignature(callExpression)
       if (!callSignature) {
-        continue
+        return
       }
 
       const firstParameter = callSignature?.getParameters()?.[0]
       if (!firstParameter) {
-        continue
+        return
       }
       const parameterType = project
         .getTypeChecker()
-        .compilerObject.getTypeOfSymbolAtLocation(
+        .getTypeOfSymbolAtLocation(
           firstParameter,
-          firstParameter.valueDeclaration!
+          firstParameter.getValueDeclarationOrThrow()
         )
-      console.log(
-        "output",
-        project
-          .getTypeChecker()
-          .compilerObject.typeToString(
-            parameterType,
-            undefined,
-            ts.TypeFormatFlags.UseFullyQualifiedType |
-              ts.TypeFormatFlags.UseStructuralFallback
-          )
-      )
-    }
 
-    const source = project.createSourceFile(
-      "routes.ts",
+      const httpMethodsSymbol = parameterType.getProperty("methods")
+      if (!httpMethodsSymbol) {
+        return
+      }
+
+      const httpMethodLiterals = httpMethodsSymbol
+        .getValueDeclarationOrThrow()
+        .getDescendantsOfKind(ts.SyntaxKind.StringLiteral)
+        .map((d) => d.getLiteralText())
+
+      const jsonResponseSymbol = parameterType.getProperty("jsonResponse")
+      let jsonResponseZodOutputType: Type | undefined = undefined
+      if (jsonResponseSymbol) {
+        const jsonResponseType = project
+          .getTypeChecker()
+          .getTypeOfSymbolAtLocation(
+            jsonResponseSymbol,
+            jsonResponseSymbol.getValueDeclarationOrThrow()
+          )
+
+        const jsonResponseZodOutputSymbol =
+          jsonResponseType.getProperty("_output")
+        if (!jsonResponseZodOutputSymbol) {
+          throw new Error("jsonResponse must be a zod schema")
+        }
+
+        jsonResponseZodOutputType = project
+          .getTypeChecker()
+          .getTypeOfSymbolAtLocation(
+            jsonResponseZodOutputSymbol,
+            jsonResponseZodOutputSymbol.getValueDeclarationOrThrow()
+          )
+      }
+
+      return {
+        route,
+        httpMethods: httpMethodLiterals,
+        jsonResponseZodOutputType,
+      }
+    })
+
+    const filteredNodes = nodes.filter(Boolean) as Exclude<
+      (typeof nodes)[number],
+      undefined
+    >[]
+
+    project.createSourceFile(
+      "manifest.ts",
       `
       import {z} from "zod"
 
       export type Routes = {
-${Object.entries(routeMap)
-  .map(([routeName, { relativePath }]) => {
-    return `'${routeName}': Parameters<typeof import("./${relativePath}").default>`
+${filteredNodes
+  .map(({ route, httpMethods, jsonResponseZodOutputType }) => {
+    return `  "${route}": {
+    methods: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
+    ${
+      jsonResponseZodOutputType
+        ? `jsonResponse: ${project
+            .getTypeChecker()
+            .compilerObject.typeToString(
+              jsonResponseZodOutputType.compilerType
+            )}`
+        : ""
+    }
+  }`
   })
-  .join("\n")}
-}`
+  .join("\n")}`
     )
 
-    // const routesType = source.getTypeAliasOrThrow("Routes")
-    // const routesType = source.getVariableDeclaration("TestRoute")
-    // const routesTypeNode = checker.getTypeAtLocation(routesType!.compilerNode)
-
-    // const callExpression = routesType?.getChildrenOfKind(ts.SyntaxKind.CallExpression)[0]
-    // const callSignature = checker.getResolvedSignature(callExpression?.compilerNode!)
-    // const parameters = callSignature?.getParameters()[0]
-    // const parameterType = checker.getTypeOfSymbolAtLocation(parameters!, parameters!.valueDeclaration!)
-    // // console.log(checker.typeToString(parameterType, undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
-
-    // const zodOutputType = parameterType.getProperty("_output")
-    // console.log(checker.typeToString(checker.getTypeOfSymbol(zodOutputType!)))
-
-    // for (const property of parameterType.getProperties()) {
-    //   console.log(property.getName(), checker.typeToString(checker.getTypeOfSymbol(property), undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
-    // }
-
-    // for (const property of routesTypeNode.getProperties()) {
-    // const typeNode = checker.typeToTypeNode(checker.getTypeOfSymbol(property), undefined, undefined)
-
-    // console.log(property.getName(), typeNode?.getChildren())
-
-    // console.log(property.getName(), property.valueDeclaration?.getChildren())
-
-    // console.log(property.getName(), checker.typeToString(checker.getTypeOfSymbol(property), undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
-
-    // console.log(typeNode?.getText())
-    // }
-
-    // transformTypeNode(routesType)
-
-    // const deeplyResolve = (target: ts.Type) => {
-    //   console.log("comment", target.getSymbol()?.getDocumentationComment(checker))
-    //   for (const property of target.getProperties()) {
-    //     // console.log(property.getName(), checker.typeToString(checker.getTypeOfSymbol(property), undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
-    //     // console.log("comment", property.getDocumentationComment(checker))
-    //     // console.log(property.getName(), checker.typeToString(checker.getTypeOfSymbol(property), undefined, ts.TypeFormatFlags.UseFullyQualifiedType))
-    //     // if (isTypeLocal(property)) {
-    //     //   // deeplyResolve(checker.getTypeOfSymbol(property))
-    //     // }
-
-    //     const propertyType = checker.getTypeOfSymbol(property)
-    //     console.log(propertyType.isClassOrInterface ? propertyType.ty)
-    //   }
-    // }
-
-    // deeplyResolve(checker.getTypeAtLocation(routesType.compilerNode))
-    // source.getDescendantsOfKind(SyntaxKind.ImportType).map((d) => {
-
-    //   const checker = project.getTypeChecker().compilerObject.typeToTypeNode(d.compilerNode.getChildren()[0], undefined, {})
-    //   console.log(checker)
-
-    //   console.log(d.getType().getText())
-    //   d.replaceWithText(d.getType().getText())
-    // })
-
-    console.log(source.getText())
-
     const result = project.emitToMemory({ emitOnlyDtsFiles: true })
-    console.log(result.getFiles().map((f) => f.text.toString()))
+    await fs.writeFile(
+      this.outputPath,
+      result.getFiles().find((f) => f.filePath.includes("/manifest.d.ts"))!.text
+    )
   }
 }

@@ -2,7 +2,7 @@ import { z } from "zod"
 import { placeholderWithRouteSpec } from "../placeholder-route-spec"
 
 export default placeholderWithRouteSpec({
-  methods: ["GET"],
+  methods: ["GET", "POST"],
   jsonBody: z.object({
     foo_id: z.string().uuid(),
   }),

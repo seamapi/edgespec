@@ -1,3 +1,6 @@
 {
-  "files": ["api/foo.ts", "placeholder-route-spec.ts"]
+  "files": ["api/foo.ts", "placeholder-route-spec.ts"],
+  "compilerOptions": {
+    "strict": true
+  }
 }
