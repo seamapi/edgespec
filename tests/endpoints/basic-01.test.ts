@@ -3,7 +3,13 @@ import { getTestRoute } from "../fixtures/get-test-route.js"
 
 test("basic-01", async (t) => {
   const { axios } = await getTestRoute(t, {
-    globalSpec: {},
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
+
+      authMiddlewareMap: {},
+      globalMiddlewares: [],
+    },
     routeSpec: {
       auth: "none",
       methods: ["GET", "POST"],

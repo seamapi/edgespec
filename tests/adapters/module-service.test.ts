@@ -3,10 +3,26 @@ import { getTestRoute } from "../fixtures/get-test-route.js"
 import { createModuleService } from "src/adapters/module-service.js"
 import { createEdgeSpecFromRouteMap } from "src/serve/create-node-server-from-route-map.js"
 
+const defaultSpecs = {
+  globalSpec: {
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {},
+    globalMiddlewares: [],
+  },
+  routeSpec: {
+    auth: "none",
+    methods: ["GET", "POST"],
+  },
+} as const
+
 test("module service with simple endpoint", async (t) => {
   const ModuleService = createModuleService(
     createEdgeSpecFromRouteMap({
       "/health": async (req) => {
+        console.log(req)
+
         return new Response(
           JSON.stringify({
             ok: true,
@@ -17,11 +33,7 @@ test("module service with simple endpoint", async (t) => {
   )
 
   const { axios } = await getTestRoute(t, {
-    globalSpec: {},
-    routeSpec: {
-      auth: "none",
-      methods: ["GET", "POST"],
-    },
+    ...defaultSpecs,
     routePath: "/module_service/[...path]",
     routeFn: ModuleService(),
   })
@@ -57,11 +69,7 @@ test("module service with complex delegation pattern", async (t) => {
   )
 
   const { axios } = await getTestRoute(t, {
-    globalSpec: {},
-    routeSpec: {
-      auth: "none",
-      methods: ["GET", "POST"],
-    },
+    ...defaultSpecs,
     routePath: "/module_service/[...path]",
     routeFn: async (req) => {
       const { delegateTo } = await req.json()
@@ -109,11 +117,7 @@ test("module service cascades settings", async (t) => {
   )
 
   const { axios } = await getTestRoute(t, {
-    globalSpec: {},
-    routeSpec: {
-      auth: "none",
-      methods: ["GET", "POST"],
-    },
+    ...defaultSpecs,
     routePath: "/module_service/[...path]",
     routeFn: ModuleService(),
     edgeSpecOptions: {
@@ -136,11 +140,7 @@ test("module service cascades route param not found settings", async (t) => {
   const ModuleService = createModuleService(createEdgeSpecFromRouteMap({}))
 
   const { axios } = await getTestRoute(t, {
-    globalSpec: {},
-    routeSpec: {
-      auth: "none",
-      methods: ["GET", "POST"],
-    },
+    ...defaultSpecs,
     routePath: "/module_service/[...path2]",
     routeFn: ModuleService({
       handleRouteParamNotFound: () => {
