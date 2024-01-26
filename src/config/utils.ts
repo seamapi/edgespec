@@ -3,6 +3,18 @@ import fs from "node:fs/promises"
 import { bundleRequire } from "bundle-require"
 import { EdgeSpecConfig } from "src/config/config"
 
+const cloneObjectAndDeleteUndefinedKeys = <T extends Record<string, any>>(
+  obj: T
+) => {
+  const clone = { ...obj }
+  Object.keys(clone).forEach((key) => {
+    if (clone[key] === undefined) {
+      delete clone[key]
+    }
+  })
+  return clone
+}
+
 export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
   tsconfigPath: string
   routesDirectory: string
@@ -14,7 +26,7 @@ export const resolveConfig = (
   return {
     tsconfigPath: path.resolve(process.cwd(), "tsconfig.json"),
     routesDirectory: path.resolve(process.cwd(), "api"),
-    ...config,
+    ...cloneObjectAndDeleteUndefinedKeys(config),
   }
 }
 
@@ -56,7 +68,7 @@ export const loadConfig = async (
   return await validateConfig(
     resolveConfig({
       ...loadedConfig,
-      ...overrides,
+      ...cloneObjectAndDeleteUndefinedKeys(overrides ?? {}),
     })
   )
 }
