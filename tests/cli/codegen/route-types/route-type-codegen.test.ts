@@ -27,6 +27,8 @@ test("CLI codegen route-types command produces the expected route types", async 
 
   // Test created file
   const routesDTs = await fs.readFile(tempPath, "utf-8")
+  t.log("Generated file:")
+  t.log(routesDTs)
 
   const project = new Project({
     compilerOptions: { strict: true },
@@ -49,6 +51,23 @@ test("CLI codegen route-types command produces the expected route types", async 
             name: string
           }
         }
+      }
+      // A route that imports part of its spec from /foo
+      "/importer": {
+        methods: "PUT"
+        jsonResponse: {
+          foo: {
+            id: string
+            name: string
+          }
+        }
+      }
+      // Route that uses z.union
+      "/union": {
+        methods: "GET" | "POST"
+        jsonResponse: {
+          foo_id: string
+        } | boolean[]
       }
     }
 
