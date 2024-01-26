@@ -4,7 +4,7 @@ import fs from "node:fs/promises"
 import { durationFormatter, sizeFormatter } from "human-readable"
 import ora from "ora"
 import { BaseCommand } from "../base-command"
-import { ResolvedEdgeSpecConfig } from "src/config"
+import { ResolvedEdgeSpecConfig } from "src/config/utils"
 
 export class BundleCommand extends BaseCommand {
   static paths = [[`bundle`]]

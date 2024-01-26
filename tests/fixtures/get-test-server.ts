@@ -17,8 +17,10 @@ export const getTestServer = async (
   const dir = path.join(path.dirname(fileURLToPath(testFileUrl)), "api")
 
   const { stop, port } = await startDevServer({
-    appDirectory: dir,
-    emulateWinterCG: true,
+    config: {
+      routesDirectory: dir,
+      emulateWinterCG: true,
+    },
   })
 
   t.teardown(async () => {

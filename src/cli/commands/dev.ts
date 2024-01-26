@@ -2,8 +2,10 @@ import { Command, Option } from "clipanion"
 import { durationFormatter } from "human-readable"
 import ora from "ora"
 import { startDevServer } from "src/dev/dev-server"
+import { BaseCommand } from "../base-command"
+import { ResolvedEdgeSpecConfig } from "src/config/utils"
 
-export class DevCommand extends Command {
+export class DevCommand extends BaseCommand {
   static paths = [[`dev`]]
 
   static usage = Command.Usage({
@@ -14,17 +16,13 @@ export class DevCommand extends Command {
     description: "The port to serve your app on",
   })
 
-  appDirectory = Option.String("--app-directory", process.cwd(), {
-    description: "The directory of your app",
-  })
-
   // todo: better syntax for this flag, seems to need --no-emulate-wintercg
   emulateWinterCG = Option.Boolean("--emulate-wintercg", true, {
     description:
       "Emulate the WinterCG runtime. When true, native APIs are unavailable.",
   })
 
-  async execute() {
+  async run(config: ResolvedEdgeSpecConfig) {
     const listenSpinner = ora({
       text: "Starting server...",
       hideCursor: false,
@@ -44,8 +42,7 @@ export class DevCommand extends Command {
 
     await startDevServer({
       port: this.port,
-      appDirectory: this.appDirectory,
-      emulateWinterCG: this.emulateWinterCG,
+      config,
       stderr: this.context.stderr,
       onListening(port) {
         listenSpinner.stopAndPersist({

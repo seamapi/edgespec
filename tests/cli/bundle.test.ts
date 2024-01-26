@@ -25,7 +25,7 @@ test("CLI bundle command produces a bundle", async (t) => {
     "bundle",
     "-o",
     tempPath,
-    "--app-directory",
+    "--routes-directory",
     appDirectoryPath,
   ])
   const result = await execution.waitUntilExit()

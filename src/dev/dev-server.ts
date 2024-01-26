@@ -4,14 +4,15 @@ import { once } from "node:events"
 import { createServer } from "node:http"
 import { AddressInfo } from "node:net"
 import path from "node:path"
-import { handleRequestWithEdgeSpec } from "src"
+import { EdgeSpecConfig, handleRequestWithEdgeSpec } from "src"
 import { getTempPathInApp } from "src/bundle/get-temp-path-in-app"
 import { bundleAndWatch } from "src/bundle/watch"
+import { ResolvedEdgeSpecConfig, loadConfig } from "src/config/utils"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
 
 interface StartDevServerOptions {
-  appDirectory: string
-  emulateWinterCG: boolean
+  configPath?: string
+  config?: EdgeSpecConfig
   port?: string
   onListening?: (port: string) => void
   onBuildStart?: () => void
@@ -27,13 +28,20 @@ export const startDevServer = async (options: StartDevServerOptions) => {
   let runtime: EdgeRuntime
   let nonWinterCGHandler: ReturnType<typeof handleRequestWithEdgeSpec>
 
+  let config: ResolvedEdgeSpecConfig
+  if (options.configPath) {
+    config = await loadConfig(options.configPath, options.config)
+  } else {
+    config = await loadConfig(undefined, options.config)
+  }
+
   const stderr = options.stderr ?? process.stderr
 
   const server = createServer(
     transformToNodeBuilder({
       defaultOrigin: `http://localhost:${options.port}`,
     })(async (req) => {
-      if (options.emulateWinterCG) {
+      if (config.emulateWinterCG) {
         const response = await runtime.dispatchFetch(req.url, req)
         await response.waitUntil()
         return response
@@ -64,16 +72,16 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     options.onListening?.((address as AddressInfo).port.toString())
   })
 
-  const tempDir = await getTempPathInApp(options.appDirectory)
+  const tempDir = await getTempPathInApp(config.routesDirectory)
   const devBundlePathForNode = path.join(tempDir, "dev-bundle.js")
 
   const { stop } = await bundleAndWatch({
-    routesDirectory: options.appDirectory,
-    bundledAdapter: options.emulateWinterCG ? "wintercg-minimal" : undefined,
+    routesDirectory: config.routesDirectory,
+    bundledAdapter: config.emulateWinterCG ? "wintercg-minimal" : undefined,
     esbuild: {
-      platform: options.emulateWinterCG ? "browser" : "node",
-      outfile: options.emulateWinterCG ? undefined : devBundlePathForNode,
-      write: options.emulateWinterCG ? false : true,
+      platform: config.emulateWinterCG ? "browser" : "node",
+      outfile: config.emulateWinterCG ? undefined : devBundlePathForNode,
+      write: config.emulateWinterCG ? false : true,
       plugins: [
         {
           name: "watch",
@@ -83,7 +91,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
             })
 
             build.onEnd(async (result) => {
-              if (options.emulateWinterCG) {
+              if (config.emulateWinterCG) {
                 if (!result.outputFiles) throw new Error("no output files")
 
                 runtime = new EdgeRuntime({
