@@ -1,4 +1,4 @@
-import {z} from "zod"
+import { z } from "zod"
 
 type PlaceholderRouteSpec = {
   methods: ("GET" | "POST" | "PUT" | "PATCH" | "DELETE")[]
@@ -7,6 +7,8 @@ type PlaceholderRouteSpec = {
 }
 
 // todo: replace with real route spec
-export const placeholderWithRouteSpec = <T extends PlaceholderRouteSpec>(spec: T) => (next: (req: Request) => Response) => {
-  return next
-}
+export const placeholderWithRouteSpec =
+  <T extends PlaceholderRouteSpec>(spec: T) =>
+  (next: (req: Request) => Response) => {
+    return next
+  }

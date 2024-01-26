@@ -1,25 +1,79 @@
 import { Command, Option } from "clipanion"
-import { Project, Node, ts } from "ts-morph"
+import { Project, ts } from "ts-morph"
 import path from "node:path"
-import fs from "node:fs/promises"
-// import * as ts from "typescript"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
 
 export class CodeGenRouteTypes extends Command {
   static paths = [[`codegen`, `route-types`]]
 
-  appDirectory = Option.String("--app-directory", process.cwd(), {
-    description: "The directory to bundle",
-  })
+  apiDirectory = Option.String(
+    "--api-directory",
+    path.join(process.cwd(), "api"),
+    {
+      description: "The directory to bundle",
+    }
+  )
+  tsconfigPath = Option.String(
+    "--tsconfig",
+    path.join(process.cwd(), "tsconfig.json"),
+    {
+      description: "Path to the project's tsconfig.json",
+    }
+  )
 
   async execute() {
-    const project = new Project({ compilerOptions: { declaration: true } })
+    const project = new Project({
+      compilerOptions: { declaration: true },
+      tsConfigFilePath: this.tsconfigPath,
+    })
 
-    const routeMap = await createRouteMapFromDirectory(this.appDirectory)
+    const routeMap = await createRouteMapFromDirectory(this.apiDirectory)
     for (const { relativePath } of Object.values(routeMap)) {
-      project.createSourceFile(
-        relativePath,
-        await fs.readFile(path.join(this.appDirectory, relativePath), "utf-8")
+      const source = project.getSourceFileOrThrow(
+        path.join(this.apiDirectory, relativePath)
+      )
+
+      const defaultExportDeclaration = source
+        .getExportedDeclarations()
+        .get("default")?.[0]
+      if (!defaultExportDeclaration) {
+        continue
+      }
+
+      const callExpression = defaultExportDeclaration?.getChildrenOfKind(
+        ts.SyntaxKind.CallExpression
+      )[0]
+      if (!callExpression) {
+        continue
+      }
+
+      const callSignature = project
+        .getTypeChecker()
+        .compilerObject.getResolvedSignature(callExpression.compilerNode)
+      if (!callSignature) {
+        continue
+      }
+
+      const firstParameter = callSignature?.getParameters()?.[0]
+      if (!firstParameter) {
+        continue
+      }
+      const parameterType = project
+        .getTypeChecker()
+        .compilerObject.getTypeOfSymbolAtLocation(
+          firstParameter,
+          firstParameter.valueDeclaration!
+        )
+      console.log(
+        "output",
+        project
+          .getTypeChecker()
+          .compilerObject.typeToString(
+            parameterType,
+            undefined,
+            ts.TypeFormatFlags.UseFullyQualifiedType |
+              ts.TypeFormatFlags.UseStructuralFallback
+          )
       )
     }
 
@@ -27,12 +81,6 @@ export class CodeGenRouteTypes extends Command {
       "routes.ts",
       `
       import {z} from "zod"
-      import {schema} from "./health"
-
-      const createSchema = (extra: string) => schema.extend({extra: z.literal(extra)})
-
-      const spec = <T>(input: z.ZodType<T>) => input
-      export const TestRoute = spec(createSchema("hello"))
 
       export type Routes = {
 ${Object.entries(routeMap)
@@ -43,40 +91,36 @@ ${Object.entries(routeMap)
 }`
     )
 
-    const checker = project.getTypeChecker().compilerObject
-
     // const routesType = source.getTypeAliasOrThrow("Routes")
-    const routesType = source.getVariableDeclaration("TestRoute")
-    // const routesTypeNode = checker.getTypeAtLocation(routesType.compilerNode)
+    // const routesType = source.getVariableDeclaration("TestRoute")
+    // const routesTypeNode = checker.getTypeAtLocation(routesType!.compilerNode)
 
-    const callExpression = routesType?.getChildrenOfKind(ts.SyntaxKind.CallExpression)[0]
-    const callSignature = checker.getResolvedSignature(callExpression?.compilerNode!)
-    const parameters = callSignature?.getParameters()[0]
-    const parameterType = checker.getTypeOfSymbolAtLocation(parameters!, parameters!.valueDeclaration!)
-    // console.log(checker.typeToString(parameterType, undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
+    // const callExpression = routesType?.getChildrenOfKind(ts.SyntaxKind.CallExpression)[0]
+    // const callSignature = checker.getResolvedSignature(callExpression?.compilerNode!)
+    // const parameters = callSignature?.getParameters()[0]
+    // const parameterType = checker.getTypeOfSymbolAtLocation(parameters!, parameters!.valueDeclaration!)
+    // // console.log(checker.typeToString(parameterType, undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
 
-    const zodOutputType = parameterType.getProperty("_output")
-    console.log(checker.typeToString(checker.getTypeOfSymbol(zodOutputType!)))
+    // const zodOutputType = parameterType.getProperty("_output")
+    // console.log(checker.typeToString(checker.getTypeOfSymbol(zodOutputType!)))
 
     // for (const property of parameterType.getProperties()) {
     //   console.log(property.getName(), checker.typeToString(checker.getTypeOfSymbol(property), undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
     // }
 
     // for (const property of routesTypeNode.getProperties()) {
-      // const typeNode = checker.typeToTypeNode(checker.getTypeOfSymbol(property), undefined, undefined)
+    // const typeNode = checker.typeToTypeNode(checker.getTypeOfSymbol(property), undefined, undefined)
 
-      // console.log(property.getName(), typeNode?.getChildren())
+    // console.log(property.getName(), typeNode?.getChildren())
 
-      // console.log(property.getName(), property.valueDeclaration?.getChildren())
+    // console.log(property.getName(), property.valueDeclaration?.getChildren())
 
-      // console.log(property.getName(), checker.typeToString(checker.getTypeOfSymbol(property), undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
+    // console.log(property.getName(), checker.typeToString(checker.getTypeOfSymbol(property), undefined, ts.TypeFormatFlags.UseFullyQualifiedType | ts.TypeFormatFlags.UseStructuralFallback))
 
-      // console.log(typeNode?.getText())
+    // console.log(typeNode?.getText())
     // }
 
-
     // transformTypeNode(routesType)
-
 
     // const deeplyResolve = (target: ts.Type) => {
     //   console.log("comment", target.getSymbol()?.getDocumentationComment(checker))

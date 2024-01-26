@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { placeholderWithRouteSpec } from "../placeholder-route-spec";
+import { z } from "zod"
+import { placeholderWithRouteSpec } from "../placeholder-route-spec"
 
 export default placeholderWithRouteSpec({
   methods: ["GET"],
@@ -11,8 +11,8 @@ export default placeholderWithRouteSpec({
       id: z.string().uuid(),
       name: z.string(),
     }),
-  })
-})(req => {
+  }),
+})((req) => {
   return Response.json({
     foo: {
       id: "example-id",
