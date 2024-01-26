@@ -30,6 +30,7 @@
     "axios": "^1.6.2",
     "esbuild-register": "^3.5.0",
     "execa": "^8.0.1",
+    "expect-type": "^0.17.3",
     "p-retry": "^6.1.0",
     "prettier": "^3.1.0",
     "tsup": "^8.0.1",
@@ -49,9 +50,18 @@
     "next-route-matcher": "^1.0.2",
     "ora": "^8.0.1",
     "redaxios": "^0.5.1",
+    "ts-morph": "^21.0.1",
     "watcher": "^2.3.0",
     "yargs": "^17.7.2",
     "zod": "^3.22.4"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=18.0.0"
