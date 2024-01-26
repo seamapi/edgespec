@@ -31,7 +31,7 @@ export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
   routesDirectory: string
 }
 
-export const resolveConfig = (
+const resolveConfig = (
   config: EdgeSpecConfig,
   configPath?: string
 ): ResolvedEdgeSpecConfig => {
@@ -53,7 +53,7 @@ export const resolveConfig = (
   }
 }
 
-export const validateConfig = async (config: ResolvedEdgeSpecConfig) => {
+const validateConfig = async (config: ResolvedEdgeSpecConfig) => {
   try {
     await fs.stat(config.routesDirectory)
   } catch (error) {

@@ -1,10 +1,5 @@
 import { Command, Option } from "clipanion"
-import {
-  ResolvedEdgeSpecConfig,
-  loadConfig,
-  resolveConfig,
-  validateConfig,
-} from "src/config/utils"
+import { ResolvedEdgeSpecConfig, loadConfig } from "src/config/utils"
 
 export abstract class BaseCommand extends Command {
   configPath = Option.String("--config,-c", {
@@ -29,7 +24,7 @@ export abstract class BaseCommand extends Command {
       return this.run(await loadConfig(this.configPath, overrides))
     }
 
-    const resolvedConfig = await validateConfig(resolveConfig(overrides))
+    const resolvedConfig = await loadConfig(undefined, overrides)
 
     return this.run(resolvedConfig)
   }
