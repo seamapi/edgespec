@@ -3,8 +3,25 @@
   "version": "0.0.2",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dev": {
+      "import": "./dist/dev.js",
+      "require": "./dist/dev.js",
+      "types": "./dist/dev.d.ts"
+    },
+    "./adapters/node": {
+      "import": "./dist/adapters/node.js",
+      "require": "./dist/adapters/node.js",
+      "types": "./dist/adapters/node.d.ts"
+    }
+  },
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
     "build": "tsup",
@@ -41,6 +58,7 @@
   "dependencies": {
     "@edge-runtime/node-utils": "^2.2.2",
     "@edge-runtime/primitives": "^4.0.5",
+    "bundle-require": "^4.0.2",
     "chalk": "^5.3.0",
     "clipanion": "^4.0.0-rc.3",
     "edge-runtime": "^2.5.7",

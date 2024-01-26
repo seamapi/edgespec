@@ -3,8 +3,10 @@ import { bundle } from "src/bundle/bundle"
 import fs from "node:fs/promises"
 import { durationFormatter, sizeFormatter } from "human-readable"
 import ora from "ora"
+import { BaseCommand } from "../base-command"
+import { ResolvedEdgeSpecConfig } from "src/config"
 
-export class BundleCommand extends Command {
+export class BundleCommand extends BaseCommand {
   static paths = [[`bundle`]]
 
   static usage = Command.Usage({
@@ -19,20 +21,8 @@ export class BundleCommand extends Command {
     description: "The path to output the bundle",
     required: true,
   })
-  appDirectory = Option.String("--app-directory", process.cwd(), {
-    description: "The directory to bundle",
-  })
 
-  async execute() {
-    try {
-      await fs.stat(this.appDirectory)
-    } catch (error) {
-      this.context.stderr.write(
-        `Could not find directory ${this.appDirectory}\n`
-      )
-      return 1
-    }
-
+  async run(config: ResolvedEdgeSpecConfig) {
     const spinner = ora("Bundling...").start()
     const buildStartedAt = performance.now()
 
