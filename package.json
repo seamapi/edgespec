@@ -54,6 +54,14 @@
     "yargs": "^17.7.2",
     "zod": "^3.22.4"
   },
+  "peerDependencies": {
+    "typescript": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=18.0.0"
   }
