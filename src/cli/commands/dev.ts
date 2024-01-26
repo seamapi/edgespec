@@ -23,6 +23,11 @@ export class DevCommand extends BaseCommand {
   })
 
   async run(config: ResolvedEdgeSpecConfig) {
+    const configWithOverrides = {
+      emulateWinterCG: this.emulateWinterCG,
+      ...config,
+    }
+
     const listenSpinner = ora({
       text: "Starting server...",
       hideCursor: false,
@@ -42,7 +47,7 @@ export class DevCommand extends BaseCommand {
 
     await startDevServer({
       port: this.port,
-      config,
+      config: configWithOverrides,
       stderr: this.context.stderr,
       onListening(port) {
         listenSpinner.stopAndPersist({
