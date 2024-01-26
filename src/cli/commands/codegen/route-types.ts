@@ -7,8 +7,8 @@ import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-di
 export class CodeGenRouteTypes extends Command {
   static paths = [[`codegen`, `route-types`]]
 
-  apiDirectory = Option.String(
-    "--api-directory",
+  appDirectory = Option.String(
+    "--app-directory",
     path.join(process.cwd(), "api"),
     {
       description: "The directory to bundle",
@@ -34,11 +34,11 @@ export class CodeGenRouteTypes extends Command {
       tsConfigFilePath: this.tsconfigPath,
     })
 
-    const routeMap = await createRouteMapFromDirectory(this.apiDirectory)
+    const routeMap = await createRouteMapFromDirectory(this.appDirectory)
 
     const nodes = Object.entries(routeMap).map(([route, { relativePath }]) => {
       const source = project.getSourceFileOrThrow(
-        path.join(this.apiDirectory, relativePath)
+        path.join(this.appDirectory, relativePath)
       )
 
       const defaultExportDeclaration = source
