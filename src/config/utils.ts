@@ -32,6 +32,9 @@ export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
   routesDirectory: string
 }
 
+/**
+ * Resolves relative paths and sets defaults for any missing values.
+ */
 const resolveConfig = (
   config: EdgeSpecConfig,
   configPath?: string
