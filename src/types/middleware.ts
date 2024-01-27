@@ -12,12 +12,14 @@ export type MiddlewareChain = readonly Middleware[]
  *
  * For example:
  *
+ * ```ts
  *  Middleware<{}, { auth: string }>
  *  Middleware<{}, { user: string }>
  *
  *  ->
  *
  *  { auth: string, user: string }
+ * ```
  */
 export type AccumulateMiddlewareChainResultOptions<
   MiddlewareChain,
@@ -38,6 +40,25 @@ export type AccumulateMiddlewareChainResultOptions<
       : never
     : never
 
+/**
+ * Picks out a subset of middlewares from a map, maintaining the order given in the array
+ *
+ * For example:
+ *
+ * ```ts
+ * MiddlewareMap = {
+ *  "session_token": Middleware<{}, { session_token: string }>,
+ *  "pat": Middleware<{}, { pat: string }>,
+ *  "api_token": Middleware<{}, { api_token: string }>
+ * }
+ * Middlewares = ["session_token", "pat"]
+ *
+ * ->
+ *
+ * [ Middleware<{}, { session_token: string }>, Middleware<{}, { pat: string }> ]
+ * ```
+ *
+ */
 export type MapMiddlewares<
   MiddlewareMap extends { [mw: string]: Middleware },
   Middlewares extends
@@ -49,8 +70,3 @@ export type MapMiddlewares<
   : Middlewares extends infer K extends keyof MiddlewareMap
     ? readonly [MiddlewareMap[K]]
     : readonly []
-
-// type t = AccumulateMiddlewareChainResultOptions<
-//   [Middleware<{}, { auth: "1" }>, Middleware<{}, { auth2: "2" }>],
-//   "union"
-// >

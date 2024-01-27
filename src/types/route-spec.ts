@@ -22,6 +22,15 @@ export type RouteSpec<AuthMiddlewares extends string> = {
   middlewares?: MiddlewareChain
 }
 
+/**
+ * Collects all middleware request options from a Global/Route spec pair
+ *
+ * This goes in order of execution:
+ *  1. Global middlewares (intersection)
+ *  2. Auth middlewares (union)
+ *  3. Global middlewares after auth (intersection)
+ *  4. Route middlewares (intersection)
+ */
 type GetMiddlewareRequestOptions<
   GS extends GlobalSpec,
   RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
