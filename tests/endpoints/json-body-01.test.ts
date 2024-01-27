@@ -4,7 +4,13 @@ import { z } from "zod"
 
 test("json-body-01", async (t) => {
   const { axios, serverUrl } = await getTestRoute(t, {
-    globalSpec: {},
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
+
+      authMiddlewareMap: {},
+      globalMiddlewares: [],
+    },
     routeSpec: {
       auth: "none",
       methods: ["GET", "POST"],
