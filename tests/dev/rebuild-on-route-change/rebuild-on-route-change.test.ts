@@ -44,11 +44,18 @@ test("dev server rebuilds upon change to existing route", async (t) => {
 
   await t.notThrowsAsync(async () => {
     // The watcher waits a little bit to debounce
-    await pRetry(async () => {
-      const response = await axios.get("/health")
-      if (response.data !== "foo") {
-        throw new Error("Server has not rebuilt yet")
+    await pRetry(
+      async () => {
+        const response = await axios.get("/health")
+        if (response.data !== "foo") {
+          throw new Error("Server has not rebuilt yet")
+        }
+      },
+      {
+        retries: 10,
+        minTimeout: 500,
+        factor: 1,
       }
-    })
+    )
   })
 })

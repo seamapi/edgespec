@@ -10,18 +10,9 @@ test("CLI dev command starts a dev server", async (t) => {
 
   const port = await getPort()
 
-  const appDirectoryPath = path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "api"
-  )
+  const rootDirectory = path.dirname(fileURLToPath(import.meta.url))
 
-  cli.executeCommand([
-    "dev",
-    "--routes-directory",
-    appDirectoryPath,
-    "-p",
-    port.toString(),
-  ])
+  cli.executeCommand(["dev", "--root", rootDirectory, "-p", port.toString()])
 
   await t.notThrowsAsync(async () => {
     await pRetry(

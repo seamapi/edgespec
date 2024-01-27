@@ -1,6 +1,6 @@
 import chalk from "chalk"
 import { EdgeRuntime } from "edge-runtime"
-import { once } from "node:events"
+import { once, EventEmitter } from "node:events"
 import { createServer } from "node:http"
 import { AddressInfo } from "node:net"
 import path from "node:path"
@@ -37,10 +37,22 @@ export const startDevServer = async (options: StartDevServerOptions) => {
 
   const stderr = options.stderr ?? process.stderr
 
+  const buildEvents = new EventEmitter()
+  // Allows us to block requests if we're currently rebuilding to avoid using a stale build
+  let isBuilding = false
+
+  // Used to avoid a race condition where the server attempts to process a request before the first build is complete
+  const firstBuildPromise = once(buildEvents, "built")
+
   const server = createServer(
     transformToNodeBuilder({
       defaultOrigin: `http://localhost:${options.port}`,
     })(async (req) => {
+      await firstBuildPromise
+      if (isBuilding) {
+        await once(buildEvents, "built")
+      }
+
       if (config.emulateWinterCG) {
         const response = await runtime.dispatchFetch(req.url, req)
         await response.waitUntil()
@@ -72,10 +84,11 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     options.onListening?.((address as AddressInfo).port.toString())
   })
 
-  const tempDir = await getTempPathInApp(config.routesDirectory)
+  const tempDir = await getTempPathInApp(config.rootDirectory)
   const devBundlePathForNode = path.join(tempDir, "dev-bundle.js")
 
   const { stop } = await bundleAndWatch({
+    rootDirectory: config.rootDirectory,
     routesDirectory: config.routesDirectory,
     bundledAdapter: config.emulateWinterCG ? "wintercg-minimal" : undefined,
     esbuild: {
@@ -87,6 +100,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
           name: "watch",
           setup(build) {
             build.onStart(() => {
+              isBuilding = true
               options.onBuildStart?.()
             })
 
@@ -106,6 +120,9 @@ export const startDevServer = async (options: StartDevServerOptions) => {
                   edgeSpecModule.default
                 )
               }
+
+              isBuilding = false
+              buildEvents.emit("built")
 
               options.onBuildEnd?.()
             })

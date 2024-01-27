@@ -2,7 +2,17 @@ import { z } from "zod"
 
 const edgeSpecConfigSchema = z
   .object({
+    /**
+     * Defaults to the current working directory.
+     */
+    rootDirectory: z.string().optional(),
+    /**
+     * If this path is relative, it's resolved relative to the `rootDirectory` option.
+     */
     tsconfigPath: z.string().optional(),
+    /**
+     * If this path is relative, it's resolved relative to the `rootDirectory` option.
+     */
     routesDirectory: z.string().optional(),
     /**
      * Emulate the WinterCG runtime. When true, native APIs are unavailable.

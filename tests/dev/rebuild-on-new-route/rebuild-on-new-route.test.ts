@@ -28,11 +28,18 @@ test("dev server rebuilds when a route is added", async (t) => {
 
   await t.notThrowsAsync(async () => {
     // The watcher waits a little bit to debounce
-    await pRetry(async () => {
-      const response = await axios.get("/health")
-      if (response.data !== "ok") {
-        throw new Error("Server has not rebuilt yet")
+    await pRetry(
+      async () => {
+        const response = await axios.get("/health")
+        if (response.data !== "ok") {
+          throw new Error("Server has not rebuilt yet")
+        }
+      },
+      {
+        retries: 10,
+        minTimeout: 500,
+        factor: 1,
       }
-    })
+    )
   })
 })

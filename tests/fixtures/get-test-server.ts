@@ -18,6 +18,7 @@ export const getTestServer = async (
 
   const { stop, port } = await startDevServer({
     config: {
+      rootDirectory: path.join(dir, ".."),
       routesDirectory: dir,
       emulateWinterCG: true,
     },

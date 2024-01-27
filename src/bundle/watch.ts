@@ -5,19 +5,21 @@ import path from "node:path"
 import { constructManifest } from "./construct-manifest"
 import { BundleOptions } from "./types"
 import { getTempPathInApp } from "./get-temp-path-in-app"
+import { isGitIgnored } from "globby"
 
 /**
- * This does not directly provide a way to retrive the contents or path of the bundle. You should provide a plugin in the `esbuild` option to do so.
+ * This does not directly provide a way to retrieve the contents or path of the bundle. You should provide a plugin in the `esbuild` option to do so.
  */
 export const bundleAndWatch = async (options: BundleOptions) => {
-  // todo: this should watch all relevant paths from a tsconfig.json, not just the ./api directory
-  // todo: should ignore files in nearest .gitignore
-  const watcher = new Watcher(options.routesDirectory, {
+  const ignore = await isGitIgnored({})
+
+  const watcher = new Watcher(options.rootDirectory, {
     recursive: true,
     ignoreInitial: true,
+    ignore,
   })
 
-  const tempDir = await getTempPathInApp(options.routesDirectory)
+  const tempDir = await getTempPathInApp(options.rootDirectory)
   const manifestPath = path.join(tempDir, "dev-manifest.ts")
 
   const invalidateManifest = async () => {
