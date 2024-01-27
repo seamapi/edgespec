@@ -56,7 +56,7 @@ type GetMiddlewareRequestOptions<
   >
 
 export type CreateWithRouteSpecFn<GS extends GlobalSpec> = <
-  const RS extends RouteSpec<InferRecordKey<GS["authMiddlewareMap"]>>,
+  const RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
 >(
   routeSpec: RS
 ) => (
