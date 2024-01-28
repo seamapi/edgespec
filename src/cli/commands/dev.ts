@@ -19,7 +19,7 @@ export class DevCommand extends Command {
   })
 
   // todo: better syntax for this flag, seems to need --no-emulate-wintercg
-  emulateWinterCG = Option.Boolean("--emulate-wintercg", true, {
+  emulateWinterCG = Option.Boolean("--emulate-wintercg", false, {
     description:
       "Emulate the WinterCG runtime. When true, native APIs are unavailable.",
   })
