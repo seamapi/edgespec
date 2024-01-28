@@ -17,7 +17,7 @@ Regardless of your target, EdgeSpec provides a consistent API as well as test fi
 ```
 npm install edgespec
 
-npx edgespec serve
+npx edgespec dev
 ```
 
 ## Usage
