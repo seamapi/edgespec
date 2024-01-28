@@ -29,7 +29,7 @@ inside of the [examples directory](./examples), but here's a basic version:
 
 ```ts
 // src/with-edge-spec.ts
-import { createWithEdgeSpec } from "src/create-with-edge-spec"
+import { createWithEdgeSpec } from "edgespec"
 
 export const withEdgeSpec = createWithEdgeSpec({
   apiName: "hello-world",
