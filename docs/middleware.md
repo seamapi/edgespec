@@ -22,7 +22,7 @@ export const someMiddleware: Middleware<
     }
   }
 
-  const [user] = req.db.query("SELECT * FROM users WHERE token=?", [authToken])
+  const [user] = await req.db.query("SELECT * FROM users WHERE token=?", [authToken])
 
   return {
     is_authenticated: Boolean(user),
