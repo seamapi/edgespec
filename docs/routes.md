@@ -1,0 +1,39 @@
+# Routes
+
+Each API route is defined in a separate file within a specific directory (by default, `./api`). Here's an example:
+
+```ts
+// api/index.ts
+import { withEdgeSpec } from "../src/with-edge-spec"
+import { z } from "zod"
+
+export default withEdgeSpec({
+  auth: "none",
+  methods: ["POST"],
+  jsonBody: z.object({
+    a: z.number(),
+    b: z.number(),
+  }),
+  jsonResponse: z.object({
+    sum: z.number(),
+  }),
+})((req) => {
+  const { a, b } = await req.json()
+
+  return new Response(
+    JSON.stringify({
+      sum: a + b,
+    })
+  )
+})
+```
+
+## File routing
+
+EdgeSpec loosely follows Next.js's route convention. For example:
+
+- `/api/health.ts` -> `GET /health`
+- `/api/resource/[id].ts` -> `GET /resource/:id`
+- `/api/resource/[id]/actions/[...action].ts` -> `GET /resource/:id/actions/:action*`
+
+Path parameters are automatically parsed and added to the `req.pathParams` object.
