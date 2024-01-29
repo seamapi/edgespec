@@ -5,11 +5,11 @@ Use or release EdgeSpec-compatible middleware with a proper type-pipeline:
 ```typescript
 import type { Middleware } from "edgespec"
 export const someMiddleware: Middleware<
-  // Middleware input
+  // Required request options (Middleware "input")
   {
     db: DatabaseClient
   },
-  // Middleware output
+  // Result request options (Middleware "output")
   {
     is_authenticated: boolean
   }
