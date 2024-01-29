@@ -19,5 +19,8 @@ export const withEdgeSpec = createWithEdgeSpec({
   globalMiddlewares: [],
 
   productionServerUrl: "https://example.com",
+
+  // Defaults to true. When true, all JSON responses are validated against the route's response schema.
+  shouldValidateResponses: true,
 })
 ```

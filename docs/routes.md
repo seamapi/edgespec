@@ -28,6 +28,8 @@ export default withEdgeSpec({
 })
 ```
 
+[Zod](https://github.com/colinhacks/zod) is used for validation. By default, **both** input and output (`Response.json()`) are validated against the provided schemas. See the docs on [`createWithEdgeSpec()`](./global-route-config.md) if you want to disable this.
+
 ## File routing
 
 EdgeSpec loosely follows Next.js's route convention. For example:
