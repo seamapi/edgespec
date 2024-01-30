@@ -4,6 +4,7 @@ import { CreateWithRouteSpecFn } from "./types/route-spec.js"
 import {
   EdgeSpecRequest,
   EdgeSpecRouteFn,
+  mergeResponses,
   setEdgeSpecRequestOptions,
 } from "./types/web-handler.js"
 
@@ -11,78 +12,98 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
 ): CreateWithRouteSpecFn<GS> => {
   return (routeSpec) =>
-    (routeFn): EdgeSpecRouteFn =>
-    async (request) => {
-      const handleErr = async (e: any) => {
-        const exceptionRouteFn = globalSpec.exceptionHandlingMiddleware?.(e)
+    finalizeEdgeSpecRouteFn(
+      (routeFn): EdgeSpecRouteFn =>
+        async (request) => {
+          const handleErr = async (e: any) => {
+            const exceptionRouteFn = globalSpec.exceptionHandlingRoute?.(e)
 
-        if (exceptionRouteFn) {
-          return await exceptionRouteFn(request)
-        }
-
-        throw e
-      }
-
-      type RequestOptions = typeof routeFn extends EdgeSpecRouteFn<infer R>
-        ? R
-        : never
-
-      const supportedAuthMiddlewares = new Set<string>(
-        routeSpec.auth === "none"
-          ? []
-          : Array.isArray(routeSpec.auth)
-            ? routeSpec.auth
-            : [routeSpec.auth]
-      )
-
-      const authMiddlewares = Object.entries(globalSpec.authMiddlewareMap)
-        .filter(([k, _]) => supportedAuthMiddlewares.has(k))
-        .map(([_, v]) => v)
-
-      let requestWithMiddlewares: EdgeSpecRequest<RequestOptions>
-
-      try {
-        request = await runAllMiddlewares(request, globalSpec.globalMiddlewares)
-
-        if (authMiddlewares.length > 0) {
-          try {
-            request = await runFirstMiddleware(request, authMiddlewares)
-          } catch (err: any) {
-            if (err instanceof AggregateError) {
-              if (err.errors.length > 1) {
-                globalSpec.onMultipleAuthMiddlewareFailures?.(err.errors)
-              }
-
-              throw err.errors[0]
+            if (exceptionRouteFn) {
+              return await exceptionRouteFn(request)
             }
 
-            throw err
+            throw e
+          }
+
+          type RequestOptions = typeof routeFn extends EdgeSpecRouteFn<infer R>
+            ? R
+            : never
+
+          const supportedAuthMiddlewares = new Set<string>(
+            routeSpec.auth === "none"
+              ? []
+              : Array.isArray(routeSpec.auth)
+                ? routeSpec.auth
+                : [routeSpec.auth]
+          )
+
+          const authMiddlewares = Object.entries(globalSpec.authMiddlewareMap)
+            .filter(([k, _]) => supportedAuthMiddlewares.has(k))
+            .map(([_, v]) => v)
+
+          let requestWithMiddlewares: EdgeSpecRequest<RequestOptions>
+
+          try {
+            request = await runAllMiddlewares(
+              request,
+              globalSpec.globalMiddlewares
+            )
+
+            if (authMiddlewares.length > 0) {
+              try {
+                request = await runFirstMiddleware(request, authMiddlewares)
+              } catch (err: any) {
+                if (err instanceof AggregateError) {
+                  if (err.errors.length > 1) {
+                    globalSpec.onMultipleAuthMiddlewareFailures?.(err.errors)
+                  }
+
+                  throw err.errors[0]
+                }
+
+                throw err
+              }
+            }
+
+            if (globalSpec.globalMiddlewaresAfterAuth) {
+              request = await runAllMiddlewares(
+                request,
+                globalSpec.globalMiddlewaresAfterAuth
+              )
+            }
+
+            if (routeSpec.middlewares) {
+              request = await runAllMiddlewares(request, routeSpec.middlewares)
+            }
+
+            requestWithMiddlewares = request as EdgeSpecRequest<RequestOptions>
+          } catch (e) {
+            return await handleErr(e)
+          }
+
+          try {
+            return await routeFn(requestWithMiddlewares)
+          } catch (e) {
+            return await handleErr(e)
           }
         }
-
-        if (globalSpec.globalMiddlewaresAfterAuth) {
-          request = await runAllMiddlewares(
-            request,
-            globalSpec.globalMiddlewaresAfterAuth
-          )
-        }
-
-        if (routeSpec.middlewares) {
-          request = await runAllMiddlewares(request, routeSpec.middlewares)
-        }
-
-        requestWithMiddlewares = request as EdgeSpecRequest<RequestOptions>
-      } catch (e) {
-        return await handleErr(e)
-      }
-
-      try {
-        return await routeFn(requestWithMiddlewares)
-      } catch (e) {
-        return await handleErr(e)
-      }
-    }
+    )
 }
+
+/**
+ * Ensure that the default response is always merged with the final output
+ * response from the route function.
+ *
+ * Without this, headers accumulated through middleware would never make their
+ * way to the final response
+ */
+const finalizeEdgeSpecRouteFn =
+  <T>(
+    routeFn: (fn: EdgeSpecRouteFn<T>) => EdgeSpecRouteFn
+  ): ((fn: EdgeSpecRouteFn<T>) => EdgeSpecRouteFn) =>
+  (fn) =>
+  async (req) =>
+    routeFn(async (r) => mergeResponses(r.responseDefaults, await fn(r)))(req)
 
 async function runAllMiddlewares<R = object>(
   initialRequest: EdgeSpecRequest,

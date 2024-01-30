@@ -1,9 +1,11 @@
-import { MapArray } from "./util"
-import { EdgeSpecRequest } from "./web-handler"
+import type { MapArray } from "./util"
+import type { EdgeSpecMiddlewareOptions, EdgeSpecRequest } from "./web-handler"
 
 export type Middleware<RequiredOptions = {}, ResultOptions = object> = (
   request: EdgeSpecRequest<RequiredOptions>
-) => ResultOptions | Promise<ResultOptions>
+) =>
+  | (ResultOptions & EdgeSpecMiddlewareOptions)
+  | Promise<ResultOptions & EdgeSpecMiddlewareOptions>
 
 export type MiddlewareChain = readonly Middleware[]
 

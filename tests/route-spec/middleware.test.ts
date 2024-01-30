@@ -161,3 +161,60 @@ test("receives local middleware", async (t) => {
     return new Response()
   })({} as EdgeSpecRequest)
 })
+
+test("responseDefaults are passed", async (t) => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {},
+    globalMiddlewares: [
+      () => ({
+        responseDefaults: new Response(null, {
+          headers: new Headers({ "x-test": "test", "x-test2": "test2" }),
+        }),
+      }),
+    ],
+  })
+
+  const response = await withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    middlewares: [
+      () => ({
+        responseDefaults: new Response("body text", {
+          headers: new Headers({ "x-test": "test2" }),
+        }),
+      }),
+    ],
+  })(() => {
+    return new Response()
+  })({} as EdgeSpecRequest)
+
+  t.is(await streamToString(response.body), "body text")
+  t.is(response.headers.get("x-test"), "test2")
+  t.is(response.headers.get("x-test2"), "test2")
+})
+
+async function streamToString(
+  stream: ReadableStream<Uint8Array> | undefined | null
+) {
+  if (!stream) return undefined
+
+  const reader = stream.getReader()
+  const textDecoder = new TextDecoder()
+  let result = ""
+
+  async function read() {
+    const { done, value } = await reader.read()
+
+    if (done) {
+      return result
+    }
+
+    result += textDecoder.decode(value, { stream: true })
+    return read()
+  }
+
+  return read()
+}

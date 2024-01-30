@@ -8,7 +8,7 @@ export type GlobalSpec = {
   globalMiddlewares: readonly Middleware[]
   globalMiddlewaresAfterAuth?: readonly Middleware[]
 
-  exceptionHandlingMiddleware?: (err: any) => EdgeSpecRouteFn | null
+  exceptionHandlingRoute?: (err: any) => EdgeSpecRouteFn | null
 
   // These improve OpenAPI generation
   apiName: string
