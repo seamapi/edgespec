@@ -1,6 +1,10 @@
 import test from "ava"
 import { createWithEdgeSpec } from "src/create-with-edge-spec"
-import { EdgeSpecRequest } from "src/types/web-handler"
+import {
+  EdgeSpecCustomResponse,
+  EdgeSpecRequest,
+  MiddlewareResponseData,
+} from "src/types/web-handler"
 
 const withSessionToken = () => ({
   auth: { session_token: { user: "lucille" } },
@@ -207,6 +211,41 @@ test("responseDefaults are passed (responseDefaults as ResponseInit)", async (t)
         responseDefaults: {
           headers: { "x-test": "test", "x-test2": "test2" },
         },
+      }),
+    ],
+  })
+
+  const response = await withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    middlewares: [
+      () => ({
+        responseDefaults: {
+          headers: { "x-test": "test2" },
+        },
+      }),
+    ],
+  })(() => {
+    return new Response("body text")
+  })({} as EdgeSpecRequest)
+
+  t.is(await streamToString(response.body), "body text")
+  t.is(response.headers.get("x-test"), "test2")
+  t.is(response.headers.get("x-test2"), "test2")
+})
+
+test("responseDefaults are passed (responseDefaults as EdgeSpecResponse)", async (t) => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {},
+    globalMiddlewares: [
+      () => ({
+        responseDefaults: new MiddlewareResponseData().headers({
+          "x-test": "test",
+          "x-test2": "test2",
+        }),
       }),
     ],
   })

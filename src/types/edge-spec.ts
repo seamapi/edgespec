@@ -1,5 +1,6 @@
 import {
   createEdgeSpecRequest,
+  SerializableToResponse,
   type EdgeSpecRouteFn,
   type EdgeSpecRouteParams,
 } from "./web-handler.js"
@@ -62,8 +63,6 @@ export function handleRequestWithEdgeSpec(
       return await handle404(edgeSpecRequest)
     }
 
-    const response: Response = await routeFn(edgeSpecRequest)
-
-    return response
+    return await routeFn(edgeSpecRequest)
   }
 }

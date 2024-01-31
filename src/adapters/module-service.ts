@@ -11,7 +11,9 @@ export interface ModuleServiceOptions {
   allowMatchingOnAnyCatchAllRouteParam?: boolean
 }
 
-export type ModuleService = (options?: ModuleServiceOptions) => EdgeSpecRouteFn
+export type ModuleService = (
+  options?: ModuleServiceOptions
+) => EdgeSpecRouteFn<{}, Response>
 
 export const createModuleService: EdgeSpecAdapter<[], ModuleService> = (
   moduleServiceEdgeSpec
