@@ -1,6 +1,6 @@
 {
   "name": "edgespec",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
   "main": "./dist/index.js",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@ava/get-port": "^2.0.0",
     "@ava/typescript": "^4.1.0",
-    "@types/node": "^18.13.0",
+    "@types/node": "^18.19.10",
     "ava": "^6.0.1",
     "axios": "^1.6.2",
     "esbuild-register": "^3.5.0",
