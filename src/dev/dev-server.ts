@@ -49,9 +49,15 @@ export const startDevServer = async (options: StartDevServerOptions) => {
       defaultOrigin: `http://localhost:${options.port}`,
     })(async (req) => {
       await firstBuildPromise
-      if (isBuilding) {
-        await once(buildEvents, "built")
-      }
+
+      // Block request if currently building
+      await new Promise<void>((resolve) => {
+        buildEvents.on("built", resolve)
+        if (!isBuilding) {
+          buildEvents.off("built", resolve)
+          resolve()
+        }
+      })
 
       if (config.emulateWinterCG) {
         const response = await runtime.dispatchFetch(req.url, req)
