@@ -6,7 +6,7 @@ export const bundle = async (options: BundleOptions) => {
   const result = await esbuild.build({
     stdin: {
       contents: await constructManifest(options),
-      resolveDir: options.directoryPath,
+      resolveDir: options.routesDirectory,
       loader: "ts",
     },
     bundle: true,

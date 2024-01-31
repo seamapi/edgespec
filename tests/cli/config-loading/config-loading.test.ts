@@ -1,27 +1,21 @@
+import getPort from "@ava/get-port"
 import test from "ava"
-import { getTestCLI } from "tests/fixtures/get-test-cli"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import getPort from "@ava/get-port"
 import pRetry from "p-retry"
+import { getTestCLI } from "tests/fixtures/get-test-cli"
 
-test("CLI dev command starts a dev server", async (t) => {
+test("Config paths are resolved relative to config file", async (t) => {
   const cli = await getTestCLI(t)
+
+  const configPath = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "edgespec.config.ts"
+  )
 
   const port = await getPort()
 
-  const appDirectoryPath = path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "api"
-  )
-
-  cli.executeCommand([
-    "dev",
-    "--routes-directory",
-    appDirectoryPath,
-    "-p",
-    port.toString(),
-  ])
+  cli.executeCommand(["dev", "--config", configPath, "-p", port.toString()])
 
   await t.notThrowsAsync(async () => {
     await pRetry(
