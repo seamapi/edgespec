@@ -21,8 +21,6 @@ test("module service with simple endpoint", async (t) => {
   const ModuleService = createModuleService(
     createEdgeSpecFromRouteMap({
       "/health": async (req) => {
-        console.log(req)
-
         return new Response(
           JSON.stringify({
             ok: true,
