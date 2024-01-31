@@ -196,6 +196,40 @@ test("responseDefaults are passed", async (t) => {
   t.is(response.headers.get("x-test2"), "test2")
 })
 
+test("responseDefaults are passed (responseDefaults as ResponseInit)", async (t) => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {},
+    globalMiddlewares: [
+      () => ({
+        responseDefaults: {
+          headers: { "x-test": "test", "x-test2": "test2" },
+        },
+      }),
+    ],
+  })
+
+  const response = await withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    middlewares: [
+      () => ({
+        responseDefaults: {
+          headers: { "x-test": "test2" },
+        },
+      }),
+    ],
+  })(() => {
+    return new Response("body text")
+  })({} as EdgeSpecRequest)
+
+  t.is(await streamToString(response.body), "body text")
+  t.is(response.headers.get("x-test"), "test2")
+  t.is(response.headers.get("x-test2"), "test2")
+})
+
 async function streamToString(
   stream: ReadableStream<Uint8Array> | undefined | null
 ) {
