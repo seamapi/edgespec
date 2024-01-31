@@ -1,15 +1,38 @@
 {
   "name": "edgespec",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dev": {
+      "import": "./dist/dev.js",
+      "require": "./dist/dev.js",
+      "types": "./dist/dev.d.ts"
+    },
+    "./adapters/node": {
+      "import": "./dist/adapters/node.js",
+      "require": "./dist/adapters/node.js",
+      "types": "./dist/adapters/node.d.ts"
+    },
+    "./adapters/wintercg-minimal": {
+      "import": "./dist/adapters/wintercg-minimal.js",
+      "require": "./dist/adapters/wintercg-minimal.js",
+      "types": "./dist/adapters/wintercg-minimal.d.ts"
+    }
+  },
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
     "build": "tsup",
     "pretest": "npm run build",
     "test": "ava",
+    "pretypecheck": "npm run build",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "lint": "prettier --check .",
@@ -34,7 +57,7 @@
   "devDependencies": {
     "@ava/get-port": "^2.0.0",
     "@ava/typescript": "^4.1.0",
-    "@types/node": "^18.13.0",
+    "@types/node": "^18.19.10",
     "ava": "^6.0.1",
     "axios": "^1.6.2",
     "esbuild-register": "^3.5.0",
@@ -50,10 +73,12 @@
   "dependencies": {
     "@edge-runtime/node-utils": "^2.2.2",
     "@edge-runtime/primitives": "^4.0.5",
+    "bundle-require": "^4.0.2",
     "chalk": "^5.3.0",
     "clipanion": "^4.0.0-rc.3",
     "edge-runtime": "^2.5.7",
     "esbuild": "^0.19.11",
+    "globby": "^14.0.0",
     "human-readable": "^0.2.1",
     "make-vfs": "^1.1.0",
     "next-route-matcher": "^1.0.2",

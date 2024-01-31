@@ -11,12 +11,12 @@ const getRandomId = (length: number): string => {
 }
 
 interface ConstructManifestOptions {
-  directoryPath: string
+  routesDirectory: string
   bundledAdapter?: "wintercg-minimal"
 }
 
 export const constructManifest = async (options: ConstructManifestOptions) => {
-  const routeMap = await createRouteMapFromDirectory(options.directoryPath)
+  const routeMap = await createRouteMapFromDirectory(options.routesDirectory)
 
   const routes = Object.entries(routeMap).map(([route, { relativePath }]) => {
     return {
@@ -33,7 +33,7 @@ ${routes
   .map(
     ({ id, relativePath }) =>
       `import * as ${id} from "${path.resolve(
-        path.join(options.directoryPath, relativePath)
+        path.join(options.routesDirectory, relativePath)
       )}"`
   )
   .join("\n")}
@@ -48,10 +48,9 @@ const edgeSpec = {
 }
 
 ${
-  // todo: should import from the edgespec package instead of an internal import
   options.bundledAdapter === "wintercg-minimal"
     ? `
-import {addFetchListener} from "src/adapters/wintercg-minimal.ts"
+import {addFetchListener} from "edgespec/adapters/wintercg-minimal"
 addFetchListener(edgeSpec)
 `
     : "export default edgeSpec"
