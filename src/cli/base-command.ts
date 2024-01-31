@@ -2,6 +2,10 @@ import { Command, Option } from "clipanion"
 import { ResolvedEdgeSpecConfig, loadConfig } from "src/config/utils"
 
 export abstract class BaseCommand extends Command {
+  rootDirectory = Option.String("--root", {
+    description: "Path to your project root",
+  })
+
   configPath = Option.String("--config,-c", {
     description: "Path to your config file (usually edgespec.config.ts)",
   })
@@ -18,6 +22,7 @@ export abstract class BaseCommand extends Command {
     const overrides = {
       tsconfigPath: this.tsconfigPath,
       routesDirectory: this.routesDirectory,
+      rootDirectory: this.rootDirectory,
     }
 
     if (this.configPath) {

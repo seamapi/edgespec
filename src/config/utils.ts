@@ -27,27 +27,40 @@ const resolvePossibleRelativePath = (
 }
 
 export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
+  rootDirectory: string
   tsconfigPath: string
   routesDirectory: string
 }
 
+/**
+ * Resolves relative paths and sets defaults for any missing values.
+ */
 const resolveConfig = (
   config: EdgeSpecConfig,
   configPath?: string
 ): ResolvedEdgeSpecConfig => {
-  const configDirectory = configPath ? path.dirname(configPath) : process.cwd()
+  let rootDirectory = process.cwd()
+
+  if (config.rootDirectory) {
+    rootDirectory = config.rootDirectory
+  } else if (config.tsconfigPath && path.isAbsolute(config.tsconfigPath)) {
+    rootDirectory = path.dirname(config.tsconfigPath)
+  } else if (configPath && path.isAbsolute(configPath)) {
+    rootDirectory = path.dirname(configPath)
+  }
 
   const { tsconfigPath, routesDirectory, ...rest } =
     cloneObjectAndDeleteUndefinedKeys(config)
 
   return {
+    rootDirectory,
     tsconfigPath: resolvePossibleRelativePath(
       tsconfigPath ?? "tsconfig.json",
-      configDirectory
+      rootDirectory
     ),
     routesDirectory: resolvePossibleRelativePath(
       routesDirectory ?? "api",
-      configDirectory
+      rootDirectory
     ),
     ...rest,
   }

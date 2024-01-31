@@ -28,6 +28,7 @@ export class BundleCommand extends BaseCommand {
 
     const output = await bundle({
       routesDirectory: config.routesDirectory,
+      rootDirectory: config.rootDirectory,
     })
 
     await fs.writeFile(this.outputPath, output)

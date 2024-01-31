@@ -14,6 +14,7 @@ test("test bundle with Node adapter", async (t) => {
 
   const bundled = await bundle({
     routesDirectory: path.join(currentDirectory, "api"),
+    rootDirectory: currentDirectory,
   })
 
   const port = await getPort()
