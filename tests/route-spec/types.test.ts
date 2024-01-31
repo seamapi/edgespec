@@ -1,6 +1,8 @@
 import test from "ava"
 import { createWithEdgeSpec } from "src/create-with-edge-spec"
 import { expectTypeOf } from "expect-type"
+import { EdgeSpecRequest, EdgeSpecResponse } from "src/types/web-handler"
+import { z } from "zod"
 
 const withSessionToken = () => ({
   auth: { session_token: { user: "lucille" } },
@@ -170,4 +172,26 @@ test.skip("route-local middlewares are available to request", () => {
 
     return new Response()
   })
+})
+
+test.skip("custom response map types are enforced", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {},
+    globalMiddlewares: [],
+  })
+
+  withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    customResponseMap: {
+      "text/html": z.string(),
+      "custom/response": z.number(),
+    },
+    // @ts-expect-error
+  })(() => {
+    return EdgeSpecResponse.custom("not a number", "custom/response")
+  })({} as EdgeSpecRequest)
 })
