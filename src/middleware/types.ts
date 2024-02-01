@@ -1,9 +1,8 @@
-import type { MapArray } from "./util"
+import type { MapArray } from "../types/util"
 import type {
-  EdgeSpecMiddlewareOptions,
   EdgeSpecRequest,
   SerializableToResponse,
-} from "./web-handler"
+} from "../types/web-handler"
 
 export type Middleware<RequiredOptions = {}, ResultOptions = object> = (
   next: (

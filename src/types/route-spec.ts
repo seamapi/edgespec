@@ -3,14 +3,14 @@ import type {
   AccumulateMiddlewareChainResultOptions,
   MiddlewareChain,
   MapMiddlewares,
-} from "./middleware"
+} from "../middleware/types"
 import type {
   GetAuthMiddlewaresFromGlobalSpec,
   GlobalSpec,
 } from "./global-spec"
 import type {
   EdgeSpecCustomResponse,
-  EdgeSpecFormDataResponse,
+  EdgeSpecMultiPartFormDataResponse,
   EdgeSpecJsonResponse,
   EdgeSpecRouteFn,
   HTTPMethods,
@@ -52,7 +52,9 @@ type GetRouteSpecResponseType<
       ? EdgeSpecJsonResponse<z.output<RS["jsonResponse"]>>
       : never)
   | (RS["multipartFormDataResponse"] extends z.ZodObject<any>
-      ? EdgeSpecFormDataResponse<z.output<RS["multipartFormDataResponse"]>>
+      ? EdgeSpecMultiPartFormDataResponse<
+          z.output<RS["multipartFormDataResponse"]>
+        >
       : never)
   | (RS["customResponseMap"] extends Record<string, z.ZodTypeAny>
       ? CustomResponseMapToEdgeSpecResponse<RS["customResponseMap"]>

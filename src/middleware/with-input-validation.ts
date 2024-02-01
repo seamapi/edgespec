@@ -1,7 +1,7 @@
 import { z, ZodFirstPartyTypeKind } from "zod"
 
 import type { QueryArrayFormats } from "src/types/global-spec"
-import { Middleware } from "src"
+import { Middleware } from "src/middleware"
 import {
   BadRequestError,
   InputParsingError,

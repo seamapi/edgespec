@@ -3,7 +3,7 @@ import { createWithEdgeSpec } from "src/create-with-edge-spec"
 import { expectTypeOf } from "expect-type"
 import { EdgeSpecRequest, EdgeSpecResponse } from "src/types/web-handler"
 import { z } from "zod"
-import { Middleware } from "src"
+import { Middleware } from "src/middleware"
 
 const withSessionToken: Middleware<
   {},

@@ -1,4 +1,4 @@
-import { Middleware } from "src/types/middleware"
+import { Middleware } from "src/middleware/types"
 import { HTTPMethods } from "src/types/web-handler"
 import { MethodNotAllowedError } from "./http-exceptions"
 

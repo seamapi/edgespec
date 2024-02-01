@@ -1,5 +1,5 @@
 import type { z } from "zod"
-import { Middleware } from "./middleware"
+import { Middleware } from "../middleware/types"
 import {
   EdgeSpecRequest,
   EdgeSpecRouteFn,
