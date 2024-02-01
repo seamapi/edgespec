@@ -13,7 +13,9 @@ import {
   mergeResponses,
 } from "./types/web-handler.js"
 import { withMethods } from "./middleware/with-methods.js"
+import { withInputValidation } from "./middleware/with-input-validation.js"
 import { withUnhandledExceptionHandling } from "./middleware/with-unhandled-exception-handling.js"
+import { ResponseValidationError } from "./middleware/http-exceptions.js"
 
 export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
@@ -47,6 +49,19 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
         ...(globalSpec.globalMiddlewaresAfterAuth ?? []),
         ...(routeSpec.middlewares ?? []),
         withMethods(routeSpec.methods),
+        withInputValidation({
+          supportedArrayFormats: globalSpec.supportedArrayFormats ?? [
+            "brackets",
+            "comma",
+            "repeat",
+          ],
+          commonParams: routeSpec.commonParams,
+          formData: routeSpec.multiPartFormData,
+          jsonBody: routeSpec.jsonBody,
+          queryParams: routeSpec.queryParams,
+          urlEncodedFormData: routeSpec.urlEncodedFormData,
+          shouldValidateGetRequestBody: globalSpec.shouldValidateGetRequestBody,
+        }),
         serializeResponse(globalSpec, routeSpec),
       ],
       routeFn,
@@ -65,23 +80,39 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
  * This also handles validation of the response and serializing it from an
  * EdgeSpecResponse to a wintercg-compatible Response
  */
-const serializeResponse =
-  <T, R extends Response | SerializableToResponse>(
-    globalSpec: GlobalSpec,
-    routeSpec: RouteSpec<any>,
-    validate?: boolean
-  ): Middleware =>
-  async (next, req) => {
+function serializeResponse(
+  globalSpec: GlobalSpec,
+  routeSpec: RouteSpec<any>,
+  skipValidation: boolean = false
+): Middleware {
+  return async (next, req) => {
     const rawResponse = await next(req)
 
-    const response = serializeToResponse(
-      validate ?? globalSpec.shouldValidateResponses ?? true,
-      routeSpec,
-      rawResponse
-    )
+    const statusCode =
+      rawResponse instanceof EdgeSpecResponse
+        ? rawResponse.statusCode()
+        : rawResponse.status
 
-    return mergeResponses(req.responseDefaults, response)
+    const isSuccess = statusCode >= 200 && statusCode < 300
+
+    try {
+      const response = serializeToResponse(
+        isSuccess &&
+          !skipValidation &&
+          (globalSpec.shouldValidateResponses ?? true),
+        routeSpec,
+        rawResponse
+      )
+
+      return mergeResponses(req.responseDefaults, response)
+    } catch (err: any) {
+      throw new ResponseValidationError(
+        "the response does not match with jsonResponse",
+        err
+      )
+    }
   }
+}
 
 async function wrapMiddlewares(
   middlewares: MiddlewareChain,
@@ -115,7 +146,9 @@ function serializeToResponse(
     }
 
     if (response instanceof EdgeSpecFormDataResponse) {
-      return response.serializeToResponse(routeSpec.formDataResponse ?? z.any())
+      return response.serializeToResponse(
+        routeSpec.multipartFormDataResponse ?? z.any()
+      )
     }
 
     if (response instanceof EdgeSpecCustomResponse) {

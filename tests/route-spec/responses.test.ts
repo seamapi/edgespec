@@ -92,7 +92,7 @@ test("validates json response", async (t) => {
   const response = await axios.get("/hello", { validateStatus: () => true })
 
   t.is(response.status, 500)
-  t.like(response.data, { error_type: "ZodError" })
+  t.like(response.data, { error_type: "ResponseValidationError" })
 })
 
 test("doesnt validates json response if response validation disabled", async (t) => {
@@ -130,7 +130,7 @@ test("serializes form data", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["GET"],
-      formDataResponse: z.object({
+      multipartFormDataResponse: z.object({
         hello: z.string(),
       }),
     },
@@ -161,7 +161,7 @@ test("can set headers, status", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["GET"],
-      formDataResponse: z.object({
+      multipartFormDataResponse: z.object({
         hello: z.string(),
       }),
     },
