@@ -24,7 +24,7 @@ export interface EdgeSpecMiddlewareOptions {
 
 export interface EdgeSpecRequestOptions extends EdgeSpecMiddlewareOptions {
   edgeSpec: EdgeSpecRouteBundle
-  pathParams?: EdgeSpecRouteParams
+  routeParams?: EdgeSpecRouteParams
 }
 
 export type WithEdgeSpecRequestOptions<T> = T & EdgeSpecRequestOptions

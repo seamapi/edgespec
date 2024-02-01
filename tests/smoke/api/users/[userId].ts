@@ -1,13 +1,8 @@
-// todo: shouldn't need to manually type this
-type RequestWithParams = {
-  pathParams: {
-    userId: string
-  }
-} & Request
+import { EdgeSpecRouteFn } from "src/types/web-handler"
 
-const getUser = async (request: RequestWithParams) => {
+const getUser: EdgeSpecRouteFn = async (request) => {
   return Response.json({
-    userId: request.pathParams.userId,
+    userId: request.routeParams?.userId,
   })
 }
 

@@ -56,7 +56,7 @@ export function handleRequestWithEdgeSpec(
 
     const edgeSpecRequest = createEdgeSpecRequest(request, {
       edgeSpec,
-      pathParams: routeParams,
+      routeParams,
       responseDefaults: new Response(),
     })
 
