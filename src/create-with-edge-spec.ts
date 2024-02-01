@@ -1,93 +1,58 @@
+import { z } from "zod"
 import type { GlobalSpec } from "./types/global-spec.js"
-import { Middleware } from "./types/middleware.js"
-import { CreateWithRouteSpecFn } from "./types/route-spec.js"
+import { Middleware, MiddlewareChain } from "./types/middleware.js"
+import { CreateWithRouteSpecFn, RouteSpec } from "./types/route-spec.js"
 import {
+  EdgeSpecFormDataResponse,
+  EdgeSpecJsonResponse,
   EdgeSpecRequest,
+  EdgeSpecResponse,
   EdgeSpecRouteFn,
+  EdgeSpecCustomResponse,
+  SerializableToResponse,
   mergeResponses,
-  setEdgeSpecRequestOptions,
 } from "./types/web-handler.js"
+import { withMethods } from "./middleware/with-methods.js"
+import { withUnhandledExceptionHandling } from "./middleware/with-unhandled-exception-handling.js"
 
 export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
 ): CreateWithRouteSpecFn<GS> => {
-  return (routeSpec) =>
-    finalizeEdgeSpecRouteFn(
-      (routeFn): EdgeSpecRouteFn =>
-        async (request) => {
-          const handleErr = async (e: any) => {
-            const exceptionRouteFn = globalSpec.exceptionHandlingRoute?.(e)
+  return (routeSpec) => (routeFn) => async (request) => {
+    const onMultipleAuthMiddlewareFailures =
+      globalSpec.onMultipleAuthMiddlewareFailures ??
+      routeSpec.onMultipleAuthMiddlewareFailures
 
-            if (exceptionRouteFn) {
-              return await exceptionRouteFn(request)
-            }
-
-            throw e
-          }
-
-          type RequestOptions = typeof routeFn extends EdgeSpecRouteFn<infer R>
-            ? R
-            : never
-
-          const supportedAuthMiddlewares = new Set<string>(
-            routeSpec.auth === "none"
-              ? []
-              : Array.isArray(routeSpec.auth)
-                ? routeSpec.auth
-                : [routeSpec.auth]
-          )
-
-          const authMiddlewares = Object.entries(globalSpec.authMiddlewareMap)
-            .filter(([k, _]) => supportedAuthMiddlewares.has(k))
-            .map(([_, v]) => v)
-
-          let requestWithMiddlewares: EdgeSpecRequest<RequestOptions>
-
-          try {
-            request = await runAllMiddlewares(
-              request,
-              globalSpec.globalMiddlewares
-            )
-
-            if (authMiddlewares.length > 0) {
-              try {
-                request = await runFirstMiddleware(request, authMiddlewares)
-              } catch (err: any) {
-                if (err instanceof AggregateError) {
-                  if (err.errors.length > 1) {
-                    globalSpec.onMultipleAuthMiddlewareFailures?.(err.errors)
-                  }
-
-                  throw err.errors[0]
-                }
-
-                throw err
-              }
-            }
-
-            if (globalSpec.globalMiddlewaresAfterAuth) {
-              request = await runAllMiddlewares(
-                request,
-                globalSpec.globalMiddlewaresAfterAuth
-              )
-            }
-
-            if (routeSpec.middlewares) {
-              request = await runAllMiddlewares(request, routeSpec.middlewares)
-            }
-
-            requestWithMiddlewares = request as EdgeSpecRequest<RequestOptions>
-          } catch (e) {
-            return await handleErr(e)
-          }
-
-          try {
-            return await routeFn(requestWithMiddlewares)
-          } catch (e) {
-            return await handleErr(e)
-          }
-        }
+    const supportedAuthMiddlewares = new Set<string>(
+      routeSpec.auth === "none"
+        ? []
+        : Array.isArray(routeSpec.auth)
+          ? routeSpec.auth
+          : [routeSpec.auth]
     )
+
+    const authMiddlewares = Object.entries(globalSpec.authMiddlewareMap)
+      .filter(([k, _]) => supportedAuthMiddlewares.has(k))
+      .map(([_, v]) => v)
+
+    return await wrapMiddlewares(
+      [
+        withUnhandledExceptionHandling,
+        serializeResponse(globalSpec, routeSpec, false),
+        ...globalSpec.globalMiddlewares,
+        firstAuthMiddlewareThatSucceeds(
+          authMiddlewares,
+          onMultipleAuthMiddlewareFailures
+        ),
+        ...(globalSpec.globalMiddlewaresAfterAuth ?? []),
+        ...(routeSpec.middlewares ?? []),
+        withMethods(routeSpec.methods),
+        serializeResponse(globalSpec, routeSpec),
+      ],
+      routeFn,
+      request
+    )
+  }
 }
 
 /**
@@ -96,51 +61,111 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
  *
  * Without this, headers accumulated through middleware would never make their
  * way to the final response
+ *
+ * This also handles validation of the response and serializing it from an
+ * EdgeSpecResponse to a wintercg-compatible Response
  */
-const finalizeEdgeSpecRouteFn =
-  <T>(
-    routeFn: (fn: EdgeSpecRouteFn<T>) => EdgeSpecRouteFn
-  ): ((fn: EdgeSpecRouteFn<T>) => EdgeSpecRouteFn) =>
-  (fn) =>
-  async (req) =>
-    routeFn(async (r) => mergeResponses(r.responseDefaults, await fn(r)))(req)
+const serializeResponse =
+  <T, R extends Response | SerializableToResponse>(
+    globalSpec: GlobalSpec,
+    routeSpec: RouteSpec<any>,
+    validate?: boolean
+  ): Middleware =>
+  async (next, req) => {
+    const rawResponse = await next(req)
 
-async function runAllMiddlewares<R = object>(
-  initialRequest: EdgeSpecRequest,
-  middlewares: readonly Middleware[]
-): Promise<EdgeSpecRequest<R>> {
-  return (await middlewares.reduce(async (lastRequestPromise, middleware) => {
-    const lastRequest = await lastRequestPromise
+    const response = serializeToResponse(
+      validate ?? globalSpec.shouldValidateResponses ?? true,
+      routeSpec,
+      rawResponse
+    )
 
-    const newRequestOpts = await middleware(lastRequest)
+    return mergeResponses(req.responseDefaults, response)
+  }
 
-    return setEdgeSpecRequestOptions(lastRequest, newRequestOpts)
-  }, Promise.resolve(initialRequest))) as EdgeSpecRequest<R>
+async function wrapMiddlewares(
+  middlewares: MiddlewareChain,
+  routeFn: EdgeSpecRouteFn<any, any>,
+  request: EdgeSpecRequest
+) {
+  return await middlewares.reduceRight(
+    (next, middleware) => {
+      return async (req) => {
+        return middleware(next, req)
+      }
+    },
+    async (request: EdgeSpecRequest) => routeFn(request)
+  )(request)
 }
 
-async function runFirstMiddleware<R>(
-  initialRequest: EdgeSpecRequest,
-  middlewares: readonly Middleware[],
-  isValid: (err: any) => boolean = () => true
-): Promise<EdgeSpecRequest<R>> {
-  const errors: any[] = []
+function serializeToResponse(
+  shouldValidateResponse: boolean,
+  routeSpec: RouteSpec<any>,
+  response: SerializableToResponse | Response
+): Response {
+  if (!shouldValidateResponse) {
+    return "serializeToResponse" in response
+      ? response.serializeToResponse(z.any())
+      : response
+  }
 
-  for (const middleware of middlewares) {
-    try {
-      const newRequestOpts = await middleware(initialRequest)
+  if (response instanceof EdgeSpecResponse) {
+    if (response instanceof EdgeSpecJsonResponse) {
+      return response.serializeToResponse(routeSpec.jsonResponse ?? z.any())
+    }
 
-      return setEdgeSpecRequestOptions(
-        initialRequest,
-        newRequestOpts
-      ) as EdgeSpecRequest<R>
-    } catch (e: any) {
-      if (!isValid(e)) {
-        throw e
-      }
+    if (response instanceof EdgeSpecFormDataResponse) {
+      return response.serializeToResponse(routeSpec.formDataResponse ?? z.any())
+    }
 
-      errors.push(e)
+    if (response instanceof EdgeSpecCustomResponse) {
+      return response.serializeToResponse(z.any())
     }
   }
 
-  throw new AggregateError(errors)
+  if ("serializeToResponse" in response) {
+    throw new Error("Unknown Response type")
+  }
+
+  return response
+}
+
+function firstAuthMiddlewareThatSucceeds(
+  authMiddlewares: MiddlewareChain,
+  onMultipleAuthMiddlewareFailures:
+    | ((errs: unknown[]) => void)
+    | null
+    | undefined
+): Middleware {
+  return async (next, req) => {
+    if (authMiddlewares.length === 0) {
+      return next(req)
+    }
+
+    let errors: unknown[] = []
+    let didAuthMiddlewareThrow = true
+
+    for (const middleware of authMiddlewares) {
+      try {
+        return await middleware((...args) => {
+          // Otherwise errors unrelated to auth thrown by built-in middleware (withMethods, withValidation) will be caught here
+          didAuthMiddlewareThrow = false
+          return next(...args)
+        }, req)
+      } catch (error) {
+        if (didAuthMiddlewareThrow) {
+          errors.push(error)
+          continue
+        } else {
+          throw error
+        }
+      }
+    }
+
+    if (onMultipleAuthMiddlewareFailures && didAuthMiddlewareThrow) {
+      onMultipleAuthMiddlewareFailures(errors)
+    }
+
+    throw errors[errors.length - 1]
+  }
 }

@@ -2,25 +2,62 @@ import type { z } from "zod"
 import type {
   AccumulateMiddlewareChainResultOptions,
   MiddlewareChain,
-  Middleware,
   MapMiddlewares,
 } from "./middleware"
 import type {
   GetAuthMiddlewaresFromGlobalSpec,
   GlobalSpec,
 } from "./global-spec"
-import type { EdgeSpecRouteFn } from "./web-handler"
-import type { InferRecordKey } from "./util"
+import type {
+  EdgeSpecCustomResponse,
+  EdgeSpecFormDataResponse,
+  EdgeSpecJsonResponse,
+  EdgeSpecRouteFn,
+  HTTPMethods,
+} from "./web-handler"
 
 export type RouteSpec<AuthMiddlewares extends string> = {
-  methods: readonly ("GET" | "POST" | "PUT" | "PATCH" | "DELETE")[]
+  methods: readonly HTTPMethods[]
 
   jsonBody?: z.ZodTypeAny
+  formData?: z.ZodObject<any>
+  queryParams?: z.ZodObject<any>
+  commonParams?: z.ZodObject<any>
+
   jsonResponse?: z.ZodTypeAny
+  formDataResponse?: z.ZodObject<any>
+  wwwFormUrlEncodedResponse?: z.ZodObject<any>
+  customResponseMap?: Record<string, z.ZodTypeAny>
 
   auth: AuthMiddlewares | readonly AuthMiddlewares[] | "none"
   middlewares?: MiddlewareChain
+
+  openApiMetadata?: any
+
+  onMultipleAuthMiddlewareFailures?: (errors: unknown[]) => void
 }
+
+type CustomResponseMapToEdgeSpecResponse<
+  M extends Record<string, z.ZodTypeAny>,
+  K extends keyof M = keyof M,
+> = K extends keyof M & string
+  ? EdgeSpecCustomResponse<z.output<M[K]>, K>
+  : never
+
+type GetRouteSpecResponseType<
+  GS extends GlobalSpec,
+  RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
+> =
+  | (RS["jsonResponse"] extends z.ZodTypeAny
+      ? EdgeSpecJsonResponse<z.output<RS["jsonResponse"]>>
+      : never)
+  | (RS["formDataResponse"] extends z.ZodObject<any>
+      ? EdgeSpecFormDataResponse<z.output<RS["formDataResponse"]>>
+      : never)
+  | (RS["customResponseMap"] extends Record<string, z.ZodTypeAny>
+      ? CustomResponseMapToEdgeSpecResponse<RS["customResponseMap"]>
+      : never)
+  | Response
 
 /**
  * Collects all middleware request options from a Global/Route spec pair
@@ -55,10 +92,16 @@ type GetMiddlewareRequestOptions<
     "intersection"
   >
 
+export type EdgeSpecRouteFnFromSpecs<
+  GS extends GlobalSpec,
+  RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
+> = EdgeSpecRouteFn<
+  GetMiddlewareRequestOptions<GS, RS>,
+  GetRouteSpecResponseType<GS, RS>
+>
+
 export type CreateWithRouteSpecFn<GS extends GlobalSpec> = <
   const RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
 >(
   routeSpec: RS
-) => (
-  route: EdgeSpecRouteFn<GetMiddlewareRequestOptions<GS, RS>>
-) => EdgeSpecRouteFn
+) => (route: EdgeSpecRouteFnFromSpecs<GS, RS>) => EdgeSpecRouteFn

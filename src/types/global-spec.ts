@@ -1,14 +1,20 @@
 import type { z } from "zod"
 import { Middleware } from "./middleware"
-import { EdgeSpecRequest, EdgeSpecRouteFn } from "./web-handler"
+import {
+  EdgeSpecRequest,
+  EdgeSpecRouteFn,
+  SerializableToResponse,
+} from "./web-handler"
 import { InferRecordKey } from "./util"
+import type { SecuritySchemeObject } from "openapi3-ts/oas31"
+
+export type QueryArrayFormat = "brackets" | "comma" | "repeat"
+export type QueryArrayFormats = readonly QueryArrayFormat[]
 
 export type GlobalSpec = {
   authMiddlewareMap: Record<string, Middleware>
   globalMiddlewares: readonly Middleware[]
   globalMiddlewaresAfterAuth?: readonly Middleware[]
-
-  exceptionHandlingRoute?: (err: any) => EdgeSpecRouteFn | null
 
   // These improve OpenAPI generation
   apiName: string
@@ -18,10 +24,10 @@ export type GlobalSpec = {
 
   shouldValidateResponses?: boolean
   shouldValidateGetRequestBody?: boolean
-  // securitySchemas?: Record<string, SecuritySchemeObject>
+  securitySchemas?: Record<string, SecuritySchemeObject>
   readonly globalSchemas?: Record<string, z.ZodTypeAny>
 
-  // supportedArrayFormats?: QueryArrayFormats
+  supportedArrayFormats?: QueryArrayFormats
 
   /**
    * If an endpoint accepts multiple auth methods and they all fail, this hook will be called with the errors thrown by the middlewares.

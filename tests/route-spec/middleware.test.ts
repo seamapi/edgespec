@@ -1,254 +1,248 @@
 import test from "ava"
+import { Middleware } from "src"
 import { createWithEdgeSpec } from "src/create-with-edge-spec"
 import { EdgeSpecRequest } from "src/types/web-handler"
+import { getTestRoute } from "tests/fixtures/get-test-route"
 
-const withSessionToken = () => ({
-  auth: { session_token: { user: "lucille" } },
-})
-const withPat = () => {
-  throw new Error("Unauthorized")
-  return { auth: { pat: { user: "lucille" } } }
-}
-const withApiToken = () => {
-  throw new Error("Unauthorized")
-  return { auth: { api_token: { user: "lucille" } } }
+const withSessionToken: Middleware<
+  {},
+  { auth: { session_token: { user: "lucille" } } }
+> = (next, req) => {
+  req.auth = { ...req.auth, session_token: { user: "lucille" } }
+  return next(req)
 }
 
-const withName = () => ({ name: "lucille" })
+const withPat: Middleware<{}, { auth: { pat: { user: "lucille" } } }> = () => {
+  throw new Error("Unauthorized")
+}
+
+const withApiToken: Middleware<
+  {},
+  { auth: { api_token: { user: "lucille" } } }
+> = () => {
+  throw new Error("Unauthorized")
+}
+
+const withName: Middleware<{}, { name: string }> = (next, req) => {
+  req.name = "lucille"
+  return next(req)
+}
 
 test("receives auth middleware", async (t) => {
-  const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
+  const { axios } = await getTestRoute(t, {
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {
-      pat: withPat,
-      api_token: withApiToken,
-      session_token: withSessionToken,
+      authMiddlewareMap: {
+        pat: withPat,
+        api_token: withApiToken,
+        session_token: withSessionToken,
+      },
+      globalMiddlewares: [],
     },
-    globalMiddlewares: [],
+    routeSpec: {
+      auth: ["pat", "api_token", "session_token"],
+      methods: ["GET"],
+    },
+    routeFn: (req) => {
+      if (!("session_token" in req.auth)) {
+        t.fail("expected session token in req.auth")
+        throw new Error()
+      }
+
+      t.log(req.auth)
+      t.is(req.auth.session_token.user, "lucille")
+
+      return new Response(req.auth.session_token.user)
+    },
+    routePath: "/hello",
   })
 
-  await withEdgeSpec({
-    auth: ["pat", "api_token", "session_token"],
-    methods: ["GET"],
-  })((req) => {
-    if (!("session_token" in req.auth)) {
-      t.fail("expected session token in req.auth")
-      throw new Error()
-    }
-
-    t.log(req.auth)
-    t.is(req.auth.session_token.user, "lucille")
-
-    return new Response()
-  })({} as EdgeSpecRequest)
+  const { data } = await axios.get("/hello")
+  t.is(data, "lucille")
 })
 
 test("fails if all auth middleware fail", async (t) => {
-  const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
+  const { axios } = await getTestRoute(t, {
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {
-      pat: withPat,
-      api_token: withApiToken,
+      authMiddlewareMap: {
+        pat: withPat,
+        api_token: withApiToken,
+      },
+      globalMiddlewares: [
+        async (next, req) => {
+          try {
+            return await next(req)
+          } catch (err: any) {
+            return new Response(err.message, { status: 500 })
+          }
+        },
+      ],
+
+      onMultipleAuthMiddlewareFailures: (errs: any[]) => {
+        for (const err of errs) {
+          t.is(err.message, "Unauthorized")
+        }
+
+        throw new Error("Unauthorized Wrapper")
+      },
     },
-    globalMiddlewares: [],
-
-    onMultipleAuthMiddlewareFailures: (errs: any[]) => {
-      for (const err of errs) {
-        t.is(err.message, "Unauthorized")
-      }
-
-      throw new Error("Unauthorized Wrapper")
+    routeSpec: {
+      auth: ["api_token", "pat"],
+      methods: ["GET"],
     },
+    routeFn: () => {
+      t.fail("endpoint should not be called")
+      return new Response()
+    },
+    routePath: "/hello",
   })
 
-  await t.throwsAsync(
-    async () =>
-      withEdgeSpec({
-        auth: ["api_token", "pat"],
-        methods: ["GET"],
-      })(() => {
-        t.fail("endpoint should not be called")
-        return new Response()
-      })({} as EdgeSpecRequest),
-    {
-      message: "Unauthorized Wrapper",
-    }
-  )
+  const { status, data } = await axios.get("/hello", {
+    validateStatus: () => true,
+  })
+  t.is(status, 500)
+  t.is(data, "Unauthorized Wrapper")
 })
 
 test("middlewares run in correct order", async (t) => {
   let counter = 0
 
-  const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
+  const { axios } = await getTestRoute(t, {
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
 
-    globalMiddlewares: [
-      () => {
-        t.is(counter++, 0)
-        return {}
-      },
-    ],
+      globalMiddlewares: [
+        (next, req) => {
+          t.is(counter++, 0)
+          return next(req)
+        },
+      ],
 
-    authMiddlewareMap: {
-      pat: () => {
-        t.is(counter++, 1)
-        return {}
+      authMiddlewareMap: {
+        pat: (next, req) => {
+          t.is(counter++, 1)
+          return next(req)
+        },
       },
+
+      globalMiddlewaresAfterAuth: [
+        (next, req) => {
+          t.is(counter++, 2)
+          return next(req)
+        },
+      ],
     },
-
-    globalMiddlewaresAfterAuth: [
-      () => {
-        t.is(counter++, 2)
-        return {}
-      },
-    ],
+    routeSpec: {
+      auth: ["pat"],
+      methods: ["GET"],
+      middlewares: [
+        (next, req) => {
+          t.is(counter++, 3)
+          return next(req)
+        },
+      ],
+    },
+    routeFn: () => {
+      return new Response()
+    },
+    routePath: "/hello",
   })
 
-  await withEdgeSpec({
-    auth: ["pat"],
-    methods: ["GET"],
-    middlewares: [
-      () => {
-        t.is(counter++, 3)
-        return {}
-      },
-    ],
-  })(() => {
-    return new Response()
-  })({} as EdgeSpecRequest)
-
+  await axios.get("/hello")
   t.is(counter, 4)
 })
 
 test("receives route middleware", async (t) => {
-  const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
+  const { axios } = await getTestRoute(t, {
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [withName],
+      authMiddlewareMap: {},
+      globalMiddlewares: [withName],
+    },
+    routeSpec: {
+      auth: "none",
+      methods: ["GET"],
+    },
+    routeFn: (req) => {
+      t.is(req.name, "lucille")
+      return new Response()
+    },
+    routePath: "/hello",
   })
 
-  await withEdgeSpec({
-    auth: "none",
-    methods: ["GET"],
-  })((req) => {
-    t.is(req.name, "lucille")
-    return new Response()
-  })({} as EdgeSpecRequest)
+  await axios.get("/hello")
 })
 
 test("receives local middleware", async (t) => {
-  const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
+  const { axios } = await getTestRoute(t, {
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+      authMiddlewareMap: {},
+      globalMiddlewares: [],
+    },
+    routeSpec: {
+      auth: "none",
+      methods: ["GET"],
+      middlewares: [withName],
+    },
+    routeFn: (req) => {
+      t.is(req.name, "lucille")
+      return new Response()
+    },
+    routePath: "/hello",
   })
 
-  await withEdgeSpec({
-    auth: "none",
-    methods: ["GET"],
-    middlewares: [withName],
-  })((req) => {
-    t.is(req.name, "lucille")
-    return new Response()
-  })({} as EdgeSpecRequest)
+  await axios.get("/hello")
 })
 
 test("responseDefaults are passed", async (t) => {
-  const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
+  const { axios } = await getTestRoute(t, {
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [
-      () => ({
-        responseDefaults: new Response(null, {
-          headers: new Headers({ "x-test": "test", "x-test2": "test2" }),
-        }),
-      }),
-    ],
+      authMiddlewareMap: {},
+      globalMiddlewares: [
+        (next, req) => {
+          req.responseDefaults.headers.set("x-test", "test")
+          req.responseDefaults.headers.set("x-test2", "test2")
+
+          return next(req)
+        },
+      ],
+    },
+    routeSpec: {
+      auth: "none",
+      methods: ["GET"],
+      middlewares: [
+        (next, req) => {
+          req.responseDefaults.headers.set("x-test", "test2")
+
+          return next(req)
+        },
+      ],
+    },
+    routeFn: () => {
+      return new Response("body text")
+    },
+    routePath: "/hello",
   })
 
-  const response = await withEdgeSpec({
-    auth: "none",
-    methods: ["GET"],
-    middlewares: [
-      () => ({
-        responseDefaults: new Response("body text", {
-          headers: new Headers({ "x-test": "test2" }),
-        }),
-      }),
-    ],
-  })(() => {
-    return new Response()
-  })({} as EdgeSpecRequest)
+  const { data, headers } = await axios.get("/hello")
+  t.is(data, "body text")
 
-  t.is(await streamToString(response.body), "body text")
-  t.is(response.headers.get("x-test"), "test2")
-  t.is(response.headers.get("x-test2"), "test2")
+  // @ts-expect-error
+  t.is(headers.get("x-test"), "test2")
+  // @ts-expect-error
+  t.is(headers.get("x-test2"), "test2")
 })
-
-test("responseDefaults are passed (responseDefaults as ResponseInit)", async (t) => {
-  const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [
-      () => ({
-        responseDefaults: {
-          headers: { "x-test": "test", "x-test2": "test2" },
-        },
-      }),
-    ],
-  })
-
-  const response = await withEdgeSpec({
-    auth: "none",
-    methods: ["GET"],
-    middlewares: [
-      () => ({
-        responseDefaults: {
-          headers: { "x-test": "test2" },
-        },
-      }),
-    ],
-  })(() => {
-    return new Response("body text")
-  })({} as EdgeSpecRequest)
-
-  t.is(await streamToString(response.body), "body text")
-  t.is(response.headers.get("x-test"), "test2")
-  t.is(response.headers.get("x-test2"), "test2")
-})
-
-async function streamToString(
-  stream: ReadableStream<Uint8Array> | undefined | null
-) {
-  if (!stream) return undefined
-
-  const reader = stream.getReader()
-  const textDecoder = new TextDecoder()
-  let result = ""
-
-  async function read() {
-    const { done, value } = await reader.read()
-
-    if (done) {
-      return result
-    }
-
-    result += textDecoder.decode(value, { stream: true })
-    return read()
-  }
-
-  return read()
-}
