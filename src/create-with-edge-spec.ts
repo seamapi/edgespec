@@ -1,9 +1,9 @@
 import { z } from "zod"
 import type { GlobalSpec } from "./types/global-spec.js"
-import { Middleware, MiddlewareChain } from "./types/middleware.js"
+import { Middleware, MiddlewareChain } from "./middleware/types.js"
 import { CreateWithRouteSpecFn, RouteSpec } from "./types/route-spec.js"
 import {
-  EdgeSpecFormDataResponse,
+  EdgeSpecMultiPartFormDataResponse,
   EdgeSpecJsonResponse,
   EdgeSpecRequest,
   EdgeSpecResponse,
@@ -145,7 +145,7 @@ function serializeToResponse(
       return response.serializeToResponse(routeSpec.jsonResponse ?? z.any())
     }
 
-    if (response instanceof EdgeSpecFormDataResponse) {
+    if (response instanceof EdgeSpecMultiPartFormDataResponse) {
       return response.serializeToResponse(
         routeSpec.multipartFormDataResponse ?? z.any()
       )

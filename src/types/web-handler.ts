@@ -84,9 +84,9 @@ export abstract class EdgeSpecResponse implements SerializableToResponse {
   }
 
   static multipartFormData<T extends Record<string, ValidFormDataValue>>(
-    ...args: ConstructorParameters<typeof EdgeSpecFormDataResponse<T>>
+    ...args: ConstructorParameters<typeof EdgeSpecMultiPartFormDataResponse<T>>
   ) {
-    return new EdgeSpecFormDataResponse<T>(...args)
+    return new EdgeSpecMultiPartFormDataResponse<T>(...args)
   }
 
   static custom<T, const C extends string>(
@@ -142,7 +142,7 @@ export class MiddlewareResponseData extends EdgeSpecResponse {
   }
 }
 
-export class EdgeSpecFormDataResponse<
+export class EdgeSpecMultiPartFormDataResponse<
   T extends Record<string, ValidFormDataValue>,
 > extends EdgeSpecResponse {
   constructor(

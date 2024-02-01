@@ -1,4 +1,4 @@
-import { Middleware } from "src/types/middleware"
+import { Middleware } from "src/middleware/types"
 
 export const withDefaultExceptionHandling: Middleware = async (next, req) => {
   try {

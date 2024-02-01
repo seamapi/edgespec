@@ -16,6 +16,11 @@
       "require": "./dist/dev.js",
       "types": "./dist/dev.d.ts"
     },
+    "./middleware": {
+      "import": "./dist/middleware.js",
+      "require": "./dist/middleware.js",
+      "types": "./dist/middleware.d.ts"
+    },
     "./adapters/node": {
       "import": "./dist/adapters/node.js",
       "require": "./dist/adapters/node.js",

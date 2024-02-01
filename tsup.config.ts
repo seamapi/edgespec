@@ -7,6 +7,7 @@ export default defineConfig({
     "adapters/wintercg-minimal": "src/adapters/wintercg-minimal.ts",
     cli: "src/cli/cli.ts",
     dev: "src/dev/dev-server.ts",
+    middleware: "src/middleware/index.ts",
   },
   format: "esm",
   treeshake: true,
