@@ -71,7 +71,6 @@
     "clipanion": "^4.0.0-rc.3",
     "edge-runtime": "^2.5.7",
     "esbuild": "^0.19.11",
-    "form-urlencoded": "^6.1.4",
     "globby": "^14.0.0",
     "human-readable": "^0.2.1",
     "make-vfs": "^1.1.0",
