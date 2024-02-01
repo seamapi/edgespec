@@ -19,7 +19,7 @@ test("CLI codegen route-types command produces the expected route types", async 
     "route-types",
     "-o",
     tempPath,
-    "--app-directory",
+    "--routes-directory",
     appDirectoryPath,
   ])
   const cliResult = await execution.waitUntilExit()

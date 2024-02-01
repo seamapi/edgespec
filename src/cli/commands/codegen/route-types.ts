@@ -1,44 +1,30 @@
-import { Command, Option } from "clipanion"
+import { Option } from "clipanion"
 import { Project, Type, ts } from "ts-morph"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
+import { BaseCommand } from "src/cli/base-command"
+import { ResolvedEdgeSpecConfig } from "src/config/utils"
 
-export class CodeGenRouteTypes extends Command {
+export class CodeGenRouteTypes extends BaseCommand {
   static paths = [[`codegen`, `route-types`]]
-
-  appDirectory = Option.String(
-    "--app-directory",
-    path.join(process.cwd(), "api"),
-    {
-      description: "The directory to bundle",
-    }
-  )
-
-  tsconfigPath = Option.String(
-    "--tsconfig",
-    path.join(process.cwd(), "tsconfig.json"),
-    {
-      description: "Path to the project's tsconfig.json",
-    }
-  )
 
   outputPath = Option.String("--output,-o", {
     description: "Path to the output file",
     required: true,
   })
 
-  async execute() {
+  async run(config: ResolvedEdgeSpecConfig) {
     const project = new Project({
       compilerOptions: { declaration: true },
-      tsConfigFilePath: this.tsconfigPath,
+      tsConfigFilePath: config.tsconfigPath,
     })
 
-    const routeMap = await createRouteMapFromDirectory(this.appDirectory)
+    const routeMap = await createRouteMapFromDirectory(config.routesDirectory)
 
     const nodes = Object.entries(routeMap).map(([route, { relativePath }]) => {
       const source = project.getSourceFileOrThrow(
-        path.join(this.appDirectory, relativePath)
+        path.join(config.routesDirectory, relativePath)
       )
 
       const defaultExportDeclaration = source
