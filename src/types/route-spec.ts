@@ -24,10 +24,11 @@ export type RouteSpec<AuthMiddlewares extends string> = {
   formData?: z.ZodObject<any>
   queryParams?: z.ZodObject<any>
   commonParams?: z.ZodObject<any>
+  urlEncodedFormData?: z.ZodObject<any>
 
   jsonResponse?: z.ZodTypeAny
   formDataResponse?: z.ZodObject<any>
-  wwwFormUrlEncodedResponse?: z.ZodObject<any>
+  urlEncodedFormDataResponse?: z.ZodObject<any>
   customResponseMap?: Record<string, z.ZodTypeAny>
 
   auth: AuthMiddlewares | readonly AuthMiddlewares[] | "none"
@@ -59,8 +60,8 @@ type GetRouteSpecResponseType<
   | (RS["formDataResponse"] extends z.ZodObject<any>
       ? EdgeSpecFormDataResponse<z.output<RS["formDataResponse"]>>
       : never)
-  | (RS["wwwFormUrlEncodedResponse"] extends z.ZodObject<any>
-      ? EdgeSpecUrlEncodedResponse<z.output<RS["wwwFormUrlEncodedResponse"]>>
+  | (RS["urlEncodedFormDataResponse"] extends z.ZodObject<any>
+      ? EdgeSpecUrlEncodedResponse<z.output<RS["urlEncodedFormDataResponse"]>>
       : never)
   | (RS["customResponseMap"] extends Record<string, z.ZodTypeAny>
       ? CustomResponseMapToEdgeSpecResponse<RS["customResponseMap"]>
@@ -98,7 +99,22 @@ type GetMiddlewareRequestOptions<
   AccumulateMiddlewareChainResultOptions<
     RS["middlewares"] extends MiddlewareChain ? RS["middlewares"] : readonly [],
     "intersection"
-  >
+  > &
+  (RS["jsonBody"] extends infer ZT extends z.ZodTypeAny
+    ? { jsonBody: z.output<ZT> }
+    : {}) &
+  (RS["formData"] extends infer ZT extends z.ZodObject<any>
+    ? { formDataBody: z.output<ZT> }
+    : {}) &
+  (RS["queryParams"] extends infer ZT extends z.ZodObject<any>
+    ? { query: z.output<ZT> }
+    : {}) &
+  (RS["commonParams"] extends infer ZT extends z.ZodObject<any>
+    ? { commonParams: z.output<ZT> }
+    : {}) &
+  (RS["urlEncodedFormData"] extends infer ZT extends z.ZodObject<any>
+    ? { urlEncodedFormData: z.output<ZT> }
+    : {})
 
 export type EdgeSpecRouteFnFromSpecs<
   GS extends GlobalSpec,

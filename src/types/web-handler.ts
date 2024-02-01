@@ -40,12 +40,18 @@ export interface SerializableToResponse {
    * @param schema - the schema to validate the response against
    */
   serializeToResponse(schema: z.ZodTypeAny): Response
+
+  statusCode(): number
 }
 
 export type ValidFormDataValue = Primitive | Blob
 
 export abstract class EdgeSpecResponse implements SerializableToResponse {
   abstract serializeToResponse(schema: z.ZodTypeAny): Response
+
+  statusCode(): number {
+    return this.options.status ?? 200
+  }
 
   status(status: number): this {
     this.options.status = status

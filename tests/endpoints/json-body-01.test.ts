@@ -10,6 +10,14 @@ test("json-body-01", async (t) => {
 
       authMiddlewareMap: {},
       globalMiddlewares: [],
+
+      exceptionHandlingMiddleware: async (next, req) => {
+        try {
+          return await next(req)
+        } catch (e) {
+          return Response.json(e, { status: 500 })
+        }
+      },
     },
     routeSpec: {
       auth: "none",
@@ -17,22 +25,33 @@ test("json-body-01", async (t) => {
       jsonBody: z.object({
         name: z.string(),
       }),
+      jsonResponse: z.object({
+        jsonBody: z.object({
+          name: z.string(),
+        }),
+        ok: z.boolean(),
+      }),
     },
     routePath: "/post-body",
-    routeFn: async (req: any) => {
-      const jsonBody = await req.json()
+    routeFn: async (req) => {
       return new Response(
         JSON.stringify({
           ok: true,
-          jsonBody,
+          jsonBody: req.jsonBody,
         })
       )
     },
   })
 
-  const { data: res } = await axios.post("/post-body", {
-    name: "hello",
-  })
+  const { data: res } = await axios.post(
+    "/post-body",
+    {
+      name: "hello",
+    },
+    {
+      validateStatus: () => true,
+    }
+  )
 
   t.is(res.ok, true)
   t.is(res.jsonBody.name, "hello")
