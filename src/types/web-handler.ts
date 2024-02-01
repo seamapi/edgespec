@@ -116,13 +116,9 @@ export class EdgeSpecCustomResponse<
   T,
   const C extends string,
 > extends EdgeSpecResponse {
-  // "phantom" data is needed for the type to be inferred correctly
-  _data: T | undefined
-  _contentType: C | undefined
-
   constructor(
     public data: T,
-    contentType: C,
+    public contentType: C,
     options: ResponseInit = {}
   ) {
     super(options)
