@@ -10,14 +10,6 @@ test("json-body-01", async (t) => {
 
       authMiddlewareMap: {},
       globalMiddlewares: [],
-
-      exceptionHandlingMiddleware: async (next, req) => {
-        try {
-          return await next(req)
-        } catch (e) {
-          return Response.json(e, { status: 500 })
-        }
-      },
     },
     routeSpec: {
       auth: "none",
