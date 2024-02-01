@@ -1,5 +1,7 @@
 import test from "ava"
 import { Middleware } from "src"
+import { createWithEdgeSpec } from "src/create-with-edge-spec"
+import { EdgeSpecRequest } from "src/types/web-handler"
 import { getTestRoute } from "tests/fixtures/get-test-route"
 
 const withSessionToken: Middleware<
@@ -71,15 +73,15 @@ test("fails if all auth middleware fail", async (t) => {
         pat: withPat,
         api_token: withApiToken,
       },
-      globalMiddlewares: [],
-
-      exceptionHandlingMiddleware: async (next, req) => {
-        try {
-          return await next(req)
-        } catch (err: any) {
-          return new Response(err.message, { status: 500 })
-        }
-      },
+      globalMiddlewares: [
+        async (next, req) => {
+          try {
+            return await next(req)
+          } catch (err: any) {
+            return new Response(err.message, { status: 500 })
+          }
+        },
+      ],
 
       onMultipleAuthMiddlewareFailures: (errs: any[]) => {
         for (const err of errs) {

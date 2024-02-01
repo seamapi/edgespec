@@ -1,6 +1,6 @@
 {
   "name": "edgespec",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
   "main": "./dist/index.js",
@@ -54,6 +54,7 @@
     "esbuild-register": "^3.5.0",
     "execa": "^8.0.1",
     "expect-type": "^0.17.3",
+    "form-urlencoded": "^6.1.4",
     "openapi3-ts": "^4.2.1",
     "p-retry": "^6.1.0",
     "prettier": "^3.1.0",

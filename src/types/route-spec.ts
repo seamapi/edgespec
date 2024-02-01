@@ -13,7 +13,6 @@ import type {
   EdgeSpecFormDataResponse,
   EdgeSpecJsonResponse,
   EdgeSpecRouteFn,
-  EdgeSpecUrlEncodedResponse,
   HTTPMethods,
 } from "./web-handler"
 
@@ -28,16 +27,11 @@ export type RouteSpec<AuthMiddlewares extends string> = {
 
   jsonResponse?: z.ZodTypeAny
   formDataResponse?: z.ZodObject<any>
-  urlEncodedFormDataResponse?: z.ZodObject<any>
   customResponseMap?: Record<string, z.ZodTypeAny>
 
   auth: AuthMiddlewares | readonly AuthMiddlewares[] | "none"
   middlewares?: MiddlewareChain
 
-  /**
-   * add x-fern-sdk-return-value to the openapi spec, useful when you want to return only a subset of the response
-   */
-  sdkReturnValue?: string | string[]
   openApiMetadata?: any
 
   onMultipleAuthMiddlewareFailures?: (errors: unknown[]) => void
@@ -59,9 +53,6 @@ type GetRouteSpecResponseType<
       : never)
   | (RS["formDataResponse"] extends z.ZodObject<any>
       ? EdgeSpecFormDataResponse<z.output<RS["formDataResponse"]>>
-      : never)
-  | (RS["urlEncodedFormDataResponse"] extends z.ZodObject<any>
-      ? EdgeSpecUrlEncodedResponse<z.output<RS["urlEncodedFormDataResponse"]>>
       : never)
   | (RS["customResponseMap"] extends Record<string, z.ZodTypeAny>
       ? CustomResponseMapToEdgeSpecResponse<RS["customResponseMap"]>

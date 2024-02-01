@@ -11,11 +11,11 @@ import {
   EdgeSpecCustomResponse,
   SerializableToResponse,
   mergeResponses,
-  EdgeSpecUrlEncodedResponse,
 } from "./types/web-handler.js"
 import { withMethods } from "./middleware/with-methods.js"
 import { InternalServerErrorException } from "./middleware/http-exceptions.js"
 import { withInputValidation } from "./middleware/with-input-validation.js"
+import { withUnhandledExceptionHandling } from "./middleware/with-unhandled-exception-handling.js"
 
 export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
@@ -39,10 +39,8 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
 
     return await wrapMiddlewares(
       [
-        serializeResponse(globalSpec, routeSpec, true),
-        ...(globalSpec.exceptionHandlingMiddleware
-          ? [globalSpec.exceptionHandlingMiddleware]
-          : []),
+        withUnhandledExceptionHandling,
+        serializeResponse(globalSpec, routeSpec, false),
         ...globalSpec.globalMiddlewares,
         firstAuthMiddlewareThatSucceeds(
           authMiddlewares,
@@ -150,12 +148,6 @@ function serializeToResponse(
 
     if (response instanceof EdgeSpecFormDataResponse) {
       return response.serializeToResponse(routeSpec.formDataResponse ?? z.any())
-    }
-
-    if (response instanceof EdgeSpecUrlEncodedResponse) {
-      return response.serializeToResponse(
-        routeSpec.urlEncodedFormDataResponse ?? z.any()
-      )
     }
 
     if (response instanceof EdgeSpecCustomResponse) {
