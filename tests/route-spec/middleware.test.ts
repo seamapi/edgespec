@@ -1,7 +1,5 @@
 import test from "ava"
-import { Middleware } from "src"
-import { createWithEdgeSpec } from "src/create-with-edge-spec"
-import { EdgeSpecRequest } from "src/types/web-handler"
+import { Middleware } from "src/middleware"
 import { getTestRoute } from "tests/fixtures/get-test-route"
 
 const withSessionToken: Middleware<
