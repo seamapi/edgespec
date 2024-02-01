@@ -221,7 +221,7 @@ export const withInputValidation =
     {},
     {
       jsonBody: z.output<JsonBody>
-      formDataBody: z.output<FormData>
+      multiPartFormData: z.output<FormData>
       query: z.output<QueryParams>
       commonParams: z.output<CommonParams>
       urlEncodedFormData: z.output<UrlEncodedFormData>
@@ -285,12 +285,12 @@ export const withInputValidation =
       }
     }
 
-    let formDataBody = undefined
+    let multiPartFormData = undefined
 
     if (input.formData) {
       try {
-        formDataBody = await req.formData()
-        formDataBody = Object.fromEntries(formDataBody.entries())
+        multiPartFormData = await req.formData()
+        multiPartFormData = Object.fromEntries(multiPartFormData.entries())
       } catch (e: any) {
         throw new InputParsingError("Error while parsing form data")
       }
@@ -318,7 +318,7 @@ export const withInputValidation =
         : req.method !== "GET" && req.method !== "DELETE"
 
       if (Boolean(input.formData) && willValidateRequestBody) {
-        req.formDataBody = input.formData?.parse(formDataBody)
+        req.multiPartFormData = input.formData?.parse(multiPartFormData)
       }
 
       if (Boolean(input.jsonBody) && willValidateRequestBody) {

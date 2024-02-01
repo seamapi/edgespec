@@ -56,7 +56,7 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
             "repeat",
           ],
           commonParams: routeSpec.commonParams,
-          formData: routeSpec.formData,
+          formData: routeSpec.multiPartFormData,
           jsonBody: routeSpec.jsonBody,
           queryParams: routeSpec.queryParams,
           urlEncodedFormData: routeSpec.urlEncodedFormData,
@@ -146,7 +146,9 @@ function serializeToResponse(
     }
 
     if (response instanceof EdgeSpecFormDataResponse) {
-      return response.serializeToResponse(routeSpec.formDataResponse ?? z.any())
+      return response.serializeToResponse(
+        routeSpec.multipartFormDataResponse ?? z.any()
+      )
     }
 
     if (response instanceof EdgeSpecCustomResponse) {

@@ -86,7 +86,7 @@ test("validates form data response success", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["POST"],
-      formData: z.object({
+      multiPartFormData: z.object({
         name: z.string(),
       }),
       jsonResponse: z.object({
@@ -95,7 +95,7 @@ test("validates form data response success", async (t) => {
     },
     routeFn: (req) => {
       return EdgeSpecResponse.json({
-        message: `hello, ${req.formDataBody.name}!`,
+        message: `hello, ${req.multiPartFormData.name}!`,
       })
     },
     routePath: "/hello",
@@ -119,7 +119,7 @@ test("validates form data response failure", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["POST"],
-      formData: z.object({
+      multiPartFormData: z.object({
         name: z.number(),
       }),
       jsonResponse: z.object({
@@ -128,7 +128,7 @@ test("validates form data response failure", async (t) => {
     },
     routeFn: (req) => {
       return EdgeSpecResponse.json({
-        message: `hello, ${req.formDataBody.name}!`,
+        message: `hello, ${req.multiPartFormData.name}!`,
       })
     },
     routePath: "/hello",

@@ -20,13 +20,13 @@ export type RouteSpec<AuthMiddlewares extends string> = {
   methods: readonly HTTPMethods[]
 
   jsonBody?: z.ZodTypeAny
-  formData?: z.ZodObject<any>
+  multiPartFormData?: z.ZodObject<any>
   queryParams?: z.ZodObject<any>
   commonParams?: z.ZodObject<any>
   urlEncodedFormData?: z.ZodObject<any>
 
   jsonResponse?: z.ZodTypeAny
-  formDataResponse?: z.ZodObject<any>
+  multipartFormDataResponse?: z.ZodObject<any>
   customResponseMap?: Record<string, z.ZodTypeAny>
 
   auth: AuthMiddlewares | readonly AuthMiddlewares[] | "none"
@@ -51,8 +51,8 @@ type GetRouteSpecResponseType<
   | (RS["jsonResponse"] extends z.ZodTypeAny
       ? EdgeSpecJsonResponse<z.output<RS["jsonResponse"]>>
       : never)
-  | (RS["formDataResponse"] extends z.ZodObject<any>
-      ? EdgeSpecFormDataResponse<z.output<RS["formDataResponse"]>>
+  | (RS["multipartFormDataResponse"] extends z.ZodObject<any>
+      ? EdgeSpecFormDataResponse<z.output<RS["multipartFormDataResponse"]>>
       : never)
   | (RS["customResponseMap"] extends Record<string, z.ZodTypeAny>
       ? CustomResponseMapToEdgeSpecResponse<RS["customResponseMap"]>
@@ -94,8 +94,8 @@ type GetMiddlewareRequestOptions<
   (RS["jsonBody"] extends infer ZT extends z.ZodTypeAny
     ? { jsonBody: z.output<ZT> }
     : {}) &
-  (RS["formData"] extends infer ZT extends z.ZodObject<any>
-    ? { formDataBody: z.output<ZT> }
+  (RS["multiPartFormData"] extends infer ZT extends z.ZodObject<any>
+    ? { multiPartFormData: z.output<ZT> }
     : {}) &
   (RS["queryParams"] extends infer ZT extends z.ZodObject<any>
     ? { query: z.output<ZT> }
