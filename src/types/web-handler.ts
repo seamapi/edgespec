@@ -18,13 +18,16 @@ export type EdgeSpecRouteParams = {
 
 export type HeadersDescriptor = Headers | HeadersInit
 
+export interface EdgeSpecInitializationOptions {
+  routeParams: EdgeSpecRouteParams
+}
+
 export interface EdgeSpecMiddlewareOptions {
   responseDefaults: Response
 }
 
 export interface EdgeSpecRequestOptions extends EdgeSpecMiddlewareOptions {
   edgeSpec: EdgeSpecRouteBundle
-  routeParams?: EdgeSpecRouteParams
 }
 
 export type WithEdgeSpecRequestOptions<T> = T & EdgeSpecRequestOptions
@@ -180,7 +183,7 @@ export type EdgeSpecFetchEvent = FetchEvent & {
 
 export function createEdgeSpecRequest(
   request: Request,
-  options: EdgeSpecRequestOptions
+  options: EdgeSpecRequestOptions & EdgeSpecInitializationOptions
 ): EdgeSpecRequest {
   return Object.assign(request, options)
 }

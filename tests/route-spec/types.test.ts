@@ -218,3 +218,22 @@ test.skip("custom response map types are enforced", () => {
     return EdgeSpecResponse.custom("not a number", "custom/response")
   })({} as EdgeSpecRequest)
 })
+
+test.skip("route param types", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {},
+    globalMiddlewares: [],
+  })
+
+  withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    routeParams: z.object({ id: z.coerce.number() }),
+  })((req) => {
+    expectTypeOf(req.routeParams.id).toBeNumber()
+    return new Response()
+  })({} as EdgeSpecRequest)
+})
