@@ -1,105 +1,33 @@
-export type HttpExceptionMetadata = {
-  type: string
-  message: string
-  data?: Record<string, unknown>
-} & Record<string, unknown>
+export interface HttpException {
+  status: number
+  message?: string
 
-export interface ThrowingOptions {
-  json?: boolean
+  _isHttpException: true
 }
 
-/**
- * Throw HttpExceptions inside API endpoints to generate nice error messages
- *
- * @example
- * ```
- * if (bad_soups.includes(soup_param)) {
- *   throw new HttpException(400, {
- *      type: "cant_make_soup",
- *      message: "Soup was too difficult, please specify a different soup"
- *    })
- * }
- * ```
- *
- **/
-export class HttpException extends Error {
-  options: ThrowingOptions
+export abstract class EdgeSpecMiddlewareError
+  extends Error
+  implements HttpException
+{
+  _isHttpException = true as const
 
   constructor(
-    public status: number,
-    public metadata: HttpExceptionMetadata,
-    options?: ThrowingOptions
+    public message: string,
+    public status: number = 500
   ) {
-    super(metadata.message)
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor)
-    }
-
-    this.options = options ?? { json: true }
-  }
-
-  toString() {
-    return `HttpException: ${this.status}, ${this.metadata.message} (${this.metadata.type})`
+    super(message)
+    this.name = this.constructor.name
   }
 }
 
-/**
- * Throw BadRequestException inside API endpoints that were provided incorrect
- * parameters or body
- *
- * @example
- * ```
- * if (bad_soups.includes(soup_param)) {
- *   throw new BadRequestException({
- *     type: "cant_make_soup",
- *     message: "Soup was too difficult, please specify a different soup",
- *   })
- * }
- * ```
- *
- **/
-export class BadRequestException extends HttpException {
-  constructor(
-    public metadata: HttpExceptionMetadata,
-    options?: ThrowingOptions
-  ) {
-    super(400, metadata, options)
+export class MethodNotAllowedError extends EdgeSpecMiddlewareError {
+  constructor(allowedMethods: readonly string[]) {
+    super(`only ${allowedMethods.join(",")} accepted`, 405)
   }
 }
 
-export class UnauthorizedException extends HttpException {
-  constructor(
-    public metadata: HttpExceptionMetadata,
-    options?: ThrowingOptions
-  ) {
-    super(401, metadata, options)
-  }
-}
-
-export class NotFoundException extends HttpException {
-  constructor(
-    public metadata: HttpExceptionMetadata,
-    options?: ThrowingOptions
-  ) {
-    super(404, metadata, options)
-  }
-}
-
-export class MethodNotAllowedException extends HttpException {
-  constructor(
-    public metadata: HttpExceptionMetadata,
-    options?: ThrowingOptions
-  ) {
-    super(405, metadata, options)
-  }
-}
-
-export class InternalServerErrorException extends HttpException {
-  constructor(
-    public metadata: HttpExceptionMetadata,
-    options?: ThrowingOptions
-  ) {
-    super(500, metadata, options)
-  }
-}
+// export class ValidationError extends EdgeSpecMiddlewareError {
+//   constructor(message: string) {
+//     super(message, 400)
+//   }
+// }

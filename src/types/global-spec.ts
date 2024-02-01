@@ -16,8 +16,6 @@ export type GlobalSpec = {
   globalMiddlewares: readonly Middleware[]
   globalMiddlewaresAfterAuth?: readonly Middleware[]
 
-  exceptionHandlingMiddleware?: Middleware
-
   // These improve OpenAPI generation
   apiName: string
   productionServerUrl: string

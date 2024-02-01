@@ -1,7 +1,6 @@
 import type { FetchEvent } from "@edge-runtime/primitives"
 import { EdgeSpecRouteBundle } from "./edge-spec"
 import { Primitive } from "type-fest"
-import formurlencoded, { type FormEncodedOptions } from "form-urlencoded"
 import { z } from "zod"
 
 export type HTTPMethods =
@@ -84,12 +83,6 @@ export abstract class EdgeSpecResponse implements SerializableToResponse {
     return new EdgeSpecFormDataResponse<T>(...args)
   }
 
-  static urlEncodedFormData<T extends Record<string, any>>(
-    ...args: ConstructorParameters<typeof EdgeSpecUrlEncodedResponse<T>>
-  ) {
-    return new EdgeSpecUrlEncodedResponse<T>(...args)
-  }
-
   static custom<T, const C extends string>(
     ...args: ConstructorParameters<typeof EdgeSpecCustomResponse<T, C>>
   ) {
@@ -165,28 +158,6 @@ export class EdgeSpecFormDataResponse<
     }
 
     return new Response(formData, this.options)
-  }
-}
-
-export class EdgeSpecUrlEncodedResponse<
-  T extends Record<string, any>,
-> extends EdgeSpecResponse {
-  constructor(
-    public data: T,
-    options: ResponseInit = {},
-    private encodingOptions?: FormEncodedOptions
-  ) {
-    super(options)
-    this.options.headers = mergeHeaders(this.options.headers, {
-      "Content-Type": "application/x-www-form-urlencoded",
-    })
-  }
-
-  serializeToResponse(schema: z.ZodTypeAny) {
-    return new Response(
-      formurlencoded(schema.parse(this.data), this.encodingOptions),
-      this.options
-    )
   }
 }
 

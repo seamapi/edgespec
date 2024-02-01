@@ -10,19 +10,19 @@ const defaultSpecs = {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    exceptionHandlingMiddleware: async (next, req) => {
-      try {
-        return await next(req)
-      } catch (e: any) {
-        return EdgeSpecResponse.json(
-          { error_type: e.constructor.name },
-          { status: 500 }
-        )
-      }
-    },
-
     authMiddlewareMap: {},
-    globalMiddlewares: [],
+    globalMiddlewares: [
+      async (next, req) => {
+        try {
+          return await next(req)
+        } catch (e: any) {
+          return EdgeSpecResponse.json(
+            { error_type: e.constructor.name },
+            { status: 500 }
+          )
+        }
+      },
+    ],
   } satisfies GlobalSpec,
 } as const
 
@@ -153,37 +153,6 @@ test("serializes form data", async (t) => {
 
   t.regex(formData, /name="hello"/)
   t.regex(formData, /world/)
-})
-
-test("serializes www url-encoded form data", async (t) => {
-  const { axios } = await getTestRoute(t, {
-    ...defaultSpecs,
-    routeSpec: {
-      auth: "none",
-      methods: ["GET"],
-      formDataResponse: z.object({
-        hello: z.string(),
-      }),
-    },
-    routeFn: () => {
-      return EdgeSpecResponse.urlEncodedFormData({
-        hello: "world",
-      })
-    },
-    routePath: "/hello",
-  })
-
-  const response = await axios.get("/hello")
-
-  t.is(response.status, 200)
-
-  t.is(
-    // @ts-expect-error - request.headers.get is bugged for some reason :/
-    response.headers.get?.("content-type"),
-    "application/x-www-form-urlencoded"
-  )
-
-  t.is(response.data, "hello=world")
 })
 
 test("can set headers, status", async (t) => {

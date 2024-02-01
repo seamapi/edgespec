@@ -13,7 +13,6 @@ import type {
   EdgeSpecFormDataResponse,
   EdgeSpecJsonResponse,
   EdgeSpecRouteFn,
-  EdgeSpecUrlEncodedResponse,
   HTTPMethods,
 } from "./web-handler"
 
@@ -58,9 +57,6 @@ type GetRouteSpecResponseType<
       : never)
   | (RS["formDataResponse"] extends z.ZodObject<any>
       ? EdgeSpecFormDataResponse<z.output<RS["formDataResponse"]>>
-      : never)
-  | (RS["wwwFormUrlEncodedResponse"] extends z.ZodObject<any>
-      ? EdgeSpecUrlEncodedResponse<z.output<RS["wwwFormUrlEncodedResponse"]>>
       : never)
   | (RS["customResponseMap"] extends Record<string, z.ZodTypeAny>
       ? CustomResponseMapToEdgeSpecResponse<RS["customResponseMap"]>
