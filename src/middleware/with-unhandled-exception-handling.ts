@@ -1,5 +1,4 @@
 import { Middleware } from "src/types/middleware"
-import { EdgeSpecMiddlewareError } from "./http-exceptions"
 
 export const withUnhandledExceptionHandling: Middleware = async (next, req) => {
   try {
