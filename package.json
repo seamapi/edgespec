@@ -42,7 +42,16 @@
   "bin": {
     "edgespec": "./dist/cli.js"
   },
-  "keywords": [],
+  "keywords": [
+    "☃️",
+    "framework",
+    "edge",
+    "typed",
+    "routing",
+    "wintercg",
+    "winter",
+    "cg"
+  ],
   "author": "Seam Labs Inc.",
   "license": "ISC",
   "devDependencies": {
