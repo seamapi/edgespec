@@ -3,13 +3,36 @@ import { createWithEdgeSpec } from "src/create-with-edge-spec"
 import { expectTypeOf } from "expect-type"
 import { EdgeSpecRequest, EdgeSpecResponse } from "src/types/web-handler"
 import { z } from "zod"
+import { Middleware } from "src"
 
-const withSessionToken = () => ({
-  auth: { session_token: { user: "lucille" } },
-})
-const withPat = () => ({ auth: { pat: { user: "lucille" } } })
-const withApiToken = () => ({ auth: { api_token: { user: "lucille" } } })
-const withName = () => ({ name: "lucille" })
+const withSessionToken: Middleware<
+  {},
+  { auth: { session_token: { user: "lucille" } } }
+> = (next, req) => {
+  req.auth = { ...req.auth, session_token: { user: "lucille" } }
+  return next(req)
+}
+
+const withPat: Middleware<{}, { auth: { pat: { user: "lucille" } } }> = (
+  next,
+  req
+) => {
+  req.auth = { ...req.auth, pat: { user: "lucille" } }
+  return next(req)
+}
+
+const withApiToken: Middleware<
+  {},
+  { auth: { api_token: { user: "lucille" } } }
+> = (next, req) => {
+  req.auth = { ...req.auth, api_token: { user: "lucille" } }
+  return next(req)
+}
+
+const withName: Middleware<{}, { name: string }> = (next, req) => {
+  req.name = "lucille"
+  return next(req)
+}
 
 test.skip("auth none is always supported", () => {
   createWithEdgeSpec({
@@ -66,7 +89,7 @@ test.skip("can select existing middleware", () => {
     productionServerUrl: "https://example.com",
 
     authMiddlewareMap: {
-      session_token: () => ({}),
+      session_token: (next, req) => next(req),
     },
     globalMiddlewares: [],
   })

@@ -4,22 +4,23 @@ import { Primitive } from "type-fest"
 import formurlencoded, { type FormEncodedOptions } from "form-urlencoded"
 import { z } from "zod"
 
+export type HTTPMethods =
+  | "GET"
+  | "POST"
+  | "DELETE"
+  | "PUT"
+  | "PATCH"
+  | "HEAD"
+  | "OPTIONS"
+
 export type EdgeSpecRouteParams = {
   [routeParam: string]: string | string[]
 }
 
 export type HeadersDescriptor = Headers | HeadersInit
 
-export type ResponseDescriptor =
-  | Response
-  | SerializableToResponse
-  | (Omit<ResponseInit, "headers"> & {
-      body?: Response["body"]
-      headers?: HeadersDescriptor
-    })
-
 export interface EdgeSpecMiddlewareOptions {
-  responseDefaults?: ResponseDescriptor
+  responseDefaults: Response
 }
 
 export interface EdgeSpecRequestOptions extends EdgeSpecMiddlewareOptions {
@@ -245,8 +246,8 @@ export function mergeHeaders(
  * responses
  */
 export function mergeResponses(
-  r1: ResponseDescriptor | SerializableToResponse | undefined | null,
-  r2: ResponseDescriptor | SerializableToResponse | undefined | null
+  r1: Response | SerializableToResponse | undefined | null,
+  r2: Response | SerializableToResponse | undefined | null
 ): Response {
   if (r1 && "serializeToResponse" in r1) r1 = r1.serializeToResponse(z.any())
   if (r2 && "serializeToResponse" in r2) r2 = r2.serializeToResponse(z.any())

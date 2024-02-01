@@ -1,6 +1,10 @@
 import type { z } from "zod"
 import { Middleware } from "./middleware"
-import { EdgeSpecRequest, EdgeSpecRouteFn } from "./web-handler"
+import {
+  EdgeSpecRequest,
+  EdgeSpecRouteFn,
+  SerializableToResponse,
+} from "./web-handler"
 import { InferRecordKey } from "./util"
 import type { SecuritySchemeObject } from "openapi3-ts/oas31"
 
@@ -12,7 +16,7 @@ export type GlobalSpec = {
   globalMiddlewares: readonly Middleware[]
   globalMiddlewaresAfterAuth?: readonly Middleware[]
 
-  exceptionHandlingRoute?: (err: any) => EdgeSpecRouteFn | null
+  exceptionHandlingMiddleware?: Middleware
 
   // These improve OpenAPI generation
   apiName: string

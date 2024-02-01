@@ -10,8 +10,16 @@ const defaultSpecs = {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    exceptionHandlingRoute: (e) => () =>
-      Response.json({ error_type: e.constructor.name }, { status: 500 }),
+    exceptionHandlingMiddleware: async (next, req) => {
+      try {
+        return await next(req)
+      } catch (e: any) {
+        return EdgeSpecResponse.json(
+          { error_type: e.constructor.name },
+          { status: 500 }
+        )
+      }
+    },
 
     authMiddlewareMap: {},
     globalMiddlewares: [],

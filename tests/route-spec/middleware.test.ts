@@ -1,24 +1,31 @@
 import test from "ava"
+import { Middleware } from "src"
 import { createWithEdgeSpec } from "src/create-with-edge-spec"
-import {
-  EdgeSpecCustomResponse,
-  EdgeSpecRequest,
-  MiddlewareResponseData,
-} from "src/types/web-handler"
+import { EdgeSpecRequest } from "src/types/web-handler"
 
-const withSessionToken = () => ({
-  auth: { session_token: { user: "lucille" } },
-})
-const withPat = () => {
-  throw new Error("Unauthorized")
-  return { auth: { pat: { user: "lucille" } } }
-}
-const withApiToken = () => {
-  throw new Error("Unauthorized")
-  return { auth: { api_token: { user: "lucille" } } }
+const withSessionToken: Middleware<
+  {},
+  { auth: { session_token: { user: "lucille" } } }
+> = (next, req) => {
+  req.auth = { ...req.auth, session_token: { user: "lucille" } }
+  return next(req)
 }
 
-const withName = () => ({ name: "lucille" })
+const withPat: Middleware<{}, { auth: { pat: { user: "lucille" } } }> = () => {
+  throw new Error("Unauthorized")
+}
+
+const withApiToken: Middleware<
+  {},
+  { auth: { api_token: { user: "lucille" } } }
+> = () => {
+  throw new Error("Unauthorized")
+}
+
+const withName: Middleware<{}, { name: string }> = (next, req) => {
+  req.name = "lucille"
+  return next(req)
+}
 
 test("receives auth middleware", async (t) => {
   const withEdgeSpec = createWithEdgeSpec({
@@ -92,23 +99,23 @@ test("middlewares run in correct order", async (t) => {
     productionServerUrl: "https://example.com",
 
     globalMiddlewares: [
-      () => {
+      (next, req) => {
         t.is(counter++, 0)
-        return {}
+        return next(req)
       },
     ],
 
     authMiddlewareMap: {
-      pat: () => {
+      pat: (next, req) => {
         t.is(counter++, 1)
-        return {}
+        return next(req)
       },
     },
 
     globalMiddlewaresAfterAuth: [
-      () => {
+      (next, req) => {
         t.is(counter++, 2)
-        return {}
+        return next(req)
       },
     ],
   })
@@ -117,9 +124,9 @@ test("middlewares run in correct order", async (t) => {
     auth: ["pat"],
     methods: ["GET"],
     middlewares: [
-      () => {
+      (next, req) => {
         t.is(counter++, 3)
-        return {}
+        return next(req)
       },
     ],
   })(() => {
@@ -173,11 +180,12 @@ test("responseDefaults are passed", async (t) => {
 
     authMiddlewareMap: {},
     globalMiddlewares: [
-      () => ({
-        responseDefaults: new Response(null, {
-          headers: new Headers({ "x-test": "test", "x-test2": "test2" }),
-        }),
-      }),
+      (next, req) => {
+        req.responseDefaults.headers.set("x-test", "test")
+        req.responseDefaults.headers.set("x-test2", "test2")
+
+        return next(req)
+      },
     ],
   })
 
@@ -185,11 +193,11 @@ test("responseDefaults are passed", async (t) => {
     auth: "none",
     methods: ["GET"],
     middlewares: [
-      () => ({
-        responseDefaults: new Response("body text", {
-          headers: new Headers({ "x-test": "test2" }),
-        }),
-      }),
+      (next, req) => {
+        req.responseDefaults.headers.set("x-test", "test2")
+
+        return next(req)
+      },
     ],
   })(() => {
     return new Response()
@@ -207,11 +215,11 @@ test("responseDefaults are passed (responseDefaults as ResponseInit)", async (t)
 
     authMiddlewareMap: {},
     globalMiddlewares: [
-      () => ({
-        responseDefaults: {
-          headers: { "x-test": "test", "x-test2": "test2" },
-        },
-      }),
+      (next, req) => {
+        req.responseDefaults.headers.set("x-test", "test")
+
+        return next(req)
+      },
     ],
   })
 
@@ -219,11 +227,11 @@ test("responseDefaults are passed (responseDefaults as ResponseInit)", async (t)
     auth: "none",
     methods: ["GET"],
     middlewares: [
-      () => ({
-        responseDefaults: {
-          headers: { "x-test": "test2" },
-        },
-      }),
+      (next, req) => {
+        req.responseDefaults.headers.set("x-test", "test2")
+
+        return next(req)
+      },
     ],
   })(() => {
     return new Response("body text")
@@ -241,12 +249,12 @@ test("responseDefaults are passed (responseDefaults as EdgeSpecResponse)", async
 
     authMiddlewareMap: {},
     globalMiddlewares: [
-      () => ({
-        responseDefaults: new MiddlewareResponseData().headers({
-          "x-test": "test",
-          "x-test2": "test2",
-        }),
-      }),
+      (next, req) => {
+        req.responseDefaults.headers.set("x-test", "test")
+        req.responseDefaults.headers.set("x-test2", "test2")
+
+        return next(req)
+      },
     ],
   })
 
@@ -254,11 +262,11 @@ test("responseDefaults are passed (responseDefaults as EdgeSpecResponse)", async
     auth: "none",
     methods: ["GET"],
     middlewares: [
-      () => ({
-        responseDefaults: {
-          headers: { "x-test": "test2" },
-        },
-      }),
+      (next, req) => {
+        req.responseDefaults.headers.set("x-test", "test2")
+
+        return next(req)
+      },
     ],
   })(() => {
     return new Response("body text")

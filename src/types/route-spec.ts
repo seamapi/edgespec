@@ -14,10 +14,11 @@ import type {
   EdgeSpecJsonResponse,
   EdgeSpecRouteFn,
   EdgeSpecUrlEncodedResponse,
+  HTTPMethods,
 } from "./web-handler"
 
 export type RouteSpec<AuthMiddlewares extends string> = {
-  methods: readonly ("GET" | "POST" | "PUT" | "PATCH" | "DELETE")[]
+  methods: readonly HTTPMethods[]
 
   jsonBody?: z.ZodTypeAny
   formData?: z.ZodObject<any>
