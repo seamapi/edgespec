@@ -171,7 +171,7 @@ export class EdgeSpecMultiPartFormDataResponse<
 }
 
 export type EdgeSpecRouteFn<
-  RequestOptions = {},
+  RequestOptions = EdgeSpecInitializationOptions,
   ResponseType extends SerializableToResponse | Response = Response,
 > = (
   req: EdgeSpecRequest<RequestOptions>
@@ -184,7 +184,7 @@ export type EdgeSpecFetchEvent = FetchEvent & {
 export function createEdgeSpecRequest(
   request: Request,
   options: EdgeSpecRequestOptions & EdgeSpecInitializationOptions
-): EdgeSpecRequest {
+): EdgeSpecRequest<EdgeSpecInitializationOptions> {
   return Object.assign(request, options)
 }
 
