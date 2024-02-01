@@ -208,21 +208,6 @@ export function createEdgeSpecRequest(
   return Object.assign(request, options)
 }
 
-export function setEdgeSpecRequestOptions<RequestOptions>(
-  request: EdgeSpecRequest,
-  options: RequestOptions & EdgeSpecMiddlewareOptions
-): EdgeSpecRequest<RequestOptions> {
-  const r = Object.assign(request, {
-    ...options,
-    responseDefaults: mergeResponses(
-      request.responseDefaults,
-      options.responseDefaults
-    ),
-  })
-
-  return r
-}
-
 export function mergeHeaders(
   h1: HeadersDescriptor | undefined | null,
   h2: HeadersDescriptor | undefined | null

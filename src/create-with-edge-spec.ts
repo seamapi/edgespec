@@ -67,13 +67,12 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
  * This also handles validation of the response and serializing it from an
  * EdgeSpecResponse to a wintercg-compatible Response
  */
-const serializeResponse =
-  <T, R extends Response | SerializableToResponse>(
-    globalSpec: GlobalSpec,
-    routeSpec: RouteSpec<any>,
-    validate?: boolean
-  ): Middleware =>
-  async (next, req) => {
+function serializeResponse(
+  globalSpec: GlobalSpec,
+  routeSpec: RouteSpec<any>,
+  validate?: boolean
+): Middleware {
+  return async (next, req) => {
     const rawResponse = await next(req)
 
     const response = serializeToResponse(
@@ -84,6 +83,7 @@ const serializeResponse =
 
     return mergeResponses(req.responseDefaults, response)
   }
+}
 
 async function wrapMiddlewares(
   middlewares: MiddlewareChain,
