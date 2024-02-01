@@ -1,7 +1,8 @@
-import { placeholderWithRouteSpec } from "../placeholder-route-spec"
+import { withEdgeSpec } from "../with-edge-spec"
 import { jsonResponse } from "./foo"
 
-export default placeholderWithRouteSpec({
+export default withEdgeSpec({
+  auth: "none",
   methods: ["PUT"],
   jsonResponse,
 })((req) => {

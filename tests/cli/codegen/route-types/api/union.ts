@@ -1,7 +1,8 @@
 import { z } from "zod"
-import { placeholderWithRouteSpec } from "../placeholder-route-spec"
+import { withEdgeSpec } from "../with-edge-spec.js"
 
-export default placeholderWithRouteSpec({
+export default withEdgeSpec({
+  auth: "none",
   methods: ["GET", "POST"],
   jsonBody: z.object({
     foo_id: z.string().uuid(),
