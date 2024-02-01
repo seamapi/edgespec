@@ -195,7 +195,7 @@ test("responseDefaults are passed", async (t) => {
     return new Response()
   })({} as EdgeSpecRequest)
 
-  t.is(await streamToString(response.body), "body text")
+  t.is(await response.text(), "body text")
   t.is(response.headers.get("x-test"), "test2")
   t.is(response.headers.get("x-test2"), "test2")
 })
@@ -229,7 +229,7 @@ test("responseDefaults are passed (responseDefaults as ResponseInit)", async (t)
     return new Response("body text")
   })({} as EdgeSpecRequest)
 
-  t.is(await streamToString(response.body), "body text")
+  t.is(await response.text(), "body text")
   t.is(response.headers.get("x-test"), "test2")
   t.is(response.headers.get("x-test2"), "test2")
 })
@@ -264,30 +264,7 @@ test("responseDefaults are passed (responseDefaults as EdgeSpecResponse)", async
     return new Response("body text")
   })({} as EdgeSpecRequest)
 
-  t.is(await streamToString(response.body), "body text")
+  t.is(await response.text(), "body text")
   t.is(response.headers.get("x-test"), "test2")
   t.is(response.headers.get("x-test2"), "test2")
 })
-
-async function streamToString(
-  stream: ReadableStream<Uint8Array> | undefined | null
-) {
-  if (!stream) return undefined
-
-  const reader = stream.getReader()
-  const textDecoder = new TextDecoder()
-  let result = ""
-
-  async function read() {
-    const { done, value } = await reader.read()
-
-    if (done) {
-      return result
-    }
-
-    result += textDecoder.decode(value, { stream: true })
-    return read()
-  }
-
-  return read()
-}

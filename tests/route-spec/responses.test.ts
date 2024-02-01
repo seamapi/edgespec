@@ -26,7 +26,7 @@ test("serializes json basic", async (t) => {
 
   t.is(response.status, 200)
   t.is(response.headers.get("content-type"), "application/json")
-  t.is(await streamToString(response.body), JSON.stringify({ hello: "world" }))
+  t.is(await response.text(), JSON.stringify({ hello: "world" }))
 })
 
 test("serializes json with status", async (t) => {
@@ -52,7 +52,7 @@ test("serializes json with status", async (t) => {
 
   t.is(response.status, 201)
   t.is(response.headers.get("content-type"), "application/json")
-  t.is(await streamToString(response.body), JSON.stringify({ hello: "world" }))
+  t.is(await response.text(), JSON.stringify({ hello: "world" }))
 })
 
 test("validates json response", async (t) => {
@@ -108,7 +108,7 @@ test("doesnt validates json response if response validation disabled", async (t)
 
   t.is(response.status, 200)
   t.is(response.headers.get("content-type"), "application/json")
-  t.is(await streamToString(response.body), JSON.stringify({ hello: "world" }))
+  t.is(await response.text(), JSON.stringify({ hello: "world" }))
 })
 
 test("serializes form data", async (t) => {
@@ -135,7 +135,7 @@ test("serializes form data", async (t) => {
   t.is(response.status, 200)
   t.is(response.headers.get("content-type"), "multipart/form-data")
 
-  const formData = (await streamToString(response.body)) ?? ""
+  const formData = (await response.text()) ?? ""
 
   t.regex(formData, /name="hello"/)
   t.regex(formData, /world/)
@@ -168,7 +168,7 @@ test("serializes www url-encoded form data", async (t) => {
     "application/x-www-form-urlencoded"
   )
 
-  t.is(await streamToString(response.body), "hello=world")
+  t.is(await response.text(), "hello=world")
 })
 
 test("can set headers, status", async (t) => {
@@ -202,7 +202,7 @@ test("can set headers, status", async (t) => {
   t.is(response.headers.get("content-type"), "application/json")
   t.is(response.headers.get("x-hello"), "world2")
   t.is(response.headers.get("x-hello-2"), "world2")
-  t.is(await streamToString(response.body), JSON.stringify({ hello: "world" }))
+  t.is(await response.text(), JSON.stringify({ hello: "world" }))
 })
 
 test("can return custom response types", async (t) => {
@@ -226,7 +226,7 @@ test("can return custom response types", async (t) => {
 
   t.is(response.status, 200)
   t.is(response.headers.get("content-type"), "text/html")
-  t.is(await streamToString(response.body), "<h1>Hello, world</h1>")
+  t.is(await response.text(), "<h1>Hello, world</h1>")
 })
 
 test("can have multiple custom response types", async (t) => {
@@ -251,28 +251,5 @@ test("can have multiple custom response types", async (t) => {
 
   t.is(response.status, 200)
   t.is(response.headers.get("content-type"), "custom/response")
-  t.is(await streamToString(response.body), "4")
+  t.is(await response.text(), "4")
 })
-
-async function streamToString(
-  stream: ReadableStream<Uint8Array> | undefined | null
-) {
-  if (!stream) return undefined
-
-  const reader = stream.getReader()
-  const textDecoder = new TextDecoder()
-  let result = ""
-
-  async function read() {
-    const { done, value } = await reader.read()
-
-    if (done) {
-      return result
-    }
-
-    result += textDecoder.decode(value, { stream: true })
-    return read()
-  }
-
-  return read()
-}
