@@ -6,7 +6,7 @@ export const withUnhandledExceptionHandling: Middleware = async (next, req) => {
   } catch (e: any) {
     if ("_isHttpException" in e) {
       console.warn(
-        "caught unhandled http exception; consider adding withDefaultExceptionHandling middleware to your global or route spec"
+        "caught unhandled HTTP exception thrown by EdgeSpec provided middlware; consider adding withDefaultExceptionHandling middleware to your global or route spec"
       )
     } else {
       console.warn(
