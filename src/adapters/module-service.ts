@@ -66,7 +66,7 @@ function getPathnameOverride(
   let paths: string[] | undefined
 
   if (routeParam) {
-    const candidate = request.pathParams?.[routeParam]
+    const candidate = request.routeParams?.[routeParam]
 
     if (candidate && Array.isArray(candidate)) {
       paths = candidate
@@ -74,7 +74,7 @@ function getPathnameOverride(
   }
 
   if (!paths && allowMatchingOnAnyCatchAllRouteParam) {
-    for (const routes of Object.values(request.pathParams ?? {})) {
+    for (const routes of Object.values(request.routeParams ?? {})) {
       if (Array.isArray(routes)) {
         paths = routes
         break
