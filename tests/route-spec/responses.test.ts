@@ -130,7 +130,7 @@ test("serializes form data", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["GET"],
-      formDataResponse: z.object({
+      multipartFormDataResponse: z.object({
         hello: z.string(),
       }),
     },
@@ -161,7 +161,7 @@ test("can set headers, status", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["GET"],
-      formDataResponse: z.object({
+      multipartFormDataResponse: z.object({
         hello: z.string(),
       }),
     },
