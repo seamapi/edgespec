@@ -25,9 +25,3 @@ export class MethodNotAllowedError extends EdgeSpecMiddlewareError {
     super(`only ${allowedMethods.join(",")} accepted`, 405)
   }
 }
-
-// export class ValidationError extends EdgeSpecMiddlewareError {
-//   constructor(message: string) {
-//     super(message, 400)
-//   }
-// }
