@@ -99,13 +99,16 @@ type GetMiddlewareRequestOptions<
     "intersection"
   >
 
+export type EdgeSpecRouteFnFromSpecs<
+  GS extends GlobalSpec,
+  RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
+> = EdgeSpecRouteFn<
+  GetMiddlewareRequestOptions<GS, RS>,
+  GetRouteSpecResponseType<GS, RS>
+>
+
 export type CreateWithRouteSpecFn<GS extends GlobalSpec> = <
   const RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
 >(
   routeSpec: RS
-) => (
-  route: EdgeSpecRouteFn<
-    GetMiddlewareRequestOptions<GS, RS>,
-    GetRouteSpecResponseType<GS, RS>
-  >
-) => EdgeSpecRouteFn
+) => (route: EdgeSpecRouteFnFromSpecs<GS, RS>) => EdgeSpecRouteFn

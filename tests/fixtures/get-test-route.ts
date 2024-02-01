@@ -11,15 +11,18 @@ import {
   GetAuthMiddlewaresFromGlobalSpec,
   GlobalSpec,
 } from "src/types/global-spec"
-import { RouteSpec } from "src/types/route-spec"
+import { EdgeSpecRouteFnFromSpecs, RouteSpec } from "src/types/route-spec"
 
-export const getTestRoute = async <const GS extends GlobalSpec>(
+export const getTestRoute = async <
+  const GS extends GlobalSpec,
+  const RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
+>(
   t: ExecutionContext,
   opts: {
     globalSpec: GS
-    routeSpec: RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>
+    routeSpec: RS
     routePath: string
-    routeFn: EdgeSpecRouteFn
+    routeFn: EdgeSpecRouteFnFromSpecs<GS, RS>
     edgeSpecOptions?: Partial<EdgeSpecOptions>
   }
 ): Promise<{ serverUrl: string; axios: AxiosInstance }> => {
