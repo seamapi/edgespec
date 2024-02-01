@@ -1,24 +1,19 @@
 # Middleware
 
-EdgeSpec middleware likely works differently than what you might expect if you've used Express/Fastify/Koa. Middleware in EdgeSpec allows you to accomplish the same goals:
+Middleware in EdgeSpec follows a similar pattern to other libraries like Express/Fastify/Koa. Middleware receives two parameters: the `next` function and the incoming `req` object. It is expected to always call `next`.
 
-- add context to the request object
-- modify the base HTTP response
-- return a response early before it hits the route handler
-
-However, it goes about this in a slightly different way. Middleware does not accept a `next` parameter to call the next middleware in the stack. Instead, middleware is called with only the request object and is expected to return a new object with additional context or options set.
+Here's a few example use cases:
 
 ### Adding context to the request object
 
-Return an object with new properties from your middleware. For example:
+Mutate the passed `req` object. For example:
 
 ```typescript
 import type { Middleware } from "edgespec"
 
-export const exampleMiddleware: Middleware = (req) => {
-  return {
-    foo: "bar",
-  }
+export const exampleMiddleware: Middleware = (next, req) => {
+  req.foo = "bar"
+  return next(req)
 }
 
 // Later, in a route...
@@ -32,7 +27,7 @@ withEdgeSpec({
 
 ### Modifying the base HTTP response
 
-Return an object with the `responseDefaults` property set. This can be a full `Response` instance or the options normally passed to the second argument of `new Response()`. For example:
+Set the property `responseDefaults` on the `req` object. This can be a full `Response` instance or the options normally passed to the second argument of `new Response()`. For example:
 
 ```typescript
 import type { Middleware } from "edgespec"
@@ -43,10 +38,9 @@ const baseResponse = new Response(null, {
   },
 })
 
-export const exampleMiddleware: Middleware = (req) => {
-  return {
-    responseDefaults: baseResponse,
-  }
+export const exampleMiddleware: Middleware = (next, req) => {
+  req.responseDefaults = baseResponse
+  return next(req)
 }
 ```
 
@@ -59,12 +53,15 @@ The `Middleware` type accepts two type parameters: the first is the additional c
 ```typescript
 import type { Middleware } from "edgespec"
 
-export const databaseMiddleware: Middleware = async (req) => {
-  const db = await connectToDatabase()
-
-  return {
-    db,
+export const databaseMiddleware: Middleware<
+  {},
+  {
+    db: DatabaseClient
   }
+> = async (next, req) => {
+  const db = await connectToDatabase()
+  req.db = db
+  return next(req)
 }
 
 export const bearerAuthMiddleware: Middleware<
@@ -76,7 +73,7 @@ export const bearerAuthMiddleware: Middleware<
   {
     is_authenticated: boolean
   }
-> = (req) => {
+> = (next, req) => {
   const authToken = req.headers.get("authorization")?.split("Bearer ")?.[1]
   if (!authToken) {
     // EdgeSpec will attach returned properties to the Request object
@@ -89,9 +86,9 @@ export const bearerAuthMiddleware: Middleware<
     authToken,
   ])
 
-  return {
-    is_authenticated: Boolean(user),
-  }
+  req.is_authenticated = Boolean(user)
+
+  return next(req)
 }
 ```
 
