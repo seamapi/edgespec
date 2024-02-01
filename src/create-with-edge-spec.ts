@@ -13,9 +13,9 @@ import {
   mergeResponses,
 } from "./types/web-handler.js"
 import { withMethods } from "./middleware/with-methods.js"
-import { InternalServerErrorException } from "./middleware/http-exceptions.js"
 import { withInputValidation } from "./middleware/with-input-validation.js"
 import { withUnhandledExceptionHandling } from "./middleware/with-unhandled-exception-handling.js"
+import { ResponseValidationError } from "./middleware/http-exceptions.js"
 
 export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
@@ -106,11 +106,10 @@ function serializeResponse(
 
       return mergeResponses(req.responseDefaults, response)
     } catch (err: any) {
-      throw new InternalServerErrorException({
-        type: "invalid_response",
-        message: "the response does not match with jsonResponse",
-        zodError: err,
-      })
+      throw new ResponseValidationError(
+        "the response does not match with jsonResponse",
+        err
+      )
     }
   }
 }

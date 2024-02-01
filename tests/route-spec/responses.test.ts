@@ -92,7 +92,7 @@ test("validates json response", async (t) => {
   const response = await axios.get("/hello", { validateStatus: () => true })
 
   t.is(response.status, 500)
-  t.like(response.data, { error_type: "InternalServerErrorException" })
+  t.like(response.data, { error_type: "ResponseValidationError" })
 })
 
 test("doesnt validates json response if response validation disabled", async (t) => {

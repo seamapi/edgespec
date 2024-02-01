@@ -3,7 +3,7 @@ import { GlobalSpec } from "src/types/global-spec"
 import { EdgeSpecResponse } from "src/types/web-handler"
 import { getTestRoute } from "tests/fixtures/get-test-route"
 import { z } from "zod"
-import formurlencoded, { type FormEncodedOptions } from "form-urlencoded"
+import formurlencoded from "form-urlencoded"
 
 const defaultSpecs = {
   globalSpec: {
@@ -11,15 +11,18 @@ const defaultSpecs = {
     productionServerUrl: "https://example.com",
 
     authMiddlewareMap: {},
-    globalMiddlewares: [],
-
-    exceptionHandlingMiddleware: async (next, req) => {
-      try {
-        return await next(req)
-      } catch (e: any) {
-        return Response.json(e, { status: 500 })
-      }
-    },
+    globalMiddlewares: [
+      async (next, req) => {
+        try {
+          return await next(req)
+        } catch (e: any) {
+          return Response.json(
+            { error_type: e.constructor.name },
+            { status: 500 }
+          )
+        }
+      },
+    ],
   } satisfies GlobalSpec,
 } as const
 
@@ -74,7 +77,7 @@ test("validates json response failure", async (t) => {
   )
 
   t.is(status, 500)
-  t.is(data.metadata.type, "invalid_response")
+  t.is(data.error_type, "ResponseValidationError")
 })
 
 test("validates form data response success", async (t) => {
@@ -140,7 +143,7 @@ test("validates form data response failure", async (t) => {
   })
 
   t.is(status, 500)
-  t.is(data.metadata.type, "invalid_input")
+  t.is(data.error_type, "InputValidationError")
 })
 
 test("validates url encoded response success", async (t) => {
@@ -220,7 +223,7 @@ test("validates url encoded response failure", async (t) => {
   )
 
   t.is(status, 500)
-  t.is(data.metadata.type, "invalid_input")
+  t.is(data.error_type, "InputValidationError")
 })
 
 test("commonParams supports json and query params", async (t) => {
@@ -337,5 +340,5 @@ test("validate query params failure", async (t) => {
   })
 
   t.is(status, 500)
-  t.is(data.metadata.type, "invalid_input")
+  t.is(data.error_type, "InputValidationError")
 })

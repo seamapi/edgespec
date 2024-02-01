@@ -1,8 +1,14 @@
 import { z, ZodFirstPartyTypeKind } from "zod"
 
-import { BadRequestException } from "src/middleware/http-exceptions"
 import type { QueryArrayFormats } from "src/types/global-spec"
 import { Middleware } from "src"
+import {
+  BadRequestError,
+  InputParsingError,
+  InputValidationError,
+  InvalidContentTypeError,
+  InvalidQueryParamsError,
+} from "./http-exceptions"
 
 const getZodObjectSchemaFromZodEffectSchema = (
   isZodEffect: boolean,
@@ -147,10 +153,9 @@ const validateQueryParams = (
           key === `${schemaKey}[]` &&
           !supportedArrayFormats.includes("brackets")
         ) {
-          throw new BadRequestException({
-            type: "invalid_query_params",
-            message: `Bracket syntax not supported for query param "${schemaKey}"`,
-          })
+          throw new InvalidQueryParamsError(
+            `Bracket syntax not supported for query param "${schemaKey}"`
+          )
         }
       }
     }
@@ -160,10 +165,9 @@ const validateQueryParams = (
     if (key_schema) {
       if (isZodSchemaArray(key_schema)) {
         if (seenKeys.has(key) && !supportedArrayFormats.includes("repeat")) {
-          throw new BadRequestException({
-            type: "invalid_query_params",
-            message: `Repeated parameters not supported for duplicate query param "${key}"`,
-          })
+          throw new InvalidQueryParamsError(
+            `Repeated parameters not supported for duplicate query param "${key}"`
+          )
         }
       }
     }
@@ -238,10 +242,9 @@ export const withInputValidation =
       (input.jsonBody || input.commonParams) &&
       !req.headers.get("content-type")?.includes("application/json")
     ) {
-      throw new BadRequestException({
-        type: "invalid_content_type",
-        message: `${req.method} requests must have Content-Type header with "application/json"`,
-      })
+      throw new InvalidContentTypeError(
+        `${req.method} requests must have Content-Type header with "application/json"`
+      )
     }
 
     if (
@@ -251,10 +254,9 @@ export const withInputValidation =
         .get("content-type")
         ?.includes("application/x-www-form-urlencoded")
     ) {
-      throw new BadRequestException({
-        type: "invalid_content_type",
-        message: `Must have Content-Type header with "application/x-www-form-urlencoded"`,
-      })
+      throw new InvalidContentTypeError(
+        `Must have Content-Type header with "application/x-www-form-urlencoded"`
+      )
     }
 
     if (
@@ -262,10 +264,9 @@ export const withInputValidation =
       (req.method === "POST" || req.method === "PATCH") &&
       !req.headers.get("content-type")?.includes("multipart/form-data")
     ) {
-      throw new BadRequestException({
-        type: "invalid_content_type",
-        message: `${req.method} requests must have Content-Type header with "multipart/form-data"`,
-      })
+      throw new InvalidContentTypeError(
+        `${req.method} requests must have Content-Type header with "multipart/form-data"`
+      )
     }
 
     // TODO eventually we should support multipart/form-data
@@ -280,10 +281,7 @@ export const withInputValidation =
       try {
         jsonBody = await req.json()
       } catch (e: any) {
-        throw new BadRequestException({
-          type: "invalid_input",
-          message: "Error while parsing JSON body",
-        })
+        throw new InputParsingError("Error while parsing JSON body")
       }
     }
 
@@ -294,10 +292,7 @@ export const withInputValidation =
         formDataBody = await req.formData()
         formDataBody = Object.fromEntries(formDataBody.entries())
       } catch (e: any) {
-        throw new BadRequestException({
-          type: "invalid_input",
-          message: "Error while parsing form data",
-        })
+        throw new InputParsingError("Error while parsing form data")
       }
     }
 
@@ -308,10 +303,7 @@ export const withInputValidation =
         const params = new URLSearchParams(await req.text())
         urlEncodedFormData = Object.fromEntries(params.entries())
       } catch (e: any) {
-        throw new BadRequestException({
-          type: "invalid_input",
-          message: "Error while parsing url encoded form data",
-        })
+        throw new InputParsingError("Error while parsing url encoded form data")
       }
     }
 
@@ -363,7 +355,7 @@ export const withInputValidation =
         )
       }
     } catch (error: any) {
-      if (error instanceof BadRequestException) {
+      if (error instanceof BadRequestError) {
         throw error
       }
 
@@ -382,17 +374,10 @@ export const withInputValidation =
             message_components.join(", ")
         }
 
-        throw new BadRequestException({
-          type: "invalid_input",
-          message,
-          validation_errors: error.format(),
-        })
+        throw new InputValidationError(message, error.format())
       }
 
-      throw new BadRequestException({
-        type: "invalid_input",
-        message: "Error while parsing input",
-      })
+      throw new InputParsingError("Error while parsing input")
     }
 
     return next(req)
