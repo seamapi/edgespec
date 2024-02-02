@@ -1,5 +1,5 @@
 import { Option } from "clipanion"
-import { Project, Type, ts } from "ts-morph"
+import { Project, Type, ts, Symbol } from "ts-morph"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
@@ -69,34 +69,19 @@ export class CodeGenRouteTypes extends BaseCommand {
         .getDescendantsOfKind(ts.SyntaxKind.StringLiteral)
         .map((d) => d.getLiteralText())
 
+      const jsonBodySymbol = parameterType.getProperty("jsonBody")
+
       const jsonResponseSymbol = parameterType.getProperty("jsonResponse")
-      let jsonResponseZodOutputType: Type | undefined = undefined
-      if (jsonResponseSymbol) {
-        const jsonResponseType = project
-          .getTypeChecker()
-          .getTypeOfSymbolAtLocation(
-            jsonResponseSymbol,
-            jsonResponseSymbol.getValueDeclarationOrThrow()
-          )
-
-        const jsonResponseZodOutputSymbol =
-          jsonResponseType.getProperty("_output")
-        if (!jsonResponseZodOutputSymbol) {
-          throw new Error("jsonResponse must be a zod schema")
-        }
-
-        jsonResponseZodOutputType = project
-          .getTypeChecker()
-          .getTypeOfSymbolAtLocation(
-            jsonResponseZodOutputSymbol,
-            jsonResponseZodOutputSymbol.getValueDeclarationOrThrow()
-          )
-      }
 
       return {
         route,
         httpMethods: httpMethodLiterals,
-        jsonResponseZodOutputType,
+        jsonResponseZodOutputType: jsonResponseSymbol
+          ? getZodTypeOfSymbol(project, jsonResponseSymbol)
+          : undefined,
+        jsonBodyZodInputType: jsonBodySymbol
+          ? getZodTypeOfSymbol(project, jsonBodySymbol)
+          : undefined,
       }
     })
 
@@ -112,8 +97,14 @@ export class CodeGenRouteTypes extends BaseCommand {
 
       export type Routes = {
 ${filteredNodes
-  .map(({ route, httpMethods, jsonResponseZodOutputType }) => {
-    return `  "${route}": {
+  .map(
+    ({
+      route,
+      httpMethods,
+      jsonResponseZodOutputType,
+      jsonBodyZodInputType,
+    }) => {
+      return `  "${route}": {
     methods: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
     ${
       jsonResponseZodOutputType
@@ -124,8 +115,16 @@ ${filteredNodes
             )}`
         : ""
     }
+    ${
+      jsonBodyZodInputType
+        ? `jsonBody: ${project
+            .getTypeChecker()
+            .compilerObject.typeToString(jsonBodyZodInputType.compilerType)}`
+        : ""
+    }
   }`
-  })
+    }
+  )
   .join("\n")}`
     )
 
@@ -135,4 +134,22 @@ ${filteredNodes
       result.getFiles().find((f) => f.filePath.includes("/manifest.d.ts"))!.text
     )
   }
+}
+
+function getZodTypeOfSymbol(project: Project, symbol: Symbol) {
+  const outerType = project
+    .getTypeChecker()
+    .getTypeOfSymbolAtLocation(symbol, symbol.getValueDeclarationOrThrow())
+
+  const innerType = outerType.getProperty("_output")
+  if (!innerType) {
+    throw new Error(`${symbol.getName()} must be a zod schema`)
+  }
+
+  return project
+    .getTypeChecker()
+    .getTypeOfSymbolAtLocation(
+      innerType,
+      innerType.getValueDeclarationOrThrow()
+    )
 }
