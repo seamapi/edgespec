@@ -1,5 +1,5 @@
 import { Option } from "clipanion"
-import { Project, Type, ts } from "ts-morph"
+import { Project, Type, ts, Symbol } from "ts-morph"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
@@ -69,34 +69,29 @@ export class CodeGenRouteTypes extends BaseCommand {
         .getDescendantsOfKind(ts.SyntaxKind.StringLiteral)
         .map((d) => d.getLiteralText())
 
-      const jsonResponseSymbol = parameterType.getProperty("jsonResponse")
-      let jsonResponseZodOutputType: Type | undefined = undefined
-      if (jsonResponseSymbol) {
-        const jsonResponseType = project
-          .getTypeChecker()
-          .getTypeOfSymbolAtLocation(
-            jsonResponseSymbol,
-            jsonResponseSymbol.getValueDeclarationOrThrow()
-          )
-
-        const jsonResponseZodOutputSymbol =
-          jsonResponseType.getProperty("_output")
-        if (!jsonResponseZodOutputSymbol) {
-          throw new Error("jsonResponse must be a zod schema")
-        }
-
-        jsonResponseZodOutputType = project
-          .getTypeChecker()
-          .getTypeOfSymbolAtLocation(
-            jsonResponseZodOutputSymbol,
-            jsonResponseZodOutputSymbol.getValueDeclarationOrThrow()
-          )
-      }
-
       return {
         route,
         httpMethods: httpMethodLiterals,
-        jsonResponseZodOutputType,
+        jsonResponseZodOutputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("jsonResponse")
+        ),
+        jsonBodyZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("jsonBody")
+        ),
+        commonParamsZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("commonParams")
+        ),
+        queryParamsZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("queryParams")
+        ),
+        urlEncodedFormDataZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("urlEncodedFormData")
+        ),
       }
     })
 
@@ -105,6 +100,12 @@ export class CodeGenRouteTypes extends BaseCommand {
       undefined
     >[]
 
+    const renderType = <TType extends ts.Type>(type: Type<TType>) => {
+      return project
+        .getTypeChecker()
+        .compilerObject.typeToString(type.compilerType)
+    }
+
     project.createSourceFile(
       "manifest.ts",
       `
@@ -112,20 +113,46 @@ export class CodeGenRouteTypes extends BaseCommand {
 
       export type Routes = {
 ${filteredNodes
-  .map(({ route, httpMethods, jsonResponseZodOutputType }) => {
-    return `  "${route}": {
+  .map(
+    ({
+      route,
+      httpMethods,
+      jsonResponseZodOutputType,
+      jsonBodyZodInputType,
+      commonParamsZodInputType,
+      queryParamsZodInputType,
+      urlEncodedFormDataZodInputType,
+    }) => {
+      return `  "${route}": {
     methods: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
     ${
       jsonResponseZodOutputType
-        ? `jsonResponse: ${project
-            .getTypeChecker()
-            .compilerObject.typeToString(
-              jsonResponseZodOutputType.compilerType
-            )}`
+        ? `jsonResponse: ${renderType(jsonResponseZodOutputType)}`
+        : ""
+    }
+    ${
+      jsonBodyZodInputType
+        ? `jsonBody: ${renderType(jsonBodyZodInputType)}`
+        : ""
+    }
+    ${
+      commonParamsZodInputType
+        ? `commonParams: ${renderType(commonParamsZodInputType)}`
+        : ""
+    }
+    ${
+      queryParamsZodInputType
+        ? `queryParams: ${renderType(queryParamsZodInputType)}`
+        : ""
+    }
+    ${
+      urlEncodedFormDataZodInputType
+        ? `urlEncodedFormData: ${renderType(urlEncodedFormDataZodInputType)}`
         : ""
     }
   }`
-  })
+    }
+  )
   .join("\n")}`
     )
 
@@ -135,4 +162,24 @@ ${filteredNodes
       result.getFiles().find((f) => f.filePath.includes("/manifest.d.ts"))!.text
     )
   }
+}
+
+function getZodTypeOfSymbol(project: Project, symbol: Symbol | undefined) {
+  if (!symbol) return undefined
+
+  const outerType = project
+    .getTypeChecker()
+    .getTypeOfSymbolAtLocation(symbol, symbol.getValueDeclarationOrThrow())
+
+  const innerType = outerType.getProperty("_output")
+  if (!innerType) {
+    throw new Error(`${symbol.getName()} must be a zod schema`)
+  }
+
+  return project
+    .getTypeChecker()
+    .getTypeOfSymbolAtLocation(
+      innerType,
+      innerType.getValueDeclarationOrThrow()
+    )
 }

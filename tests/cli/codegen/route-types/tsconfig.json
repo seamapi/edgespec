@@ -1,5 +1,5 @@
 {
-  "files": ["api/foo.ts", "placeholder-route-spec.ts"],
+  "files": ["api/foo.ts", "with-edge-spec.ts"],
   "compilerOptions": {
     "strict": true
   }

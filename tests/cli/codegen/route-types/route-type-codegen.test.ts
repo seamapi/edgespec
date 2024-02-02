@@ -51,6 +51,9 @@ test("CLI codegen route-types command produces the expected route types", async 
             name: string
           }
         }
+        jsonBody: {
+          foo_id: string
+        }
       }
       // A route that imports part of its spec from /foo
       "/importer": {
@@ -68,6 +71,9 @@ test("CLI codegen route-types command produces the expected route types", async 
         jsonResponse: {
           foo_id: string
         } | boolean[]
+        jsonBody: {
+          foo_id: string
+        }
       }
     }
 
