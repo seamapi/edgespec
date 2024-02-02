@@ -69,19 +69,17 @@ export class CodeGenRouteTypes extends BaseCommand {
         .getDescendantsOfKind(ts.SyntaxKind.StringLiteral)
         .map((d) => d.getLiteralText())
 
-      const jsonBodySymbol = parameterType.getProperty("jsonBody")
-
-      const jsonResponseSymbol = parameterType.getProperty("jsonResponse")
-
       return {
         route,
         httpMethods: httpMethodLiterals,
-        jsonResponseZodOutputType: jsonResponseSymbol
-          ? getZodTypeOfSymbol(project, jsonResponseSymbol)
-          : undefined,
-        jsonBodyZodInputType: jsonBodySymbol
-          ? getZodTypeOfSymbol(project, jsonBodySymbol)
-          : undefined,
+        jsonResponseZodOutputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("jsonResponse")
+        ),
+        jsonBodyZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("jsonBody")
+        ),
       }
     })
 
@@ -89,6 +87,12 @@ export class CodeGenRouteTypes extends BaseCommand {
       (typeof nodes)[number],
       undefined
     >[]
+
+    const renderType = <TType extends ts.Type>(type: Type<TType>) => {
+      return project
+        .getTypeChecker()
+        .compilerObject.typeToString(type.compilerType)
+    }
 
     project.createSourceFile(
       "manifest.ts",
@@ -108,18 +112,12 @@ ${filteredNodes
     methods: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
     ${
       jsonResponseZodOutputType
-        ? `jsonResponse: ${project
-            .getTypeChecker()
-            .compilerObject.typeToString(
-              jsonResponseZodOutputType.compilerType
-            )}`
+        ? `jsonResponse: ${renderType(jsonResponseZodOutputType)}`
         : ""
     }
     ${
       jsonBodyZodInputType
-        ? `jsonBody: ${project
-            .getTypeChecker()
-            .compilerObject.typeToString(jsonBodyZodInputType.compilerType)}`
+        ? `jsonBody: ${renderType(jsonBodyZodInputType)}`
         : ""
     }
   }`
@@ -136,7 +134,9 @@ ${filteredNodes
   }
 }
 
-function getZodTypeOfSymbol(project: Project, symbol: Symbol) {
+function getZodTypeOfSymbol(project: Project, symbol: Symbol | undefined) {
+  if (!symbol) return undefined
+
   const outerType = project
     .getTypeChecker()
     .getTypeOfSymbolAtLocation(symbol, symbol.getValueDeclarationOrThrow())
