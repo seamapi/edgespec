@@ -182,11 +182,13 @@ export interface RequestInput<
   CommonParams extends z.ZodTypeAny,
   FormData extends z.ZodTypeAny,
   UrlEncodedFormData extends z.ZodTypeAny,
+  RouteParams extends z.ZodTypeAny,
 > {
   jsonBody?: JsonBody
   queryParams?: QueryParams
   commonParams?: CommonParams
   formData?: FormData
+  routeParams?: RouteParams
   urlEncodedFormData?: UrlEncodedFormData
   shouldValidateGetRequestBody?: boolean
   supportedArrayFormats: QueryArrayFormats
@@ -209,13 +211,15 @@ export const withInputValidation =
     CommonParams extends z.ZodTypeAny,
     FormData extends z.ZodTypeAny,
     UrlEncodedFormData extends z.ZodTypeAny,
+    RouteParams extends z.ZodTypeAny,
   >(
     input: RequestInput<
       JsonBody,
       QueryParams,
       CommonParams,
       FormData,
-      UrlEncodedFormData
+      UrlEncodedFormData,
+      RouteParams
     >
   ): Middleware<
     {},
@@ -328,6 +332,10 @@ export const withInputValidation =
       if (Boolean(input.urlEncodedFormData) && willValidateRequestBody) {
         req.urlEncodedFormData =
           input.urlEncodedFormData?.parse(urlEncodedFormData)
+      }
+
+      if (Boolean(input.routeParams) && "routeParams" in req) {
+        req.routeParams = input.routeParams?.parse(req.routeParams)
       }
 
       if (input.queryParams) {

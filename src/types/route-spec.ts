@@ -14,6 +14,7 @@ import type {
   EdgeSpecJsonResponse,
   EdgeSpecRouteFn,
   HTTPMethods,
+  EdgeSpecRouteParams,
 } from "./web-handler"
 
 export type RouteSpec<AuthMiddlewares extends string> = {
@@ -24,6 +25,7 @@ export type RouteSpec<AuthMiddlewares extends string> = {
   queryParams?: z.ZodObject<any>
   commonParams?: z.ZodObject<any>
   urlEncodedFormData?: z.ZodObject<any>
+  routeParams?: z.ZodObject<any>
 
   jsonResponse?: z.ZodTypeAny
   multipartFormDataResponse?: z.ZodObject<any>
@@ -107,7 +109,10 @@ type GetMiddlewareRequestOptions<
     : {}) &
   (RS["urlEncodedFormData"] extends infer ZT extends z.ZodObject<any>
     ? { urlEncodedFormData: z.output<ZT> }
-    : {})
+    : {}) &
+  (RS["routeParams"] extends infer ZT extends z.ZodObject<any>
+    ? { routeParams: z.output<ZT> }
+    : { routeParams: EdgeSpecRouteParams })
 
 export type EdgeSpecRouteFnFromSpecs<
   GS extends GlobalSpec,

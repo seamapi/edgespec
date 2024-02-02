@@ -342,3 +342,32 @@ test("validate query params failure", async (t) => {
   t.is(status, 500)
   t.is(data.error_type, "InputValidationError")
 })
+
+test("validate route params", async (t) => {
+  const { axios } = await getTestRoute(t, {
+    ...defaultSpecs,
+    routeSpec: {
+      auth: "none",
+      methods: ["GET"],
+      routeParams: z.object({
+        world: z.coerce.number(),
+      }),
+      jsonResponse: z.object({
+        value: z.number(),
+      }),
+    },
+    routeFn: (req) => {
+      return EdgeSpecResponse.json({
+        value: req.routeParams.world,
+      })
+    },
+    routePath: "/hello/[world]",
+  })
+
+  const { data, status } = await axios.get("/hello/4", {
+    validateStatus: () => true,
+  })
+
+  t.is(status, 200)
+  t.is(data.value, 4)
+})

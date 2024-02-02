@@ -18,13 +18,16 @@ export type EdgeSpecRouteParams = {
 
 export type HeadersDescriptor = Headers | HeadersInit
 
+export interface EdgeSpecInitializationOptions {
+  routeParams: EdgeSpecRouteParams
+}
+
 export interface EdgeSpecMiddlewareOptions {
   responseDefaults: Response
 }
 
 export interface EdgeSpecRequestOptions extends EdgeSpecMiddlewareOptions {
   edgeSpec: EdgeSpecRouteBundle
-  routeParams?: EdgeSpecRouteParams
 }
 
 export type WithEdgeSpecRequestOptions<T> = T & EdgeSpecRequestOptions
@@ -168,7 +171,7 @@ export class EdgeSpecMultiPartFormDataResponse<
 }
 
 export type EdgeSpecRouteFn<
-  RequestOptions = {},
+  RequestOptions = EdgeSpecInitializationOptions,
   ResponseType extends SerializableToResponse | Response = Response,
 > = (
   req: EdgeSpecRequest<RequestOptions>
@@ -180,8 +183,8 @@ export type EdgeSpecFetchEvent = FetchEvent & {
 
 export function createEdgeSpecRequest(
   request: Request,
-  options: EdgeSpecRequestOptions
-): EdgeSpecRequest {
+  options: EdgeSpecRequestOptions & EdgeSpecInitializationOptions
+): EdgeSpecRequest<EdgeSpecInitializationOptions> {
   return Object.assign(request, options)
 }
 

@@ -3,7 +3,11 @@ import {
   type EdgeSpecRouteBundle,
   handleRequestWithEdgeSpec,
 } from "src/types/edge-spec"
-import { EdgeSpecRequest, EdgeSpecRouteFn } from "src/types/web-handler"
+import {
+  EdgeSpecInitializationOptions,
+  EdgeSpecRequest,
+  EdgeSpecRouteFn,
+} from "src/types/web-handler"
 
 export interface ModuleServiceOptions {
   routeParam?: string
@@ -11,9 +15,7 @@ export interface ModuleServiceOptions {
   allowMatchingOnAnyCatchAllRouteParam?: boolean
 }
 
-export type ModuleService = (
-  options?: ModuleServiceOptions
-) => EdgeSpecRouteFn<{}, Response>
+export type ModuleService = (options?: ModuleServiceOptions) => EdgeSpecRouteFn
 
 export const createModuleService: EdgeSpecAdapter<[], ModuleService> = (
   moduleServiceEdgeSpec
@@ -44,7 +46,7 @@ export const createModuleService: EdgeSpecAdapter<[], ModuleService> = (
 }
 
 function getPathnameOverride(
-  request: EdgeSpecRequest,
+  request: EdgeSpecRequest<EdgeSpecInitializationOptions>,
   options: ModuleServiceOptions
 ):
   | {

@@ -1,7 +1,7 @@
 import test from "ava"
 import { createWithEdgeSpec } from "src/create-with-edge-spec"
 import { expectTypeOf } from "expect-type"
-import { EdgeSpecRequest, EdgeSpecResponse } from "src/types/web-handler"
+import { EdgeSpecResponse } from "src/types/web-handler"
 import { z } from "zod"
 import { Middleware } from "src/middleware"
 
@@ -216,5 +216,24 @@ test.skip("custom response map types are enforced", () => {
     // @ts-expect-error
   })(() => {
     return EdgeSpecResponse.custom("not a number", "custom/response")
-  })({} as EdgeSpecRequest)
+  })({} as any)
+})
+
+test.skip("route param types", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {},
+    globalMiddlewares: [],
+  })
+
+  withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    routeParams: z.object({ id: z.coerce.number() }),
+  })((req) => {
+    expectTypeOf(req.routeParams.id).toBeNumber()
+    return new Response()
+  })({} as any)
 })

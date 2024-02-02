@@ -59,6 +59,7 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           formData: routeSpec.multiPartFormData,
           jsonBody: routeSpec.jsonBody,
           queryParams: routeSpec.queryParams,
+          routeParams: routeSpec.routeParams,
           urlEncodedFormData: routeSpec.urlEncodedFormData,
           shouldValidateGetRequestBody: globalSpec.shouldValidateGetRequestBody,
         }),
