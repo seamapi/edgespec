@@ -80,6 +80,18 @@ export class CodeGenRouteTypes extends BaseCommand {
           project,
           parameterType.getProperty("jsonBody")
         ),
+        commonParamsZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("commonParams")
+        ),
+        queryParamsZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("queryParams")
+        ),
+        urlEncodedFormDataZodInputType: getZodTypeOfSymbol(
+          project,
+          parameterType.getProperty("urlEncodedFormData")
+        ),
       }
     })
 
@@ -107,6 +119,9 @@ ${filteredNodes
       httpMethods,
       jsonResponseZodOutputType,
       jsonBodyZodInputType,
+      commonParamsZodInputType,
+      queryParamsZodInputType,
+      urlEncodedFormDataZodInputType,
     }) => {
       return `  "${route}": {
     methods: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
@@ -118,6 +133,21 @@ ${filteredNodes
     ${
       jsonBodyZodInputType
         ? `jsonBody: ${renderType(jsonBodyZodInputType)}`
+        : ""
+    }
+    ${
+      commonParamsZodInputType
+        ? `commonParams: ${renderType(commonParamsZodInputType)}`
+        : ""
+    }
+    ${
+      queryParamsZodInputType
+        ? `queryParams: ${renderType(queryParamsZodInputType)}`
+        : ""
+    }
+    ${
+      urlEncodedFormDataZodInputType
+        ? `urlEncodedFormData: ${renderType(urlEncodedFormDataZodInputType)}`
         : ""
     }
   }`
