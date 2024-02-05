@@ -11,12 +11,21 @@ import { isGitIgnored } from "globby"
  * This does not directly provide a way to retrieve the contents or path of the bundle. You should provide a plugin in the `esbuild` option to do so.
  */
 export const bundleAndWatch = async (options: BundleOptions) => {
-  const ignore = await isGitIgnored({})
+  const ignore = await isGitIgnored({
+    cwd: options.rootDirectory,
+  })
 
   const watcher = new Watcher(options.rootDirectory, {
     recursive: true,
     ignoreInitial: true,
-    ignore,
+    ignore: (filePath) => {
+      // globby breaks when the path being tested is not within the current working directory (cwd/rootDirectory)
+      if (!path.relative(options.rootDirectory, filePath).startsWith("..")) {
+        return ignore(filePath)
+      }
+
+      return true
+    },
   })
 
   const tempDir = await getTempPathInApp(options.rootDirectory)
