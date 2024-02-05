@@ -244,3 +244,29 @@ test("responseDefaults are passed", async (t) => {
   // @ts-expect-error
   t.is(headers.get("x-test2"), "test2")
 })
+
+test("allows omitting auth field in route spec", async (t) => {
+  const { axios } = await getTestRoute(t, {
+    globalSpec: {
+      apiName: "hello-world",
+      productionServerUrl: "https://example.com",
+
+      authMiddlewareMap: {
+        pat: withPat,
+        api_token: withApiToken,
+        session_token: withSessionToken,
+      },
+      globalMiddlewares: [],
+    },
+    routeSpec: {
+      methods: ["GET"],
+    },
+    routeFn: () => {
+      return new Response("lucille")
+    },
+    routePath: "/hello",
+  })
+
+  const { data } = await axios.get("/hello")
+  t.is(data, "lucille")
+})

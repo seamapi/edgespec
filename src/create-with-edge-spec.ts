@@ -26,7 +26,7 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
       routeSpec.onMultipleAuthMiddlewareFailures
 
     const supportedAuthMiddlewares = new Set<string>(
-      routeSpec.auth === "none"
+      routeSpec.auth == null || routeSpec.auth === "none"
         ? []
         : Array.isArray(routeSpec.auth)
           ? routeSpec.auth

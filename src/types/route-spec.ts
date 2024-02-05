@@ -31,7 +31,13 @@ export type RouteSpec<AuthMiddlewares extends string> = {
   multipartFormDataResponse?: z.ZodObject<any>
   customResponseMap?: Record<string, z.ZodTypeAny>
 
-  auth: AuthMiddlewares | readonly AuthMiddlewares[] | "none"
+  auth?:
+    | AuthMiddlewares
+    | readonly AuthMiddlewares[]
+    | "none"
+    | null
+    | undefined
+
   middlewares?: MiddlewareChain
 
   openApiMetadata?: any
@@ -82,7 +88,12 @@ type GetMiddlewareRequestOptions<
   (RS["auth"] extends "none"
     ? {}
     : AccumulateMiddlewareChainResultOptions<
-        MapMiddlewares<GS["authMiddlewareMap"], RS["auth"]>,
+        MapMiddlewares<
+          GS["authMiddlewareMap"],
+          RS["auth"] extends undefined | null
+            ? "none"
+            : Exclude<RS["auth"], undefined | null>
+        >,
         "union"
       >) &
   AccumulateMiddlewareChainResultOptions<
