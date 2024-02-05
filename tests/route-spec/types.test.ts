@@ -237,3 +237,29 @@ test.skip("route param types", () => {
     return new Response()
   })({} as any)
 })
+
+const middlewareWithInputs: Middleware<{ x: number }, { y: number }> = (
+  next,
+  req
+) => next(req)
+
+test.skip("allows middleware with inputs", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {
+      test: middlewareWithInputs,
+    },
+    globalMiddlewares: [],
+  })
+
+  withEdgeSpec({
+    auth: "test",
+    methods: ["GET"],
+    routeParams: z.object({ id: z.coerce.number() }),
+  })((req) => {
+    expectTypeOf(req.y).toBeNumber()
+    return new Response()
+  })({} as any)
+})

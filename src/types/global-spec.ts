@@ -12,9 +12,9 @@ export type QueryArrayFormat = "brackets" | "comma" | "repeat"
 export type QueryArrayFormats = readonly QueryArrayFormat[]
 
 export type GlobalSpec = {
-  authMiddlewareMap: Record<string, Middleware>
-  globalMiddlewares: readonly Middleware[]
-  globalMiddlewaresAfterAuth?: readonly Middleware[]
+  authMiddlewareMap: Record<string, Middleware<any, any>>
+  globalMiddlewares: readonly Middleware<any, any>[]
+  globalMiddlewaresAfterAuth?: readonly Middleware<any, any>[]
 
   // These improve OpenAPI generation
   apiName: string
