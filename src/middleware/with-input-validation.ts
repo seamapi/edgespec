@@ -283,7 +283,7 @@ export const withInputValidation =
 
     if (input.jsonBody || input.commonParams) {
       try {
-        jsonBody = await req.json()
+        jsonBody = await req.clone().json()
       } catch (e: any) {
         throw new InputParsingError("Error while parsing JSON body")
       }
@@ -293,7 +293,7 @@ export const withInputValidation =
 
     if (input.formData) {
       try {
-        multiPartFormData = await req.formData()
+        multiPartFormData = await req.clone().formData()
         multiPartFormData = Object.fromEntries(multiPartFormData.entries())
       } catch (e: any) {
         throw new InputParsingError("Error while parsing form data")
@@ -304,7 +304,7 @@ export const withInputValidation =
 
     if (input.urlEncodedFormData) {
       try {
-        const params = new URLSearchParams(await req.text())
+        const params = new URLSearchParams(await req.clone().text())
         urlEncodedFormData = Object.fromEntries(params.entries())
       } catch (e: any) {
         throw new InputParsingError("Error while parsing url encoded form data")

@@ -371,3 +371,34 @@ test("validate route params", async (t) => {
   t.is(status, 200)
   t.is(data.value, 4)
 })
+
+test("allows getting json", async (t) => {
+  const { axios } = await getTestRoute(t, {
+    ...defaultSpecs,
+    routeSpec: {
+      auth: "none",
+      methods: ["POST"],
+      jsonBody: z.object({
+        hello: z.string(),
+      }),
+      jsonResponse: z.object({
+        hello: z.string(),
+      }),
+    },
+    routeFn: async (req) => {
+      return EdgeSpecResponse.json(await req.json())
+    },
+    routePath: "/hello/world",
+  })
+
+  const { data, status } = await axios.post(
+    "/hello/world",
+    { hello: "world" },
+    {
+      validateStatus: () => true,
+    }
+  )
+
+  t.is(status, 200)
+  t.is(data.hello, "world")
+})
