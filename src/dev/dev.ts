@@ -9,3 +9,5 @@ export const devServer = {
     startServer: startHeadlessDevServer,
   },
 }
+
+export type { HeadlessBuildEvents } from "./headless/types"

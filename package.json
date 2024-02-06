@@ -11,6 +11,11 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./config": {
+      "import": "./dist/config.js",
+      "require": "./dist/config.js",
+      "types": "./dist/config.d.ts"
+    },
     "./dev": {
       "import": "./dist/dev.js",
       "require": "./dist/dev.js",

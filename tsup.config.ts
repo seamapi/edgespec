@@ -8,6 +8,7 @@ export default defineConfig({
     cli: "src/cli/cli.ts",
     dev: "src/dev/dev.ts",
     middleware: "src/middleware/index.ts",
+    config: "src/config/index.ts",
   },
   format: "esm",
   treeshake: true,

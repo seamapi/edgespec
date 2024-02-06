@@ -33,6 +33,7 @@ If you want to add EdgeSpec to an existing project, check out [this recipe](./re
 - [EdgeSpec config](./docs/edgespec-config.md)
 - [Bundling & deployment](./docs/bundling-and-deployment.md) 🚀
 - [Embedding as a module](./docs/embedding.md)
+- [Programmatic usage](./docs/programmatic-usage.md)
 
 ## Alternatives
 

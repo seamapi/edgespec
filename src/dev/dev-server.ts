@@ -10,7 +10,7 @@ import { startHeadlessDevBundler } from "./headless/start-bundler"
 export interface StartDevServerOptions {
   configPath?: string
   config?: EdgeSpecConfig
-  port: number
+  port?: number
   onListening?: (port: number) => void
   onBuildStart?: () => void
   onBuildEnd?: () => void
@@ -38,9 +38,11 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     options.onBuildEnd?.()
   })
 
+  const port = options.port ?? 3000
+
   const [server, { stop }] = await Promise.all([
     startHeadlessDevServer({
-      port: options.port,
+      port,
       config,
       headlessEventEmitter: eventEmitter,
     }),
@@ -50,8 +52,8 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     }),
   ])
 
-  server.listen(options.port, () => {
-    options.onListening?.(options.port)
+  server.listen(port, () => {
+    options.onListening?.(port)
   })
 
   return {
