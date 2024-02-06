@@ -45,22 +45,32 @@ export class DevCommand extends BaseCommand {
       allowMultiples: ["m", "s", "ms"],
     })
 
+    // Prevents the build spinner from displaying before the listening message
+    // No spinner collision plz! 🙈
+    let resolveOnListeningPromise: () => void
+    const listeningPromise = new Promise<void>((resolve) => {
+      resolveOnListeningPromise = resolve
+    })
+
     await startDevServer({
       port: this.port,
       config: configWithOverrides,
-      stderr: this.context.stderr,
       onListening(port) {
         listenSpinner.stopAndPersist({
           symbol: "☃️",
           text: ` listening on port ${port}: http://localhost:${port}\n`,
         })
+
+        resolveOnListeningPromise()
       },
-      onBuildStart() {
-        spinner.start("Building...")
+      async onBuildStart() {
         buildStartedAt = performance.now()
+        await listeningPromise
+        spinner.start("Building...")
       },
-      onBuildEnd() {
+      async onBuildEnd() {
         const durationMs = performance.now() - buildStartedAt
+        await listeningPromise
         spinner.succeed(`Built in ${timeFormatter(durationMs)}`)
       },
     })
