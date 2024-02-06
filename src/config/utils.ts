@@ -43,11 +43,12 @@ const resolveConfig = (
 
   if (config.rootDirectory) {
     rootDirectory = config.rootDirectory
-  } else if (config.tsconfigPath && path.isAbsolute(config.tsconfigPath)) {
-    rootDirectory = path.dirname(config.tsconfigPath)
-  } else if (configPath && path.isAbsolute(configPath)) {
+  } else if (configPath) {
     rootDirectory = path.dirname(configPath)
+  } else if (config.tsconfigPath) {
+    rootDirectory = path.dirname(config.tsconfigPath)
   }
+  rootDirectory = path.resolve(rootDirectory)
 
   const { tsconfigPath, routesDirectory, ...rest } =
     cloneObjectAndDeleteUndefinedKeys(config)
