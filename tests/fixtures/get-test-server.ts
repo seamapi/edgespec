@@ -2,6 +2,7 @@ import { ExecutionContext } from "ava"
 import path from "node:path"
 import defaultAxios from "axios"
 import { fileURLToPath } from "node:url"
+import getPort from "@ava/get-port"
 import { startDevServer } from "src/dev/dev-server"
 
 /**
@@ -25,6 +26,7 @@ export const getTestServer = async (
       routesDirectory,
       emulateWinterCG: true,
     },
+    port: await getPort(),
   })
 
   t.teardown(async () => {
