@@ -35,6 +35,11 @@
       "import": "./dist/adapters/wintercg-minimal.js",
       "require": "./dist/adapters/wintercg-minimal.js",
       "types": "./dist/adapters/wintercg-minimal.d.ts"
+    },
+    "./testing/ava": {
+      "import": "./dist/testing/ava.js",
+      "require": "./dist/testing/ava.js",
+      "types": "./dist/testing/ava.d.ts"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",
