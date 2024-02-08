@@ -24,7 +24,10 @@ export interface StartDevServerOptions {
 export const startDevServer = async (options: StartDevServerOptions) => {
   let config: ResolvedEdgeSpecConfig
   if (options.configPath) {
-    config = await loadConfig(options.configPath, options.config)
+    config = await loadConfig(
+      { configPath: options.configPath },
+      options.config
+    )
   } else {
     config = await loadConfig(undefined, options.config)
   }

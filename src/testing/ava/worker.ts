@@ -19,7 +19,9 @@ export class Worker {
     this.firstFinishedBuildingEventPromise = EventEmitter2.once(
       this.headlessEventEmitter,
       "finished-building"
-    ).then((data) => data as HeadlessBuildEvents["finished-building"])
+    ).then(
+      (data) => data as Parameters<HeadlessBuildEvents["finished-building"]>
+    )
 
     this.startBundlerPromise = this.startBundler()
   }
@@ -38,6 +40,7 @@ export class Worker {
     this.headlessEventEmitter.on("*", function (...args) {
       const message: MessageFromWorker = {
         type: "from-headless-dev-bundler",
+        // @ts-expect-error
         originalEventType: this.event,
         data: args,
       }
