@@ -8,6 +8,19 @@ For the examples below, assume that there is a single `/health` endpoint that re
 
 ## AVA
 
+Add this to your AVA config (in `package.json`, `ava.config.js`, or `ava.config.mjs`):
+
+```js
+{
+  // your AVA config...
+  watchMode: {
+		ignoreChanges: [".edgespec"],
+	}
+}
+```
+
+Then, you can import a helper to start a dev server:
+
 ```typescript
 import test from "ava"
 import axios from "axios"
@@ -21,3 +34,5 @@ test("GET /health", async (t) => {
   t.is(await healthResponse.text(), "OK")
 })
 ```
+
+This helper is well-optimized. Under the hood it uses a singleton dev bundler, so your tests are speedy and concurrent runs aren't an issue.
