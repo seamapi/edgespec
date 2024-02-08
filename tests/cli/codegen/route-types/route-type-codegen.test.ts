@@ -14,6 +14,7 @@ test("CLI codegen route-types command produces the expected route types", async 
 
   const tempPath = path.join(os.tmpdir(), `${randomUUID()}.d.ts`)
   const appDirectoryPath = path.join(testFileDirectory, "api")
+  const tsconfigPath = path.join(testFileDirectory, "tsconfig.json")
   const execution = cli.executeCommand([
     "codegen",
     "route-types",
@@ -21,6 +22,8 @@ test("CLI codegen route-types command produces the expected route types", async 
     tempPath,
     "--routes-directory",
     appDirectoryPath,
+    "--tsconfig",
+    tsconfigPath,
   ])
   const cliResult = await execution.waitUntilExit()
   t.is(cliResult.exitCode, 0)

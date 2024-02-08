@@ -53,7 +53,7 @@ export class DevCommand extends BaseCommand {
     })
 
     await startDevServer({
-      port: this.port,
+      port: parseInt(this.port, 10),
       config: configWithOverrides,
       onListening(port) {
         listenSpinner.stopAndPersist({

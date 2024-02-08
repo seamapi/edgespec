@@ -11,6 +11,11 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./config": {
+      "import": "./dist/config.js",
+      "require": "./dist/config.js",
+      "types": "./dist/config.d.ts"
+    },
     "./dev": {
       "import": "./dist/dev.js",
       "require": "./dist/dev.js",
@@ -75,6 +80,7 @@
     "tsup": "^8.0.1",
     "tsx": "^4.7.0",
     "type-fest": "^4.10.0",
+    "typed-emitter": "^2.1.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
