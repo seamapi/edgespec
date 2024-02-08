@@ -37,14 +37,19 @@ export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
  */
 const resolveConfig = (
   config: EdgeSpecConfig,
-  configPath?: string
+  source?: {
+    configPath?: string
+    rootDirectory?: string
+  }
 ): ResolvedEdgeSpecConfig => {
   let rootDirectory = process.cwd()
 
   if (config.rootDirectory) {
     rootDirectory = config.rootDirectory
-  } else if (configPath) {
-    rootDirectory = path.dirname(configPath)
+  } else if (source?.configPath) {
+    rootDirectory = path.dirname(source.configPath)
+  } else if (source?.rootDirectory) {
+    rootDirectory = source.rootDirectory
   } else if (config.tsconfigPath) {
     rootDirectory = path.dirname(config.tsconfigPath)
   }
@@ -84,19 +89,44 @@ const validateConfig = async (config: ResolvedEdgeSpecConfig) => {
 }
 
 export const loadConfig = async (
-  configPath?: string,
+  source?: {
+    configPath?: string
+    rootDirectory?: string
+  },
   overrides?: Partial<EdgeSpecConfig>
 ) => {
   let loadedConfig: EdgeSpecConfig = {}
-  if (configPath) {
+
+  let resolvedSource = { ...source }
+
+  if (resolvedSource.rootDirectory) {
+    let configInRootExists = false
+    try {
+      await fs.stat(
+        path.join(resolvedSource.rootDirectory, "edgespec.config.ts")
+      )
+      configInRootExists = true
+    } catch {}
+
+    if (configInRootExists) {
+      resolvedSource.configPath = path.join(
+        resolvedSource.rootDirectory,
+        "edgespec.config.ts"
+      )
+    }
+  }
+
+  if (resolvedSource.configPath) {
     const {
       mod: { default: config },
     } = await bundleRequire({
-      filepath: configPath,
+      filepath: resolvedSource.configPath,
     })
 
     if (!config) {
-      throw new Error(`Could not find a default export in ${configPath}`)
+      throw new Error(
+        `Could not find a default export in ${resolvedSource.configPath}`
+      )
     }
 
     loadedConfig = config
@@ -108,7 +138,7 @@ export const loadConfig = async (
         ...loadedConfig,
         ...cloneObjectAndDeleteUndefinedKeys(overrides ?? {}),
       },
-      configPath
+      resolvedSource
     )
   )
 }

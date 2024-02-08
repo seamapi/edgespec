@@ -16,5 +16,8 @@ export default () => {
     extensions: {
       ts: "commonjs",
     },
+    environmentVariables: {
+      IS_TESTING_EDGESPEC: "true",
+    },
   }
 }

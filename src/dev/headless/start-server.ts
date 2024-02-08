@@ -13,6 +13,7 @@ export interface StartHeadlessDevServerOptions {
   port: number
   config: ResolvedEdgeSpecConfig
   headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
+  initialBundlePath?: string
 }
 
 /**
@@ -24,12 +25,16 @@ export const startHeadlessDevServer = ({
   port,
   config,
   headlessEventEmitter,
+  initialBundlePath,
 }: StartHeadlessDevServerOptions) => {
   let runtime: EdgeRuntime
   let nonWinterCGHandler: ReturnType<typeof handleRequestWithEdgeSpec>
 
   let bundlePath: string
-  let shouldReload = false
+  if (initialBundlePath) {
+    bundlePath = initialBundlePath
+  }
+  let shouldReload = true
   headlessEventEmitter.on("finished-building", (result) => {
     bundlePath = result.bundlePath
     shouldReload = true
@@ -46,10 +51,14 @@ export const startHeadlessDevServer = ({
       const edgeSpecModule = await import(`file:${bundlePath}#${Date.now()}`)
       nonWinterCGHandler = handleRequestWithEdgeSpec(edgeSpecModule.default)
     }
+
+    shouldReload = false
   }
 
   // Used to avoid a race condition where the server attempts to process a request before the first build is complete
-  const firstBuildPromise = once(headlessEventEmitter, "finished-building")
+  const firstBuildPromise = initialBundlePath
+    ? Promise.resolve()
+    : once(headlessEventEmitter, "finished-building")
 
   const server = createServer(
     transformToNodeBuilder({
