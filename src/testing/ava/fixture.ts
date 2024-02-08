@@ -8,9 +8,12 @@ import { InitialWorkerData, MessageFromWorker } from "./types"
 import { loadConfig } from "src/config"
 import { ExecutionContext } from "ava"
 import { once } from "node:events"
+import { fileURLToPath } from "node:url"
 
 const getWorker = async (initialData: InitialWorkerData) => {
   const key = hash(initialData)
+
+  const dirname = path.dirname(fileURLToPath(import.meta.url))
 
   if (process.env.IS_TESTING_EDGESPEC) {
     const { registerSharedTypeScriptWorker } = await import(
@@ -18,7 +21,7 @@ const getWorker = async (initialData: InitialWorkerData) => {
     )
     return registerSharedTypeScriptWorker({
       filename: new URL(
-        `file:${path.resolve(__dirname, "worker-wrapper.ts")}#${key}`
+        `file:${path.resolve(dirname, "worker-wrapper.ts")}#${key}`
       ),
       initialData: initialData as any,
     })
@@ -26,7 +29,7 @@ const getWorker = async (initialData: InitialWorkerData) => {
 
   return registerSharedWorker({
     filename: new URL(
-      `file:${path.resolve(__dirname, "worker-wrapper.mjs")}#${key}`
+      `file:${path.resolve(dirname, "ava/worker-wrapper.js")}#${key}`
     ),
     initialData: initialData as any,
     supportedProtocols: ["ava-4"],
@@ -44,8 +47,10 @@ export const getTestServer = async (
   t: ExecutionContext,
   options?: GetTestServerOptions
 ) => {
+  const rootDirectory = options?.rootDirectory ?? process.cwd()
+
   const worker = await getWorker({
-    rootDirectory: options?.rootDirectory ?? process.cwd(),
+    rootDirectory,
   })
   await worker.available
 
@@ -65,7 +70,7 @@ export const getTestServer = async (
   const port = await getPort()
   const server = devServer.headless.startServer({
     port,
-    config: await loadConfig({ rootDirectory: options?.rootDirectory }),
+    config: await loadConfig({ rootDirectory }),
     headlessEventEmitter: eventEmitter as any,
     initialBundlePath: msg.bundlePath,
   })

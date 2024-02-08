@@ -49,7 +49,9 @@ export const startHeadlessDevServer = ({
     } else {
       // We append the timestamp to the path to bust the cache
       const edgeSpecModule = await import(`file:${bundlePath}#${Date.now()}`)
-      nonWinterCGHandler = handleRequestWithEdgeSpec(edgeSpecModule.default)
+      nonWinterCGHandler = handleRequestWithEdgeSpec(
+        edgeSpecModule.default.default
+      )
     }
 
     shouldReload = false

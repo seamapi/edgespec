@@ -70,7 +70,6 @@
   "author": "Seam Labs Inc.",
   "license": "ISC",
   "devDependencies": {
-    "@ava/get-port": "^2.0.0",
     "@ava/typescript": "^4.1.0",
     "@types/eventemitter2": "^4.1.0",
     "@types/node": "^18.19.10",
@@ -92,6 +91,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@ava/get-port": "^2.0.0",
     "@edge-runtime/node-utils": "^2.2.2",
     "@edge-runtime/primitives": "^4.0.5",
     "bundle-require": "^4.0.2",

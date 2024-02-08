@@ -14,9 +14,11 @@ export default defineConfig({
     config: "src/config/index.ts",
     // Test fixtures
     "testing/ava": "src/testing/ava/index.ts",
+    "testing/ava/worker-wrapper": "src/testing/ava/worker-wrapper.ts",
   },
   format: "esm",
   treeshake: true,
   dts: true,
   sourcemap: true,
+  external: ["ava", "ava/plugin", "ava-typescript-worker"],
 })
