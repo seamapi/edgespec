@@ -68,6 +68,7 @@ const resolveConfig = (
       routesDirectory ?? "api",
       rootDirectory
     ),
+    emulateWinterCG: true,
     ...rest,
   }
 }
