@@ -1,5 +1,4 @@
 {
-  "files": ["api/foo.ts", "with-edge-spec.ts"],
   "compilerOptions": {
     "strict": true
   }

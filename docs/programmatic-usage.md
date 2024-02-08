@@ -4,8 +4,6 @@ Everything you can do through the CLI, you can do programmatically (and more!).
 
 ## Starting a dev server
 
-The simple method:
-
 ```typescript
 import { devServer } from "edgespec/dev"
 
@@ -28,7 +26,17 @@ devServer.startDevServer({
 })
 ```
 
-If you instead want to only run the bundler once but have multiple servers (useful in testing environments):
+## [Soon] codegen
+
+## [Soon] bundling
+
+## Advanced
+
+When using a test runner, the default dev server has a major downside: all tests must share the same instance of the dev server, which prevents you from sharing context between tests and your application (assuming you want to run tests in parallel).
+
+To fix this, you can use a "headless" dev server, which splits the bundling and serving into two separate functions, coupled by an event bus. This allows you to run the bundler once and share the bundle between multiple servers (usually, one server per test).
+
+It's unlikely you'll need to use this API directly—check out [soon] supported test runners.
 
 ```typescript
 import { EventEmitter } from "node:events"
@@ -54,7 +62,3 @@ const server = devServer.headless.startServer({
 
 server.listen(3000)
 ```
-
-## [Soon] codegen
-
-## [Soon] bundling
