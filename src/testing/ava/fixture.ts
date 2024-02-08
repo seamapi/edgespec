@@ -42,10 +42,10 @@ export type GetTestServerOptions = {
 
 export const getTestServer = async (
   t: ExecutionContext,
-  options: GetTestServerOptions
+  options?: GetTestServerOptions
 ) => {
   const worker = await getWorker({
-    rootDirectory: options.rootDirectory ?? process.cwd(),
+    rootDirectory: options?.rootDirectory ?? process.cwd(),
   })
   await worker.available
 
@@ -65,7 +65,7 @@ export const getTestServer = async (
   const port = await getPort()
   const server = devServer.headless.startServer({
     port,
-    config: await loadConfig({ rootDirectory: options.rootDirectory }),
+    config: await loadConfig({ rootDirectory: options?.rootDirectory }),
     headlessEventEmitter: eventEmitter as any,
     initialBundlePath: msg.bundlePath,
   })
