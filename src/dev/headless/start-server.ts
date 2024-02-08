@@ -49,9 +49,11 @@ export const startHeadlessDevServer = ({
     } else {
       // We append the timestamp to the path to bust the cache
       const edgeSpecModule = await import(`file:${bundlePath}#${Date.now()}`)
-      nonWinterCGHandler = handleRequestWithEdgeSpec(
-        edgeSpecModule.default.default
-      )
+      // If the file is imported as CJS, the default export is nested.
+      // Naming this with .mjs seems to break some on-the-fly transpiling tools downstream.
+      const defaultExport =
+        edgeSpecModule.default.default ?? edgeSpecModule.default
+      nonWinterCGHandler = handleRequestWithEdgeSpec(defaultExport)
     }
 
     shouldReload = false
