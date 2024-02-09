@@ -36,10 +36,9 @@ export const createModuleService: EdgeSpecAdapter<[], ModuleService> = (
       return await pathnameOverrideResult.failed(request)
     }
 
-    const response = await handleRequestWithEdgeSpec(
-      edgeSpec,
-      pathnameOverrideResult.pathnameOverride
-    )(request)
+    const response = await handleRequestWithEdgeSpec(edgeSpec, {
+      pathnameOverride: pathnameOverrideResult.pathnameOverride,
+    })(request)
 
     return response
   }
