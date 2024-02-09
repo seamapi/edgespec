@@ -21,7 +21,7 @@ export interface StartHeadlessDevServerOptions {
  *
  * This must be run within a native context (Node.js, Bun, or Deno).
  */
-export const startHeadlessDevServer = ({
+export const startHeadlessDevServer = async ({
   port,
   config,
   headlessEventEmitter,
@@ -35,10 +35,13 @@ export const startHeadlessDevServer = ({
     bundlePath = initialBundlePath
   }
   let shouldReload = true
-  headlessEventEmitter.on("finished-building", (result) => {
+  const finishedBuildingListener: HeadlessBuildEvents["finished-building"] = (
+    result
+  ) => {
     bundlePath = result.bundlePath
     shouldReload = true
-  })
+  }
+  headlessEventEmitter.on("finished-building", finishedBuildingListener)
 
   const reload = async () => {
     if (config.emulateWinterCG) {
@@ -101,5 +104,17 @@ export const startHeadlessDevServer = ({
     })
   )
 
-  return server
+  const listeningPromise = once(server, "listening")
+  server.listen(port)
+  await listeningPromise
+
+  return {
+    server,
+    stop: async () => {
+      const closePromise = once(server, "close")
+      server.close()
+      await closePromise
+      headlessEventEmitter.off("finished-building", finishedBuildingListener)
+    },
+  }
 }

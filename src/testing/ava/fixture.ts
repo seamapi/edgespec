@@ -68,7 +68,7 @@ export const getTestServer = async (
 
   const eventEmitter = new EventEmitter2({ wildcard: true })
   const port = await getPort()
-  const server = devServer.headless.startServer({
+  const serverFixture = await devServer.headless.startServer({
     port,
     config: await loadConfig({ rootDirectory }),
     headlessEventEmitter: eventEmitter as any,
@@ -94,12 +94,8 @@ export const getTestServer = async (
   t.teardown(async () => {
     messageHandlerAbortController.abort()
     await messageHandlerPromise
-    server.close()
+    await serverFixture.stop()
   })
-
-  const listeningPromise = once(server, "listening")
-  server.listen(port)
-  await listeningPromise
 
   return {
     port,

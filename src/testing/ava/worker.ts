@@ -29,15 +29,7 @@ export class Worker {
   public async handleTestWorker(
     testWorker: SharedWorker.TestWorker<MessageToWorker | MessageFromWorker>
   ) {
-    for await (const message of testWorker.subscribe()) {
-      if (message.data.type === "get-initial-bundle") {
-        await this.startBundlerPromise
-        const [{ bundlePath }] = await this.firstFinishedBuildingEventPromise
-        message.reply({ type: "initial-bundle", bundlePath })
-      }
-    }
-
-    this.headlessEventEmitter.on("*", function (...args) {
+    const listener = function (...args: any[]) {
       const message: MessageFromWorker = {
         type: "from-headless-dev-bundler",
         // @ts-expect-error
@@ -45,7 +37,21 @@ export class Worker {
         data: args,
       }
       testWorker.publish(message)
+    }
+
+    this.headlessEventEmitter.on("*", listener)
+
+    testWorker.teardown(() => {
+      this.headlessEventEmitter.off("*", listener)
     })
+
+    for await (const message of testWorker.subscribe()) {
+      if (message.data.type === "get-initial-bundle") {
+        await this.startBundlerPromise
+        const [{ bundlePath }] = await this.firstFinishedBuildingEventPromise
+        message.reply({ type: "initial-bundle", bundlePath })
+      }
+    }
   }
 
   private async startBundler() {
