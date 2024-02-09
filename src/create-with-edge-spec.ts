@@ -39,6 +39,12 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
 
     return await wrapMiddlewares(
       [
+        // Injected into the VM when running in WinterCG emulation mode
+        // @ts-expect-error
+        ...(typeof _injectedEdgeSpecMiddlewares !== "undefined"
+          ? // @ts-expect-error
+            _injectedEdgeSpecMiddlewares
+          : []),
         withUnhandledExceptionHandling,
         serializeResponse(globalSpec, routeSpec, false),
         ...globalSpec.globalMiddlewares,
@@ -115,7 +121,7 @@ function serializeResponse(
   }
 }
 
-async function wrapMiddlewares(
+export async function wrapMiddlewares(
   middlewares: MiddlewareChain,
   routeFn: EdgeSpecRouteFn<any, any>,
   request: EdgeSpecRequest

@@ -8,12 +8,14 @@ import { ResolvedEdgeSpecConfig } from "src/config/utils"
 import { EdgeRuntime } from "edge-runtime"
 import { handleRequestWithEdgeSpec } from "src/types/edge-spec"
 import chalk from "chalk"
+import type { Middleware } from "src/middleware"
 
 export interface StartHeadlessDevServerOptions {
   port: number
   config: ResolvedEdgeSpecConfig
   headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
   initialBundlePath?: string
+  middlewares?: Middleware[]
 }
 
 /**
@@ -26,6 +28,7 @@ export const startHeadlessDevServer = async ({
   config,
   headlessEventEmitter,
   initialBundlePath,
+  middlewares,
 }: StartHeadlessDevServerOptions) => {
   let runtime: EdgeRuntime
   let nonWinterCGHandler: ReturnType<typeof handleRequestWithEdgeSpec>
@@ -48,6 +51,10 @@ export const startHeadlessDevServer = async ({
       const contents = await fs.readFile(bundlePath, "utf-8")
       runtime = new EdgeRuntime({
         initialCode: contents,
+        extend(context) {
+          context._injectedEdgeSpecMiddlewares = middlewares
+          return context
+        },
       })
     } else {
       // We append the timestamp to the path to bust the cache
@@ -56,7 +63,9 @@ export const startHeadlessDevServer = async ({
       // Naming this with .mjs seems to break some on-the-fly transpiling tools downstream.
       const defaultExport =
         edgeSpecModule.default.default ?? edgeSpecModule.default
-      nonWinterCGHandler = handleRequestWithEdgeSpec(defaultExport)
+      nonWinterCGHandler = handleRequestWithEdgeSpec(defaultExport, {
+        middlewares,
+      })
     }
 
     shouldReload = false

@@ -1,4 +1,4 @@
-import { once, EventEmitter } from "node:events"
+import { EventEmitter } from "node:events"
 import { AddressInfo } from "node:net"
 import { EdgeSpecConfig } from "src"
 import { loadConfig } from "src/config/utils"
@@ -6,6 +6,7 @@ import TypedEventEmitter from "typed-emitter"
 import { startHeadlessDevServer } from "./headless/start-server"
 import { HeadlessBuildEvents } from "./headless/types"
 import { startHeadlessDevBundler } from "./headless/start-bundler"
+import type { Middleware } from "src/middleware"
 
 export interface StartDevServerOptions {
   rootDirectory?: string
@@ -14,6 +15,7 @@ export interface StartDevServerOptions {
   onListening?: (port: number) => void
   onBuildStart?: () => void
   onBuildEnd?: () => void
+  middlewares?: Middleware[]
 }
 
 /**
@@ -43,6 +45,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
       port,
       config,
       headlessEventEmitter: eventEmitter,
+      middlewares: options.middlewares,
     }),
     startHeadlessDevBundler({
       config,

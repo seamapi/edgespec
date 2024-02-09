@@ -1,11 +1,12 @@
+import type { Middleware } from "src/middleware/types.js"
 import {
   createEdgeSpecRequest,
-  SerializableToResponse,
   type EdgeSpecRouteFn,
   type EdgeSpecRouteParams,
 } from "./web-handler.js"
 
 import type { ReadonlyDeep } from "type-fest"
+import { wrapMiddlewares } from "src/create-with-edge-spec.js"
 
 export type EdgeSpecRouteMatcher = (pathname: string) =>
   | {
@@ -35,9 +36,14 @@ export type EdgeSpecAdapter<
   ReturnValue = void,
 > = (edgeSpec: EdgeSpecRouteBundle, ...options: Options) => ReturnValue
 
+interface HandleRequestWithEdgeSpecOptions {
+  pathnameOverride?: string
+  middlewares?: Middleware[]
+}
+
 export function handleRequestWithEdgeSpec(
   edgeSpec: EdgeSpecRouteBundle,
-  pathnameOverride?: string
+  options: HandleRequestWithEdgeSpecOptions = {}
 ): (request: Request) => Promise<Response> {
   return async (request: Request) => {
     const {
@@ -49,10 +55,10 @@ export function handleRequestWithEdgeSpec(
         }),
     } = edgeSpec
 
-    const pathname = pathnameOverride ?? new URL(request.url).pathname
+    const pathname = options.pathnameOverride ?? new URL(request.url).pathname
     const { matchedRoute, routeParams } = routeMatcher(pathname) ?? {}
 
-    const routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]
+    let routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]
 
     const edgeSpecRequest = createEdgeSpecRequest(request, {
       edgeSpec,
@@ -64,6 +70,6 @@ export function handleRequestWithEdgeSpec(
       return await handle404(edgeSpecRequest)
     }
 
-    return await routeFn(edgeSpecRequest)
+    return wrapMiddlewares(options.middlewares ?? [], routeFn, edgeSpecRequest)
   }
 }
