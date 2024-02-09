@@ -43,6 +43,12 @@ export type GetTestServerOptions = {
   rootDirectory?: string
 }
 
+/**
+ * Start a test dev server for AVA. This works in watch mode too!
+ * Check out the [docs](https://github.com/seamapi/edgespec/blob/main/docs/testing.md) for more information.
+ *
+ * @param t test context from AVA
+ */
 export const getTestServer = async (
   t: ExecutionContext,
   options?: GetTestServerOptions
