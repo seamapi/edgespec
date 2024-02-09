@@ -37,36 +37,22 @@ export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
  */
 const resolveConfig = (
   config: EdgeSpecConfig,
-  source?: {
-    configPath?: string
-    rootDirectory?: string
-  }
+  rootDirectory: string
 ): ResolvedEdgeSpecConfig => {
-  let rootDirectory = process.cwd()
-
-  if (config.rootDirectory) {
-    rootDirectory = config.rootDirectory
-  } else if (source?.configPath) {
-    rootDirectory = path.dirname(source.configPath)
-  } else if (source?.rootDirectory) {
-    rootDirectory = source.rootDirectory
-  } else if (config.tsconfigPath) {
-    rootDirectory = path.dirname(config.tsconfigPath)
-  }
-  rootDirectory = path.resolve(rootDirectory)
+  const resolvedRootDirectory = path.resolve(rootDirectory)
 
   const { tsconfigPath, routesDirectory, ...rest } =
     cloneObjectAndDeleteUndefinedKeys(config)
 
   return {
-    rootDirectory,
+    rootDirectory: resolvedRootDirectory,
     tsconfigPath: resolvePossibleRelativePath(
       tsconfigPath ?? "tsconfig.json",
-      rootDirectory
+      resolvedRootDirectory
     ),
     routesDirectory: resolvePossibleRelativePath(
       routesDirectory ?? "api",
-      rootDirectory
+      resolvedRootDirectory
     ),
     emulateWinterCG: true,
     ...rest,
@@ -90,43 +76,28 @@ const validateConfig = async (config: ResolvedEdgeSpecConfig) => {
 }
 
 export const loadConfig = async (
-  source?: {
-    configPath?: string
-    rootDirectory?: string
-  },
+  rootDirectory: string,
   overrides?: Partial<EdgeSpecConfig>
 ) => {
   let loadedConfig: EdgeSpecConfig = {}
 
-  let resolvedSource = { ...source }
+  let configInRootExists = false
+  const potentialConfigPath = path.join(rootDirectory, "edgespec.config.ts")
+  try {
+    await fs.stat(potentialConfigPath)
+    configInRootExists = true
+  } catch {}
 
-  if (resolvedSource.rootDirectory) {
-    let configInRootExists = false
-    try {
-      await fs.stat(
-        path.join(resolvedSource.rootDirectory, "edgespec.config.ts")
-      )
-      configInRootExists = true
-    } catch {}
-
-    if (configInRootExists) {
-      resolvedSource.configPath = path.join(
-        resolvedSource.rootDirectory,
-        "edgespec.config.ts"
-      )
-    }
-  }
-
-  if (resolvedSource.configPath) {
+  if (configInRootExists) {
     const {
       mod: { default: config },
     } = await bundleRequire({
-      filepath: resolvedSource.configPath,
+      filepath: potentialConfigPath,
     })
 
     if (!config) {
       throw new Error(
-        `Could not find a default export in ${resolvedSource.configPath}`
+        `Could not find a default export in ${potentialConfigPath}`
       )
     }
 
@@ -139,7 +110,7 @@ export const loadConfig = async (
         ...loadedConfig,
         ...cloneObjectAndDeleteUndefinedKeys(overrides ?? {}),
       },
-      resolvedSource
+      rootDirectory
     )
   )
 }
