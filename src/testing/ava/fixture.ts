@@ -9,6 +9,7 @@ import { loadConfig } from "src/config"
 import { ExecutionContext } from "ava"
 import { once } from "node:events"
 import { fileURLToPath } from "node:url"
+import { Middleware } from "src/middleware/types"
 
 const getWorker = async (initialData: InitialWorkerData) => {
   const key = hash(initialData)
@@ -41,6 +42,11 @@ export type GetTestServerOptions = {
    * Defaults to the current working directory.
    */
   rootDirectory?: string
+  /**
+   * Middlewares that run before any other middleware.
+   * This is often used for dependency injection.
+   */
+  middlewares?: Middleware[]
 }
 
 /**
@@ -79,6 +85,7 @@ export const getTestServer = async (
     config: await loadConfig(rootDirectory),
     headlessEventEmitter: eventEmitter as any,
     initialBundlePath: msg.bundlePath,
+    middlewares: options?.middlewares ?? [],
   })
 
   const messageHandlerAbortController = new AbortController()
