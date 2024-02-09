@@ -55,9 +55,7 @@ export class Worker {
   }
 
   private async startBundler() {
-    const config = await loadConfig({
-      rootDirectory: this.initialData.rootDirectory,
-    })
+    const config = await loadConfig(this.initialData.rootDirectory)
     return devServer.headless.startBundler({
       config,
       headlessEventEmitter: this.headlessEventEmitter as any,

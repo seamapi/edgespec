@@ -6,10 +6,6 @@ export abstract class BaseCommand extends Command {
     description: "Path to your project root",
   })
 
-  configPath = Option.String("--config,-c", {
-    description: "Path to your config file (usually edgespec.config.ts)",
-  })
-
   tsconfigPath = Option.String("--tsconfig", {
     description: "Path to your tsconfig.json",
   })
@@ -25,15 +21,9 @@ export abstract class BaseCommand extends Command {
       rootDirectory: this.rootDirectory,
     }
 
-    if (this.configPath) {
-      return this.run(
-        await loadConfig({ configPath: this.configPath }, overrides)
-      )
-    }
-
-    const resolvedConfig = await loadConfig(undefined, overrides)
-
-    return this.run(resolvedConfig)
+    return this.run(
+      await loadConfig(this.rootDirectory ?? process.cwd(), overrides)
+    )
   }
 
   abstract run(config: ResolvedEdgeSpecConfig): Promise<number | void>

@@ -5,17 +5,14 @@ import { fileURLToPath } from "node:url"
 import pRetry from "p-retry"
 import { getTestCLI } from "tests/fixtures/get-test-cli"
 
-test("Config paths are resolved relative to config file", async (t) => {
+test("Config paths are resolved relative to root directory", async (t) => {
   const cli = await getTestCLI(t)
 
-  const configPath = path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "edgespec.config.ts"
-  )
+  const rootDirectory = path.dirname(fileURLToPath(import.meta.url))
 
   const port = await getPort()
 
-  cli.executeCommand(["dev", "--config", configPath, "-p", port.toString()])
+  cli.executeCommand(["dev", "--root", rootDirectory, "-p", port.toString()])
 
   await t.notThrowsAsync(async () => {
     await pRetry(

@@ -1,14 +1,14 @@
 import { once, EventEmitter } from "node:events"
 import { AddressInfo } from "node:net"
 import { EdgeSpecConfig } from "src"
-import { ResolvedEdgeSpecConfig, loadConfig } from "src/config/utils"
+import { loadConfig } from "src/config/utils"
 import TypedEventEmitter from "typed-emitter"
 import { startHeadlessDevServer } from "./headless/start-server"
 import { HeadlessBuildEvents } from "./headless/types"
 import { startHeadlessDevBundler } from "./headless/start-bundler"
 
 export interface StartDevServerOptions {
-  configPath?: string
+  rootDirectory?: string
   config?: EdgeSpecConfig
   port?: number
   onListening?: (port: number) => void
@@ -22,15 +22,10 @@ export interface StartDevServerOptions {
  * This must be run within a native context (Node.js, Bun, or Deno).
  */
 export const startDevServer = async (options: StartDevServerOptions) => {
-  let config: ResolvedEdgeSpecConfig
-  if (options.configPath) {
-    config = await loadConfig(
-      { configPath: options.configPath },
-      options.config
-    )
-  } else {
-    config = await loadConfig(undefined, options.config)
-  }
+  const config = await loadConfig(
+    options.rootDirectory ?? process.cwd(),
+    options.config
+  )
 
   const eventEmitter =
     new EventEmitter() as TypedEventEmitter<HeadlessBuildEvents>

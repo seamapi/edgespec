@@ -76,7 +76,7 @@ export const getTestServer = async (
   const port = await getPort()
   const serverFixture = await devServer.headless.startServer({
     port,
-    config: await loadConfig({ rootDirectory }),
+    config: await loadConfig(rootDirectory),
     headlessEventEmitter: eventEmitter as any,
     initialBundlePath: msg.bundlePath,
   })
