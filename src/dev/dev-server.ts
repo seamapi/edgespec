@@ -24,7 +24,10 @@ export interface StartDevServerOptions {
 export const startDevServer = async (options: StartDevServerOptions) => {
   let config: ResolvedEdgeSpecConfig
   if (options.configPath) {
-    config = await loadConfig(options.configPath, options.config)
+    config = await loadConfig(
+      { configPath: options.configPath },
+      options.config
+    )
   } else {
     config = await loadConfig(undefined, options.config)
   }
@@ -40,7 +43,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
 
   const port = options.port ?? 3000
 
-  const [server, { stop }] = await Promise.all([
+  const [headlessServer, headlessBundler] = await Promise.all([
     startHeadlessDevServer({
       port,
       config,
@@ -52,17 +55,10 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     }),
   ])
 
-  server.listen(port, () => {
-    options.onListening?.(port)
-  })
-
   return {
-    port: (server.address() as AddressInfo).port.toString(),
+    port: (headlessServer.server.address() as AddressInfo).port.toString(),
     stop: async () => {
-      await stop()
-      const closePromise = once(server, "close")
-      server.close()
-      await closePromise
+      await Promise.all([headlessServer.stop(), headlessBundler.stop()])
     },
   }
 }

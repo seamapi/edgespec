@@ -42,6 +42,7 @@ test("dev server rebuilds upon change to existing route", async (t) => {
   `
   )
 
+  t.timeout(6_000)
   await t.notThrowsAsync(async () => {
     // The watcher waits a little bit to debounce
     await pRetry(

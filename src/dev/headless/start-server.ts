@@ -13,6 +13,7 @@ export interface StartHeadlessDevServerOptions {
   port: number
   config: ResolvedEdgeSpecConfig
   headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
+  initialBundlePath?: string
 }
 
 /**
@@ -20,20 +21,27 @@ export interface StartHeadlessDevServerOptions {
  *
  * This must be run within a native context (Node.js, Bun, or Deno).
  */
-export const startHeadlessDevServer = ({
+export const startHeadlessDevServer = async ({
   port,
   config,
   headlessEventEmitter,
+  initialBundlePath,
 }: StartHeadlessDevServerOptions) => {
   let runtime: EdgeRuntime
   let nonWinterCGHandler: ReturnType<typeof handleRequestWithEdgeSpec>
 
   let bundlePath: string
-  let shouldReload = false
-  headlessEventEmitter.on("finished-building", (result) => {
+  if (initialBundlePath) {
+    bundlePath = initialBundlePath
+  }
+  let shouldReload = true
+  const finishedBuildingListener: HeadlessBuildEvents["finished-building"] = (
+    result
+  ) => {
     bundlePath = result.bundlePath
     shouldReload = true
-  })
+  }
+  headlessEventEmitter.on("finished-building", finishedBuildingListener)
 
   const reload = async () => {
     if (config.emulateWinterCG) {
@@ -44,12 +52,20 @@ export const startHeadlessDevServer = ({
     } else {
       // We append the timestamp to the path to bust the cache
       const edgeSpecModule = await import(`file:${bundlePath}#${Date.now()}`)
-      nonWinterCGHandler = handleRequestWithEdgeSpec(edgeSpecModule.default)
+      // If the file is imported as CJS, the default export is nested.
+      // Naming this with .mjs seems to break some on-the-fly transpiling tools downstream.
+      const defaultExport =
+        edgeSpecModule.default.default ?? edgeSpecModule.default
+      nonWinterCGHandler = handleRequestWithEdgeSpec(defaultExport)
     }
+
+    shouldReload = false
   }
 
   // Used to avoid a race condition where the server attempts to process a request before the first build is complete
-  const firstBuildPromise = once(headlessEventEmitter, "finished-building")
+  const firstBuildPromise = initialBundlePath
+    ? Promise.resolve()
+    : once(headlessEventEmitter, "finished-building")
 
   const server = createServer(
     transformToNodeBuilder({
@@ -88,5 +104,17 @@ export const startHeadlessDevServer = ({
     })
   )
 
-  return server
+  const listeningPromise = once(server, "listening")
+  server.listen(port)
+  await listeningPromise
+
+  return {
+    server,
+    stop: async () => {
+      const closePromise = once(server, "close")
+      server.close()
+      await closePromise
+      headlessEventEmitter.off("finished-building", finishedBuildingListener)
+    },
+  }
 }

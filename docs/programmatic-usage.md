@@ -36,14 +36,14 @@ When using a test runner, the default dev server has a major downside: all tests
 
 To fix this, you can use a "headless" dev server, which splits the bundling and serving into two separate functions, coupled by an event bus. This allows you to run the bundler once and share the bundle between multiple servers (usually, one server per test).
 
-It's unlikely you'll need to use this API directly—check out [soon] supported test runners.
+It's unlikely you'll need to use this API directly—check out the built-in fixtures for [supported test runners](./testing.md).
 
 ```typescript
 import { EventEmitter } from "node:events"
 import { loadConfig } from "edgespec/config"
 import { devServer, HeadlessBuildEvents } from "edgespec/dev"
 
-const config = await loadConfig("./edgespec.config.ts")
+const config = await loadConfig({ configPath: "./edgespec.config.ts" })
 
 // This can be any compatible event emitter implementation
 const headlessEventEmitter = new EventEmitter() as HeadlessBuildEvents

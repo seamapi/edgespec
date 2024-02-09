@@ -26,7 +26,9 @@ export abstract class BaseCommand extends Command {
     }
 
     if (this.configPath) {
-      return this.run(await loadConfig(this.configPath, overrides))
+      return this.run(
+        await loadConfig({ configPath: this.configPath }, overrides)
+      )
     }
 
     const resolvedConfig = await loadConfig(undefined, overrides)
