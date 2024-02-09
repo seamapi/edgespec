@@ -19,6 +19,8 @@ Add this to your AVA config (in `package.json`, `ava.config.js`, or `ava.config.
 }
 ```
 
+You'll also need to install an optional peer dependency: `npm add @ava/get-port -D`.
+
 Then, you can import a helper to start a dev server:
 
 ```typescript
