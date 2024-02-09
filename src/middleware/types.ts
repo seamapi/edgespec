@@ -9,7 +9,12 @@ export type Middleware<
   ResultOptions = object,
   Context = {},
 > = (
-  request: EdgeSpecRequest<RequiredOptions & Partial<ResultOptions>>,
+  request: EdgeSpecRequest<
+    RequiredOptions &
+      Partial<ResultOptions> & {
+        routeParams: Readonly<Record<string, unknown>>
+      }
+  >,
   ctx: Context,
   next: (
     request: EdgeSpecRequest<RequiredOptions & Partial<ResultOptions>>,

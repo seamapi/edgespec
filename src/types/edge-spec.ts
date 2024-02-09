@@ -4,7 +4,6 @@ import {
   type EdgeSpecRouteFn,
   type EdgeSpecRouteParams,
   EdgeSpecRequest,
-  EdgeSpecInitializationOptions,
 } from "./web-handler.js"
 
 import type { ReadonlyDeep } from "type-fest"
@@ -89,9 +88,7 @@ export function makeRequestAgainstEdgeSpec(
     } else {
       if ((request as any).routeParams) {
         // These are the route params of the parent route hosting the EdgeSpec service
-        const routeParams = (
-          request as unknown as EdgeSpecInitializationOptions
-        ).routeParams
+        const routeParams = (request as unknown as EdgeSpecRequest).routeParams
 
         // If the child service is hosted at /foo/[...path], we want to find the [...path] parameter
         const wildcardRouteParameters = Object.values(routeParams).filter((p) =>

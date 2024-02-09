@@ -1,7 +1,6 @@
 export type {
   EdgeSpecRequest,
   EdgeSpecRequestOptions,
-  WithEdgeSpecRequestOptions,
   HTTPMethods,
   EdgeSpecResponse,
   EdgeSpecJsonResponse,
