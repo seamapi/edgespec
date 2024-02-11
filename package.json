@@ -52,8 +52,8 @@
     "format": "prettier --write .",
     "lint": "prettier --check .",
     "cli:dev": "tsx src/cli/cli.ts",
-    "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
-    "example:hello-world:interact": "node --loader=tsx --no-warnings ./src/cli/cli.js interact ./examples/hello-world/routes"
+    "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes",
+    "example:todo-app:interact": "node --loader=tsx --no-warnings ./src/cli/cli.js interact ./examples/hello-world/routes"
   },
   "bin": {
     "edgespec": "./dist/cli.js"
