@@ -54,7 +54,7 @@ const resolveConfig = (
       routesDirectory ?? "api",
       resolvedRootDirectory
     ),
-    emulateWinterCG: true,
+    platform: "wintercg-minimal",
     ...rest,
   }
 }

@@ -6,7 +6,7 @@ import { durationFormatter, sizeFormatter } from "human-readable"
 import ora from "ora"
 import { BaseCommand } from "../base-command"
 import { ResolvedEdgeSpecConfig } from "src/config/utils"
-import * as t from "typanion"
+
 import { BundleOptions } from "src/bundle/types"
 import { join as joinPath } from "node:path"
 
@@ -24,11 +24,6 @@ export class BundleCommand extends BaseCommand {
   outputPath = Option.String("--output,-o", {
     description: "The path to output the bundle",
     required: true,
-  })
-
-  platform = Option.String("--platform", "none", {
-    description: "The platform to bundle for",
-    validator: t.isEnum(["none", "node"]),
   })
 
   async run(config: ResolvedEdgeSpecConfig) {
@@ -49,7 +44,7 @@ export class BundleCommand extends BaseCommand {
         )
       })
 
-    if (this.platform === "node") {
+    if (config.platform === "node") {
       platformBundleOptions = {
         esbuild: {
           platform: "node",

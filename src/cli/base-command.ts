@@ -1,4 +1,5 @@
 import { Command, Option } from "clipanion"
+import * as t from "typanion"
 import { ResolvedEdgeSpecConfig, loadConfig } from "src/config/utils"
 
 export abstract class BaseCommand extends Command {
@@ -14,11 +15,17 @@ export abstract class BaseCommand extends Command {
     description: "Path to your routes directory",
   })
 
+  platform = Option.String("--platform", {
+    description: "The platform to bundle for",
+    validator: t.isEnum(["node", "wintercg-minimal"]),
+  })
+
   async execute() {
     const overrides = {
       tsconfigPath: this.tsconfigPath,
       routesDirectory: this.routesDirectory,
       rootDirectory: this.rootDirectory,
+      platform: this.platform as "node" | "wintercg-minimal",
     }
 
     return this.run(

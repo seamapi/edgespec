@@ -35,7 +35,7 @@ export const startHeadlessDevServer = async ({
       defaultOrigin: `http://localhost:${port}`,
     })(async (req) => {
       try {
-        if (config.emulateWinterCG) {
+        if (config.platform === "wintercg-minimal") {
           const runtime = await controller.getWinterCGRuntime()
           const response = await runtime.dispatchFetch(req.url, req)
           await response.waitUntil()
