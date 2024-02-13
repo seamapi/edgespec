@@ -14,8 +14,8 @@ export class RequestHandlerController {
 
   private bundlePathPromise: Promise<string>
 
-  // This mutex prevents race conditions if there are multiple concurrent .getWinterCGRuntime() or .getNodeHandler() calls
-  private loaderMutex = new Mutex()
+  // This prevents race conditions if there are multiple concurrent .getWinterCGRuntime() or .getNodeHandler() calls
+  private loaderPromiseChain = new Mutex()
 
   constructor(
     private headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>,
@@ -42,7 +42,7 @@ export class RequestHandlerController {
    * You **should not** cache the result of this function. Call it every time you want to use the runtime.
    */
   async getWinterCGRuntime() {
-    return this.loaderMutex.runExclusive(async () => {
+    return this.loaderPromiseChain.runExclusive(async () => {
       if (this.cachedWinterCGRuntime) {
         return this.cachedWinterCGRuntime
       }
@@ -64,7 +64,7 @@ export class RequestHandlerController {
    * You **should not** cache the result of this function. Call it every time you want to use the handler.
    */
   async getNodeHandler() {
-    return this.loaderMutex.runExclusive(async () => {
+    return this.loaderPromiseChain.runExclusive(async () => {
       if (this.cachedNodeHandler) {
         return this.cachedNodeHandler
       }
