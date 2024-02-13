@@ -1,6 +1,7 @@
 import { Command, Option } from "clipanion"
 import { bundle } from "src/bundle/bundle"
 import fs from "node:fs/promises"
+import path from "node:path"
 import { durationFormatter, sizeFormatter } from "human-readable"
 import ora from "ora"
 import { BaseCommand } from "../base-command"
@@ -29,8 +30,12 @@ export class BundleCommand extends BaseCommand {
     const output = await bundle({
       routesDirectory: config.routesDirectory,
       rootDirectory: config.rootDirectory,
+      esbuild: {
+        platform: config.emulateWinterCG ? "browser" : "node",
+      },
     })
 
+    await fs.mkdir(path.dirname(this.outputPath), { recursive: true })
     await fs.writeFile(this.outputPath, output)
 
     spinner.stopAndPersist({
