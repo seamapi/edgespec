@@ -6,10 +6,10 @@ export interface EdgeSpecNodeAdapterOptions {
   port?: number
 }
 
-export const startServer: EdgeSpecAdapter<[EdgeSpecNodeAdapterOptions]> = (
-  edgeSpec,
-  { port }
-) => {
+export const startServer: EdgeSpecAdapter<
+  [EdgeSpecNodeAdapterOptions],
+  Promise<http.Server>
+> = async (edgeSpec, { port }) => {
   const transformToNode = transformToNodeBuilder({
     defaultOrigin: `http://localhost${port ? `:${port}` : ""}`,
   })
@@ -17,7 +17,8 @@ export const startServer: EdgeSpecAdapter<[EdgeSpecNodeAdapterOptions]> = (
   const server = http.createServer(
     transformToNode(handleRequestWithEdgeSpec(edgeSpec))
   )
-  server.listen(port)
+
+  await new Promise<void>((resolve) => server.listen(port, resolve))
 
   return server
 }

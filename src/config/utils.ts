@@ -2,6 +2,7 @@ import path from "node:path"
 import fs from "node:fs/promises"
 import { bundleRequire } from "bundle-require"
 import { EdgeSpecConfig } from "src/config/config"
+import { SetRequired } from "type-fest"
 
 const cloneObjectAndDeleteUndefinedKeys = <T extends Record<string, any>>(
   obj: T
@@ -36,13 +37,12 @@ export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
  * Resolves relative paths and sets defaults for any missing values.
  */
 const resolveConfig = (
-  config: EdgeSpecConfig,
-  rootDirectory: string
+  config: SetRequired<EdgeSpecConfig, "rootDirectory">
 ): ResolvedEdgeSpecConfig => {
-  const resolvedRootDirectory = path.resolve(rootDirectory)
-
-  const { tsconfigPath, routesDirectory, ...rest } =
+  const { rootDirectory, tsconfigPath, routesDirectory, ...rest } =
     cloneObjectAndDeleteUndefinedKeys(config)
+
+  const resolvedRootDirectory = path.resolve(config.rootDirectory)
 
   return {
     rootDirectory: resolvedRootDirectory,
@@ -105,12 +105,10 @@ export const loadConfig = async (
   }
 
   return await validateConfig(
-    resolveConfig(
-      {
-        ...loadedConfig,
-        ...cloneObjectAndDeleteUndefinedKeys(overrides ?? {}),
-      },
-      rootDirectory
-    )
+    resolveConfig({
+      rootDirectory,
+      ...loadedConfig,
+      ...cloneObjectAndDeleteUndefinedKeys(overrides ?? {}),
+    })
   )
 }
