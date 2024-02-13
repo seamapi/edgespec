@@ -5,24 +5,18 @@ import path from "node:path"
 import { randomUUID } from "node:crypto"
 import { fileURLToPath } from "node:url"
 
-test("CLI bundle command requires an output path", async (t) => {
-  const cli = await getTestCLI(t)
-
-  const execution = cli.executeCommand(["bundle"])
-  const result = await execution.waitUntilExit()
-  t.is(result.exitCode, 1)
-})
-
-test("CLI bundle command produces a bundle", async (t) => {
+test("CLI bundle command produces a bundle with node platform", async (t) => {
   const cli = await getTestCLI(t)
 
   const tempPath = path.join(os.tmpdir(), `${randomUUID()}.js`)
   const appDirectoryPath = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
-    "../smoke/api"
+    "./nodejs-edgespec-project/api"
   )
   const execution = cli.executeCommand([
     "bundle",
+    "--platform",
+    "node",
     "-o",
     tempPath,
     "--routes-directory",

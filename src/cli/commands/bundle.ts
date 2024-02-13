@@ -1,10 +1,13 @@
 import { Command, Option } from "clipanion"
 import { bundle } from "src/bundle/bundle"
-import fs from "node:fs/promises"
+import fs, { readFile } from "node:fs/promises"
 import { durationFormatter, sizeFormatter } from "human-readable"
 import ora from "ora"
 import { BaseCommand } from "../base-command"
 import { ResolvedEdgeSpecConfig } from "src/config/utils"
+import * as t from "typanion"
+import { BundleOptions } from "src/bundle/types"
+import { join as joinPath } from "node:path"
 
 export class BundleCommand extends BaseCommand {
   static paths = [[`bundle`]]
@@ -22,11 +25,40 @@ export class BundleCommand extends BaseCommand {
     required: true,
   })
 
+  platform = Option.String("--platform", "none", {
+    description: "The platform to bundle for",
+    validator: t.isEnum(["none", "node"]),
+  })
+
   async run(config: ResolvedEdgeSpecConfig) {
     const spinner = ora("Bundling...").start()
     const buildStartedAt = performance.now()
 
+    let platformBundleOptions: Partial<BundleOptions> = {}
+
+    const rootDirPackageJson = await readFile(
+      joinPath(config.rootDirectory, "package.json")
+    )
+      .then((r) => JSON.parse(r.toString()))
+      .catch((e) => {
+        throw new Error(
+          `Could not read package.json in ${
+            config.rootDirectory
+          }\n\n${e.toString()}`
+        )
+      })
+
+    if (this.platform === "node") {
+      platformBundleOptions = {
+        esbuild: {
+          platform: "node",
+          external: Object.keys(rootDirPackageJson.dependencies || {}),
+        },
+      }
+    }
+
     const output = await bundle({
+      ...platformBundleOptions,
       routesDirectory: config.routesDirectory,
       rootDirectory: config.rootDirectory,
     })
