@@ -7,11 +7,14 @@ import { handleRequestWithEdgeSpec } from "src/types/edge-spec"
 import { HeadlessBuildEvents } from "./types"
 
 export class RequestHandlerController {
+  // This is so we know if the bundler is currently building when we need to load the runtime
   private bundlerState: "building" | "idle" = "idle"
   private cachedWinterCGRuntime?: EdgeRuntime
   private cachedNodeHandler?: ReturnType<typeof handleRequestWithEdgeSpec>
+
   private bundlePathPromise: Promise<string>
 
+  // These mutexes prevent race conditions if there are multiple concurrent .getWinterCGRuntime() or .getNodeHandler() calls
   private winterCGLoaderMutex = new Mutex()
   private nodeHandlerLoaderMutex = new Mutex()
 
@@ -27,6 +30,8 @@ export class RequestHandlerController {
       "finished-building",
       this.handleFinishedBuilding.bind(this)
     )
+
+    // Sometimes we know the bundle path ahead of time, otherwise we wait for the first build to finish to fetch the path
     this.bundlePathPromise = initialBundlePath
       ? Promise.resolve(initialBundlePath)
       : once(headlessEventEmitter, "finished-building").then(
@@ -35,12 +40,12 @@ export class RequestHandlerController {
   }
 
   async getWinterCGRuntime() {
-    if (this.cachedWinterCGRuntime) {
-      return this.cachedWinterCGRuntime
-    }
-
     return this.winterCGLoaderMutex.runExclusive(async () => {
-      return await this.retryIfBundleInvalidedDuringCallback(async () => {
+      if (this.cachedWinterCGRuntime) {
+        return this.cachedWinterCGRuntime
+      }
+
+      return await this.executeCallbackWhenBundleIsReady(async () => {
         const contents = await fs.readFile(
           await this.bundlePathPromise,
           "utf-8"
@@ -54,12 +59,12 @@ export class RequestHandlerController {
   }
 
   async getNodeHandler() {
-    if (this.cachedNodeHandler) {
-      return this.cachedNodeHandler
-    }
-
     return this.nodeHandlerLoaderMutex.runExclusive(async () => {
-      return await this.retryIfBundleInvalidedDuringCallback(async () => {
+      if (this.cachedNodeHandler) {
+        return this.cachedNodeHandler
+      }
+
+      return await this.executeCallbackWhenBundleIsReady(async () => {
         // We append the timestamp to the path to bust the cache
         const edgeSpecModule = await import(
           `file:${await this.bundlePathPromise}#${Date.now()}`
@@ -88,6 +93,7 @@ export class RequestHandlerController {
 
   private handleStartedBuilding() {
     this.bundlerState = "building"
+    // Invalidate cached handlers
     this.cachedWinterCGRuntime = undefined
     this.cachedNodeHandler = undefined
   }
@@ -96,13 +102,15 @@ export class RequestHandlerController {
     this.bundlerState = "idle"
   }
 
-  private async retryIfBundleInvalidedDuringCallback<T>(
+  private async executeCallbackWhenBundleIsReady<T>(
     callback: () => T
   ): Promise<T> {
+    // If currently building, wait for it to finish
     if (this.bundlerState === "building") {
       await once(this.headlessEventEmitter, "finished-building")
     }
 
+    // If the bundler started building while the callback was executing, we'll need to re-run the callback
     let didStartBuildingDuringReload = false
     let finishedBuildingPromise: Promise<any> | undefined
     once(this.headlessEventEmitter, "started-building").then(() => {
@@ -117,9 +125,7 @@ export class RequestHandlerController {
 
     if (didStartBuildingDuringReload) {
       await finishedBuildingPromise
-      return await this.retryIfBundleInvalidedDuringCallback(
-        callback.bind(this)
-      )
+      return await this.executeCallbackWhenBundleIsReady(callback.bind(this))
     }
 
     return result
