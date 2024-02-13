@@ -12,6 +12,7 @@
   "compilerOptions": {
     "outDir": "./dist-types",
     "emitDeclarationOnly": true,
-    "declaration": true
+    "declaration": true,
+    "noEmit": false
   }
 }
