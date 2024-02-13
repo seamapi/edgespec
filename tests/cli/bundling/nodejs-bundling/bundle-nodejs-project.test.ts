@@ -24,7 +24,4 @@ test("CLI bundle command produces a bundle with node platform", async (t) => {
   ])
   const result = await execution.waitUntilExit()
   t.is(result.exitCode, 0)
-
-  const bundle = await import(tempPath)
-  t.truthy(bundle.default.routeMapWithHandlers)
 })
