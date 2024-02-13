@@ -1,6 +1,5 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "skipLibCheck": true
-  }
+  "extends": "../../../../tsconfig.json",
+  "include": ["api/foo.ts"],
+  "exclude": []
 }

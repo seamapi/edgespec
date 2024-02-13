@@ -26,7 +26,7 @@ test("CLI codegen route-types command shows diagnostics if compilation fails", a
   const cliResult = await execution.waitUntilExit()
   t.is(cliResult.exitCode, 1)
   t.true(
-    cliResult.stdout.includes(
+    cliResult.stderr.includes(
       `Property 'thisMethodDoesNotExist' does not exist`
     )
   )

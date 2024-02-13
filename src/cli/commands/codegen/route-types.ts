@@ -16,7 +16,11 @@ export class CodeGenRouteTypes extends BaseCommand {
 
   async run(config: ResolvedEdgeSpecConfig) {
     const project = new Project({
-      compilerOptions: { declaration: true, noEmit: false },
+      compilerOptions: {
+        declaration: true,
+        noEmit: false,
+        emitDeclarationOnly: true,
+      },
       tsConfigFilePath: config.tsconfigPath,
     })
 
