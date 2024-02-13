@@ -1,8 +1,6 @@
 import esbuild from "esbuild"
 import { constructManifest } from "./construct-manifest"
 import { BundleOptions } from "./types"
-import { join as joinPath } from "node:path"
-import { readFile } from "node:fs/promises"
 
 export const bundle = async (options: BundleOptions) => {
   const result = await esbuild.build({
