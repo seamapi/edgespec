@@ -28,6 +28,12 @@ export class MethodNotAllowedError extends EdgeSpecMiddlewareError {
   }
 }
 
+export class NotFoundError extends EdgeSpecMiddlewareError {
+  constructor(message: string) {
+    super(message, 404)
+  }
+}
+
 export abstract class BadRequestError extends EdgeSpecMiddlewareError {
   constructor(message: string) {
     super(message, 400)
