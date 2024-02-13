@@ -38,6 +38,9 @@ export class RequestHandlerController {
         )
   }
 
+  /**
+   * You **should not** cache the result of this function. Call it every time you want to use the runtime.
+   */
   async getWinterCGRuntime() {
     return this.loaderMutex.runExclusive(async () => {
       if (this.cachedWinterCGRuntime) {
@@ -57,6 +60,9 @@ export class RequestHandlerController {
     })
   }
 
+  /**
+   * You **should not** cache the result of this function. Call it every time you want to use the handler.
+   */
   async getNodeHandler() {
     return this.loaderMutex.runExclusive(async () => {
       if (this.cachedNodeHandler) {
