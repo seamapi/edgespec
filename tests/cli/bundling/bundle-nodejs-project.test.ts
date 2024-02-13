@@ -5,7 +5,7 @@ import path from "node:path"
 import { randomUUID } from "node:crypto"
 import { fileURLToPath } from "node:url"
 
-test("CLI bundle command produces a bundle with node platform", async (t) => {
+test("edgespec bundle doesn't throw for node:* imports when --platform node is provided", async (t) => {
   const cli = await getTestCLI(t)
 
   const tempPath = path.join(os.tmpdir(), `${randomUUID()}.js`)
