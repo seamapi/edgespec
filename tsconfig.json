@@ -107,5 +107,5 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "allowImportingTsExtensions": true
   },
-  "exclude": ["node_modules", "dist", "dist-types", "examples"]
+  "exclude": ["node_modules", "dist", "dist-types", "examples", "tests/cli/codegen/route-types-error/api/foo.ts"]
 }
