@@ -62,9 +62,6 @@ export class BundleCommand extends BaseCommand {
       ...platformBundleOptions,
       routesDirectory: config.routesDirectory,
       rootDirectory: config.rootDirectory,
-      esbuild: {
-        platform: config.emulateWinterCG ? "browser" : "node",
-      },
     })
 
     await fs.mkdir(path.dirname(this.outputPath), { recursive: true })
