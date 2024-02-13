@@ -21,6 +21,7 @@ test("dev server rebuilds upon change to existing route", async (t) => {
   `
   )
   t.teardown(async () => {
+    console.log("tearing down")
     await fs.unlink(routePath)
   })
 
