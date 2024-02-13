@@ -18,7 +18,8 @@ export default defineConfig({
   },
   format: "esm",
   treeshake: true,
-  dts: true,
+  dts: false,
   sourcemap: true,
+  splitting: false,
   external: ["ava", "ava/plugin", "ava-typescript-worker"],
 })

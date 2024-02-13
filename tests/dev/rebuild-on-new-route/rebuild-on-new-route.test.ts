@@ -26,6 +26,7 @@ test("dev server rebuilds when a route is added", async (t) => {
     await fs.unlink(routePath)
   })
 
+  t.timeout(10_000)
   await t.notThrowsAsync(async () => {
     // The watcher waits a little bit to debounce
     await pRetry(
