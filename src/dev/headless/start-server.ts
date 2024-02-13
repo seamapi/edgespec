@@ -1,6 +1,5 @@
-import EventEmitter, { once } from "node:events"
+import { once } from "node:events"
 import { createServer } from "node:http"
-import fs from "node:fs/promises"
 import TypedEmitter from "typed-emitter"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
 import { HeadlessBuildEvents } from "./types"
