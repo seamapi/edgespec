@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/index.ts",
+    "src/middleware/index.ts",
+    "src/adapters/node.ts",
+    "src/adapters/wintercg-minimal.ts",
+    "src/dev/dev.ts",
+    "src/config/index.ts",
+    "src/testing/ava/index.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "./dist-types",
+    "emitDeclarationOnly": true,
+    "declaration": true
+  }
+}
