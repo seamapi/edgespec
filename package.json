@@ -1,50 +1,54 @@
 {
   "name": "edgespec",
-  "version": "0.0.24",
+  "version": "0.0.26",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "dist-types"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist-types/index.d.ts"
     },
     "./config": {
       "import": "./dist/config.js",
       "require": "./dist/config.js",
-      "types": "./dist/config.d.ts"
+      "types": "./dist-types/config/config.d.ts"
     },
     "./dev": {
       "import": "./dist/dev.js",
       "require": "./dist/dev.js",
-      "types": "./dist/dev.d.ts"
+      "types": "./dist-types/dev/dev.d.ts"
     },
     "./middleware": {
       "import": "./dist/middleware.js",
       "require": "./dist/middleware.js",
-      "types": "./dist/middleware.d.ts"
+      "types": "./dist-types/middleware/index.d.ts"
     },
     "./adapters/node": {
       "import": "./dist/adapters/node.js",
       "require": "./dist/adapters/node.js",
-      "types": "./dist/adapters/node.d.ts"
+      "types": "./dist-types/adapters/node.d.ts"
     },
     "./adapters/wintercg-minimal": {
       "import": "./dist/adapters/wintercg-minimal.js",
       "require": "./dist/adapters/wintercg-minimal.js",
-      "types": "./dist/adapters/wintercg-minimal.d.ts"
+      "types": "./dist-types/adapters/wintercg-minimal.d.ts"
     },
     "./testing/ava": {
       "import": "./dist/testing/ava.js",
       "require": "./dist/testing/ava.js",
-      "types": "./dist/testing/ava.d.ts"
+      "types": "./dist-types/testing/ava/index.d.ts"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && tsc -p tsconfig.build.json",
     "pretest": "npm run build",
     "test": "ava",
     "pretypecheck": "npm run build",
@@ -72,6 +76,7 @@
   "devDependencies": {
     "@ava/get-port": "^2.0.0",
     "@ava/typescript": "^4.1.0",
+    "@microsoft/api-extractor": "^7.40.1",
     "@types/eventemitter2": "^4.1.0",
     "@types/node": "^18.19.10",
     "@types/object-hash": "^3.0.6",
@@ -94,6 +99,7 @@
   "dependencies": {
     "@edge-runtime/node-utils": "^2.2.2",
     "@edge-runtime/primitives": "^4.0.5",
+    "async-mutex": "^0.4.1",
     "bundle-require": "^4.0.2",
     "chalk": "^5.3.0",
     "clipanion": "^4.0.0-rc.3",
