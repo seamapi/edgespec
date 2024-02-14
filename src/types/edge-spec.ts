@@ -18,7 +18,6 @@ export type EdgeSpecRouteMatcher = (pathname: string) =>
 export type EdgeSpecRouteMap = Record<string, EdgeSpecRouteFn>
 
 export interface EdgeSpecOptions {
-  handleModuleServiceRouteNotFound?: EdgeSpecRouteFn
   handle404?: EdgeSpecRouteFn
 }
 
