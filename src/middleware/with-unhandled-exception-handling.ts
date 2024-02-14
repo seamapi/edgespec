@@ -18,6 +18,8 @@ export const withUnhandledExceptionHandling: Middleware = async (
       )
     }
 
+    console.error(e)
+
     return new Response(null, {
       status: 500,
     })
