@@ -22,7 +22,7 @@ test("middleware is injected", async (t) => {
 
   const { port } = await getTestServer(t, {
     rootDirectory: path.dirname(fileURLToPath(import.meta.url)),
-    middlewares: [sampleMiddleware],
+    middleware: [sampleMiddleware],
   })
 
   const healthResponse = await fetch(`http://localhost:${port}/middleware-test`)

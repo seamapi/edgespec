@@ -3,7 +3,7 @@
 Every EdgeSpec project has a global wrapper defined in a file often called `with-edge-spec.ts`. This defines things like:
 
 - Authentication methods
-- Global middlewares
+- Global middleware
 - Metadata for code generation
 
 Here's an example:

@@ -129,7 +129,7 @@ test("middlewares run in correct order", async (t) => {
     routeSpec: {
       auth: ["pat"],
       methods: ["GET"],
-      middlewares: [
+      middleware: [
         (req, ctx, next) => {
           t.is(counter++, 3)
           return next(req, ctx)
@@ -174,7 +174,7 @@ test("receives local middleware", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["GET"],
-      middlewares: [withName],
+      middleware: [withName],
     },
     routeFn: (req) => {
       t.is(req.name, "lucille")
@@ -202,7 +202,7 @@ test("responseDefaults are passed", async (t) => {
     routeSpec: {
       auth: "none",
       methods: ["GET"],
-      middlewares: [
+      middleware: [
         (req, ctx, next) => {
           req.responseDefaults.headers.set("x-test", "test2")
 

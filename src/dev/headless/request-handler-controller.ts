@@ -21,7 +21,7 @@ export class RequestHandlerController {
 
   constructor(
     private headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>,
-    private middlewares: Middleware[],
+    private middleware: Middleware[],
     initialBundlePath?: string
   ) {
     headlessEventEmitter.on(
@@ -55,11 +55,11 @@ export class RequestHandlerController {
           await this.bundlePathPromise,
           "utf-8"
         )
-        const { middlewares } = this
+        const { middleware } = this
         this.cachedWinterCGRuntime = new EdgeRuntime({
           initialCode: contents,
           extend(context) {
-            context._injectedEdgeSpecMiddlewares = middlewares
+            context._injectedEdgeSpecMiddleware = middleware
             return context
           },
         })

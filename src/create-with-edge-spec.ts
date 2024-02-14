@@ -42,9 +42,9 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
       [
         // Injected into the VM when running in WinterCG emulation mode
         // @ts-expect-error
-        ...(typeof _injectedEdgeSpecMiddlewares !== "undefined"
+        ...(typeof _injectedEdgeSpecMiddleware !== "undefined"
           ? // @ts-expect-error
-            _injectedEdgeSpecMiddlewares
+            _injectedEdgeSpecMiddleware
           : []),
         withUnhandledExceptionHandling,
         serializeResponse(globalSpec, routeSpec, false),
@@ -54,7 +54,7 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           onMultipleAuthMiddlewareFailures
         ),
         ...(globalSpec.afterAuthMiddleware ?? []),
-        ...(routeSpec.middlewares ?? []),
+        ...(routeSpec.middleware ?? []),
         withMethods(routeSpec.methods),
         withInputValidation({
           supportedArrayFormats: globalSpec.supportedArrayFormats ?? [

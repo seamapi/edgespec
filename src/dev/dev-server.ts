@@ -45,7 +45,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
       port,
       config,
       headlessEventEmitter: eventEmitter,
-      middlewares: options.middleware,
+      middleware: options.middleware,
     }),
     startHeadlessDevBundler({
       config,
