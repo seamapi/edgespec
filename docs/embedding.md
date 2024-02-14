@@ -16,9 +16,7 @@ export default withEdgeSpec({
   // This is a thin wrapper over `await import()` to enable types, you can use `import * as shipsApi from "@acme/star-wars-ships` directly if you want.
   const shipsApi = await loadBundle("@acme/star-wars-ships")
 
-  return shipsApi.makeRequest(req, {
-    // This is important so that the ships API sees the correct path.
-    removePathnamePrefix: "/ships",
-  })
+  // The /ships base path is automatically removed from the request path that the ships API sees.
+  return shipsApi.makeRequest(req)
 })
 ```
