@@ -28,7 +28,6 @@ export const getTestServer = async (
     rootDirectory: path.join(routesDirectory, ".."),
     config: {
       routesDirectory,
-      platform: "wintercg-minimal",
     },
     port: await getPort(),
     middleware: options?.middleware,
