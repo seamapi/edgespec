@@ -289,3 +289,17 @@ test.skip("typed ctx.json()", () => {
     return ctx.json({ id: 1 })
   })({} as any, DEFAULT_CONTEXT)
 })
+
+test.skip("middlewares have routeParams", () => {
+  const _: Middleware = (req, ctx, next) => {
+    expectTypeOf(req.routeParams).toMatchTypeOf<Record<string, unknown>>()
+    return next(req, ctx)
+  }
+})
+
+test.skip("middlewares have routeParams which can be typed", () => {
+  const _: Middleware<{ routeParams: { fake: string } }> = (req, ctx, next) => {
+    expectTypeOf(req.routeParams.fake).toMatchTypeOf<string>()
+    return next(req, ctx)
+  }
+})
