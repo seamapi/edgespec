@@ -115,11 +115,7 @@ export class CodeGenRouteTypes extends BaseCommand {
     const renderType = <TType extends ts.Type>(type: Type<TType>) => {
       return project
         .getTypeChecker()
-        .compilerObject.typeToString(
-          type.compilerType,
-          undefined,
-          TypeFormatFlags.NoTruncation
-        )
+        .compilerObject.typeToString(type.compilerType)
     }
 
     project.createSourceFile(
