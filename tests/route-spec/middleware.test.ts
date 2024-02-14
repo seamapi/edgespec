@@ -29,15 +29,11 @@ const withName: Middleware<{}, { name: string }> = (req, ctx, next) => {
 test("receives auth middleware", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {
+      authMiddleware: {
         pat: withPat,
         api_token: withApiToken,
         session_token: withSessionToken,
       },
-      globalMiddlewares: [],
     },
     routeSpec: {
       auth: ["pat", "api_token", "session_token"],
@@ -64,14 +60,11 @@ test("receives auth middleware", async (t) => {
 test("fails if all auth middleware fail", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {
+      authMiddleware: {
         pat: withPat,
         api_token: withApiToken,
       },
-      globalMiddlewares: [
+      beforeAuthMiddleware: [
         async (req, ctx, next) => {
           try {
             return await next(req, ctx)
@@ -112,24 +105,21 @@ test("middlewares run in correct order", async (t) => {
 
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      globalMiddlewares: [
+      beforeAuthMiddleware: [
         (req, ctx, next) => {
           t.is(counter++, 0)
           return next(req, ctx)
         },
       ],
 
-      authMiddlewareMap: {
+      authMiddleware: {
         pat: (req, ctx, next) => {
           t.is(counter++, 1)
           return next(req, ctx)
         },
       },
 
-      globalMiddlewaresAfterAuth: [
+      afterAuthMiddleware: [
         (req, ctx, next) => {
           t.is(counter++, 2)
           return next(req, ctx)
@@ -159,11 +149,8 @@ test("middlewares run in correct order", async (t) => {
 test("receives route middleware", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {},
-      globalMiddlewares: [withName],
+      authMiddleware: {},
+      beforeAuthMiddleware: [withName],
     },
     routeSpec: {
       auth: "none",
@@ -182,11 +169,7 @@ test("receives route middleware", async (t) => {
 test("receives local middleware", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {},
-      globalMiddlewares: [],
+      authMiddleware: {},
     },
     routeSpec: {
       auth: "none",
@@ -206,11 +189,8 @@ test("receives local middleware", async (t) => {
 test("responseDefaults are passed", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {},
-      globalMiddlewares: [
+      authMiddleware: {},
+      beforeAuthMiddleware: [
         (req, ctx, next) => {
           req.responseDefaults.headers.set("x-test", "test")
           req.responseDefaults.headers.set("x-test2", "test2")
@@ -248,15 +228,11 @@ test("responseDefaults are passed", async (t) => {
 test("allows omitting auth field in route spec", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {
+      authMiddleware: {
         pat: withPat,
         api_token: withApiToken,
         session_token: withSessionToken,
       },
-      globalMiddlewares: [],
     },
     routeSpec: {
       methods: ["GET"],

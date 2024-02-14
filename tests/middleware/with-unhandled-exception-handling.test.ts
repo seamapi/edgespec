@@ -4,11 +4,7 @@ import { getTestRoute } from "../fixtures/get-test-route.js"
 test("unhandled exception doesn't explode", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {},
-      globalMiddlewares: [],
+      authMiddleware: {},
     },
     routeSpec: {
       auth: "none",

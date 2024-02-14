@@ -6,11 +6,8 @@ import { HttpException } from "src/middleware/http-exceptions.js"
 test("handles internal middleware issues", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {},
-      globalMiddlewares: [withDefaultExceptionHandling],
+      authMiddleware: {},
+      beforeAuthMiddleware: [withDefaultExceptionHandling],
     },
     routeSpec: {
       auth: "none",
@@ -35,11 +32,8 @@ test("handles internal middleware issues", async (t) => {
 test("handles custom http exceptions", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
-      apiName: "hello-world",
-      productionServerUrl: "https://example.com",
-
-      authMiddlewareMap: {},
-      globalMiddlewares: [withDefaultExceptionHandling],
+      authMiddleware: {},
+      beforeAuthMiddleware: [withDefaultExceptionHandling],
     },
     routeSpec: {
       auth: "none",

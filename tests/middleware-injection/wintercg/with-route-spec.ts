@@ -14,8 +14,8 @@ const sampleMiddleware: Middleware<{}, { middlewareType: string }> = (
 }
 
 export const withRouteSpec = createWithEdgeSpec({
-  globalMiddlewares: [sampleMiddleware],
-  authMiddlewareMap: {},
+  beforeAuthMiddleware: [sampleMiddleware],
+  authMiddleware: {},
   apiName: "Example",
   productionServerUrl: "https://example.com",
 })
