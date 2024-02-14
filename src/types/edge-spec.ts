@@ -22,11 +22,19 @@ export interface EdgeSpecOptions {
   handle404?: EdgeSpecRouteFn
 }
 
+interface MakeRequestOptions {
+  removePathnamePrefix?: string
+}
+
 // make this deeply immutable to force usage through helper functions
 export type EdgeSpecRouteBundle = ReadonlyDeep<
   EdgeSpecOptions & {
     routeMatcher: EdgeSpecRouteMatcher
     routeMapWithHandlers: EdgeSpecRouteMap
+    makeRequest: (
+      request: Request,
+      options?: MakeRequestOptions
+    ) => Promise<Response>
   }
 >
 
@@ -37,7 +45,7 @@ export type EdgeSpecAdapter<
 
 export function handleRequestWithEdgeSpec(
   edgeSpec: EdgeSpecRouteBundle,
-  pathnameOverride?: string
+  options: MakeRequestOptions = {}
 ): (request: Request) => Promise<Response> {
   return async (request: Request) => {
     const {
@@ -49,7 +57,11 @@ export function handleRequestWithEdgeSpec(
         }),
     } = edgeSpec
 
-    const pathname = pathnameOverride ?? new URL(request.url).pathname
+    let pathname = new URL(request.url).pathname
+    if (options.removePathnamePrefix) {
+      pathname = pathname.replace(options.removePathnamePrefix, "")
+    }
+
     const { matchedRoute, routeParams } = routeMatcher(pathname) ?? {}
 
     const routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]

@@ -1,6 +1,6 @@
 import http from "node:http"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
-import { EdgeSpecAdapter, handleRequestWithEdgeSpec } from "src/types/edge-spec"
+import type { EdgeSpecAdapter } from "src/types/edge-spec"
 
 export interface EdgeSpecNodeAdapterOptions {
   port?: number
@@ -15,7 +15,7 @@ export const startServer: EdgeSpecAdapter<
   })
 
   const server = http.createServer(
-    transformToNode(handleRequestWithEdgeSpec(edgeSpec))
+    transformToNode((req) => edgeSpec.makeRequest(req))
   )
 
   await new Promise<void>((resolve) => server.listen(port, resolve))
