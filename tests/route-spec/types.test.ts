@@ -4,34 +4,36 @@ import { expectTypeOf } from "expect-type"
 import { EdgeSpecResponse } from "src/types/web-handler"
 import { z } from "zod"
 import { Middleware } from "src/middleware"
+import { DEFAULT_CONTEXT } from "src/types/context"
 
 const withSessionToken: Middleware<
   {},
   { auth: { session_token: { user: "lucille" } } }
-> = (next, req) => {
+> = (req, ctx, next) => {
   req.auth = { ...req.auth, session_token: { user: "lucille" } }
-  return next(req)
+  return next(req, ctx)
 }
 
 const withPat: Middleware<{}, { auth: { pat: { user: "lucille" } } }> = (
-  next,
-  req
+  req,
+  ctx,
+  next
 ) => {
   req.auth = { ...req.auth, pat: { user: "lucille" } }
-  return next(req)
+  return next(req, ctx)
 }
 
 const withApiToken: Middleware<
   {},
   { auth: { api_token: { user: "lucille" } } }
-> = (next, req) => {
+> = (req, ctx, next) => {
   req.auth = { ...req.auth, api_token: { user: "lucille" } }
-  return next(req)
+  return next(req, ctx)
 }
 
-const withName: Middleware<{}, { name: string }> = (next, req) => {
+const withName: Middleware<{}, { name: string }> = (req, ctx, next) => {
   req.name = "lucille"
-  return next(req)
+  return next(req, ctx)
 }
 
 test.skip("auth none is always supported", () => {
@@ -89,7 +91,7 @@ test.skip("can select existing middleware", () => {
     productionServerUrl: "https://example.com",
 
     authMiddlewareMap: {
-      session_token: (next, req) => next(req),
+      session_token: (req, ctx, next) => next(req, ctx),
     },
     globalMiddlewares: [],
   })
@@ -216,7 +218,7 @@ test.skip("custom response map types are enforced", () => {
     // @ts-expect-error
   })(() => {
     return EdgeSpecResponse.custom("not a number", "custom/response")
-  })({} as any)
+  })({} as any, DEFAULT_CONTEXT)
 })
 
 test.skip("route param types", () => {
@@ -235,13 +237,14 @@ test.skip("route param types", () => {
   })((req) => {
     expectTypeOf(req.routeParams.id).toBeNumber()
     return new Response()
-  })({} as any)
+  })({} as any, DEFAULT_CONTEXT)
 })
 
 const middlewareWithInputs: Middleware<{ x: number }, { y: number }> = (
-  next,
-  req
-) => next(req)
+  req,
+  ctx,
+  next
+) => next(req, ctx)
 
 test.skip("allows middleware with inputs", () => {
   const withEdgeSpec = createWithEdgeSpec({
@@ -261,5 +264,28 @@ test.skip("allows middleware with inputs", () => {
   })((req) => {
     expectTypeOf(req.y).toBeNumber()
     return new Response()
-  })({} as any)
+  })({} as any, DEFAULT_CONTEXT)
+})
+
+test.skip("typed ctx.json()", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {
+      test: middlewareWithInputs,
+    },
+    globalMiddlewares: [],
+  })
+
+  withEdgeSpec({
+    auth: "test",
+    methods: ["GET"],
+    jsonResponse: z.object({
+      id: z.number(),
+    }),
+    routeParams: z.object({ id: z.coerce.number() }),
+  })((_, ctx) => {
+    return ctx.json({ id: 1 })
+  })({} as any, DEFAULT_CONTEXT)
 })

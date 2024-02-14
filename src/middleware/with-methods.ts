@@ -4,10 +4,10 @@ import { MethodNotAllowedError } from "./http-exceptions"
 
 export const withMethods =
   (methods: readonly HTTPMethods[]): Middleware =>
-  (next, req) => {
+  (req, ctx, next) => {
     if (!(methods as string[]).includes(req.method)) {
       throw new MethodNotAllowedError(methods)
     }
 
-    return next(req)
+    return next(req, ctx)
   }

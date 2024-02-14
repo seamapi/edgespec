@@ -13,7 +13,7 @@ export type QueryArrayFormats = readonly QueryArrayFormat[]
 
 export type GlobalSpec = {
   authMiddlewareMap: Record<string, Middleware<any, any>>
-  globalMiddlewares: readonly Middleware<any, any>[]
+  globalMiddlewares: readonly Middleware<unknown, unknown, {}>[]
   globalMiddlewaresAfterAuth?: readonly Middleware<any, any>[]
 
   // These improve OpenAPI generation
