@@ -38,11 +38,7 @@ const withName: Middleware<{}, { name: string }> = (req, ctx, next) => {
 
 test.skip("auth none is always supported", () => {
   createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddleware: {},
   })({
     auth: "none",
     methods: ["GET"],
@@ -51,11 +47,7 @@ test.skip("auth none is always supported", () => {
 
 test.skip("auth none cannot be provided in an array", () => {
   createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddleware: {},
   })({
     // @ts-expect-error
     auth: ["none"],
@@ -65,11 +57,7 @@ test.skip("auth none cannot be provided in an array", () => {
 
 test.skip("cannot select non-existent auth methods", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddleware: {},
   })
 
   withEdgeSpec({
@@ -87,13 +75,9 @@ test.skip("cannot select non-existent auth methods", () => {
 
 test.skip("can select existing middleware", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {
+    authMiddleware: {
       session_token: (req, ctx, next) => next(req, ctx),
     },
-    globalMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -109,11 +93,8 @@ test.skip("can select existing middleware", () => {
 
 test.skip("middleware objects are available", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [withName],
+    authMiddleware: {},
+    beforeAuthMiddleware: [withName],
   })
 
   withEdgeSpec({
@@ -128,13 +109,9 @@ test.skip("middleware objects are available", () => {
 
 test.skip("auth middleware objects are available as singleton", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {
+    authMiddleware: {
       session_token: withSessionToken,
     },
-    globalMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -151,15 +128,11 @@ test.skip("auth middleware objects are available as singleton", () => {
 
 test.skip("auth middleware objects are available as union", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {
+    authMiddleware: {
       session_token: withSessionToken,
       pat: withPat,
       api_token: withApiToken,
     },
-    globalMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -181,11 +154,7 @@ test.skip("auth middleware objects are available as union", () => {
 
 test.skip("route-local middlewares are available to request", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddleware: {},
   })
 
   withEdgeSpec({
@@ -201,11 +170,7 @@ test.skip("route-local middlewares are available to request", () => {
 
 test.skip("custom response map types are enforced", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddleware: {},
   })
 
   withEdgeSpec({
@@ -223,11 +188,7 @@ test.skip("custom response map types are enforced", () => {
 
 test.skip("route param types", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddleware: {},
   })
 
   withEdgeSpec({
@@ -248,13 +209,9 @@ const middlewareWithInputs: Middleware<{ x: number }, { y: number }> = (
 
 test.skip("allows middleware with inputs", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {
+    authMiddleware: {
       test: middlewareWithInputs,
     },
-    globalMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -269,13 +226,9 @@ test.skip("allows middleware with inputs", () => {
 
 test.skip("typed ctx.json()", () => {
   const withEdgeSpec = createWithEdgeSpec({
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {
+    authMiddleware: {
       test: middlewareWithInputs,
     },
-    globalMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -285,7 +238,8 @@ test.skip("typed ctx.json()", () => {
       id: z.number(),
     }),
     routeParams: z.object({ id: z.coerce.number() }),
-  })((_, ctx) => {
-    return ctx.json({ id: 1 })
-  })({} as any, DEFAULT_CONTEXT)
+  })((req) => {
+    expectTypeOf(req.y).toBeNumber()
+    return new Response()
+  })({} as any, {} as any)
 })

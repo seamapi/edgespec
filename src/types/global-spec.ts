@@ -1,10 +1,5 @@
 import type { z } from "zod"
 import { Middleware } from "../middleware/types"
-import {
-  EdgeSpecRequest,
-  EdgeSpecRouteFn,
-  SerializableToResponse,
-} from "./web-handler"
 import { InferRecordKey } from "./util"
 import type { SecuritySchemeObject } from "openapi3-ts/oas31"
 
@@ -12,21 +7,19 @@ export type QueryArrayFormat = "brackets" | "comma" | "repeat"
 export type QueryArrayFormats = readonly QueryArrayFormat[]
 
 export type GlobalSpec = {
-  authMiddlewareMap: Record<string, Middleware<any, any>>
-  globalMiddlewares: readonly Middleware<unknown, unknown, {}>[]
-  globalMiddlewaresAfterAuth?: readonly Middleware<any, any>[]
+  authMiddleware: Record<string, Middleware<any, any>>
+  beforeAuthMiddleware?: readonly Middleware<unknown, unknown, {}>[]
+  afterAuthMiddleware?: readonly Middleware<any, any>[]
 
-  // These improve OpenAPI generation
-  apiName: string
-  productionServerUrl: string
-
-  addOkStatus?: boolean
+  openapi?: {
+    apiName?: string
+    productionServerUrl?: string
+    securitySchemas?: Record<string, SecuritySchemeObject>
+    readonly globalSchemas?: Record<string, z.ZodTypeAny>
+  }
 
   shouldValidateResponses?: boolean
   shouldValidateGetRequestBody?: boolean
-  securitySchemas?: Record<string, SecuritySchemeObject>
-  readonly globalSchemas?: Record<string, z.ZodTypeAny>
-
   supportedArrayFormats?: QueryArrayFormats
 
   /**
@@ -37,4 +30,4 @@ export type GlobalSpec = {
 }
 
 export type GetAuthMiddlewaresFromGlobalSpec<GS extends GlobalSpec> =
-  InferRecordKey<GS["authMiddlewareMap"]>
+  InferRecordKey<GS["authMiddleware"]>

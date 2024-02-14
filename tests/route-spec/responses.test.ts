@@ -7,11 +7,8 @@ import { GlobalSpec } from "src/types/global-spec.js"
 
 const defaultSpecs = {
   globalSpec: {
-    apiName: "hello-world",
-    productionServerUrl: "https://example.com",
-
-    authMiddlewareMap: {},
-    globalMiddlewares: [
+    authMiddleware: {},
+    beforeAuthMiddleware: [
       async (req, ctx, next) => {
         try {
           return await next(req, ctx)

@@ -13,12 +13,9 @@ Here's an example:
 import { createWithEdgeSpec } from "edgespec"
 
 export const withEdgeSpec = createWithEdgeSpec({
-  apiName: "hello-world",
-
-  authMiddlewareMap: {},
-  globalMiddlewares: [],
-
-  productionServerUrl: "https://example.com",
+  beforeAuthMiddleware: [],
+  authMiddleware: {},
+  afterAuthMiddleware: [],
 
   // Defaults to true. When true, all JSON responses are validated against the route's response schema.
   shouldValidateResponses: true,

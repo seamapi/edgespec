@@ -8,8 +8,8 @@ test("json-body-01", async (t) => {
       apiName: "hello-world",
       productionServerUrl: "https://example.com",
 
-      authMiddlewareMap: {},
-      globalMiddlewares: [],
+      authMiddleware: {},
+      beforeAuthMiddleware: [],
     },
     routeSpec: {
       auth: "none",
