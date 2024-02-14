@@ -51,13 +51,3 @@ test.serial("can make request when hosted on subpath", async (t) => {
   t.is(response.status, 200)
   t.is(await response.text(), "ok")
 })
-
-test.serial("automatically detects and removes base path", async (t) => {
-  const bundle = await createAndLoadBundle(t)
-
-  const response = await bundle.makeRequest(
-    new Request(new URL("https://example.com/a/sample/module/sub/path/health"))
-  )
-  t.is(response.status, 200)
-  t.is(await response.text(), "ok")
-})

@@ -3,6 +3,8 @@ import {
   SerializableToResponse,
   type EdgeSpecRouteFn,
   type EdgeSpecRouteParams,
+  EdgeSpecRequest,
+  EdgeSpecInitializationOptions,
 } from "./web-handler.js"
 
 import type { ReadonlyDeep } from "type-fest"
@@ -26,6 +28,8 @@ interface MakeRequestOptions {
    * Defaults to true. When true, we will attempt to automatically remove any pathname prefix from the request. This is useful when you're hosting an EdgeSpec service on a subpath of your application.
    *
    * For example, if you're hosting an EdgeSpec service "Foo" at /foo/[...path], then this option will automatically remove the /foo prefix from the request so that the Foo service only sees /[...path].
+   *
+   * This currently only works if your parent application is also an EdgeSpec service and it's hosting the child service on a wildcard route (/foo/[...path]).
    */
   automaticallyRemovePathnamePrefix?: boolean
 
@@ -79,16 +83,28 @@ export function makeRequestAgainstEdgeSpec(
 
       pathname = pathname.replace(removePathnamePrefix, "")
     } else {
-      const pathSegments = pathname.split("/").filter(Boolean)
-      let matchingPath: string | undefined = undefined
-      for (let i = pathSegments.length; i >= 0; i--) {
-        const path = `/${pathSegments.slice(i).join("/")}`
-        if (routeMatcher(path)) {
-          matchingPath = path
-        }
-      }
+      if ((request as any).routeParams) {
+        // These are the route params of the parent route hosting the EdgeSpec service
+        const routeParams = (
+          request as unknown as EdgeSpecInitializationOptions
+        ).routeParams
 
-      pathname = matchingPath ?? pathname
+        // If the child service is hosted at /foo/[...path], we want to find the [...path] parameter
+        const wildcardRouteParameters = Object.values(routeParams).filter((p) =>
+          Array.isArray(p)
+        )
+        if (wildcardRouteParameters.length === 0) {
+          throw new Error("No wildcard route parameters found")
+        }
+
+        if (wildcardRouteParameters.length > 1) {
+          throw new Error("Only one wildcard route parameter is supported")
+        }
+
+        const wildcardRouteParameter = wildcardRouteParameters[0]
+
+        pathname = `/${(wildcardRouteParameter as string[]).join("/")}`
+      }
     }
 
     const { matchedRoute, routeParams } = routeMatcher(pathname) ?? {}
