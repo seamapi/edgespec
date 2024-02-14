@@ -160,7 +160,7 @@ test.skip("route-local middlewares are available to request", () => {
   withEdgeSpec({
     auth: "none",
     methods: ["GET"],
-    middlewares: [withName],
+    middleware: [withName],
   })((req) => {
     expectTypeOf<(typeof req)["name"]>().toBeString()
 

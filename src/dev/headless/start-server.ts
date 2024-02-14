@@ -13,7 +13,7 @@ export interface StartHeadlessDevServerOptions {
   config: ResolvedEdgeSpecConfig
   headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
   initialBundlePath?: string
-  middlewares?: Middleware[]
+  middleware?: Middleware[]
 }
 
 /**
@@ -26,11 +26,11 @@ export const startHeadlessDevServer = async ({
   config,
   headlessEventEmitter,
   initialBundlePath,
-  middlewares = [],
+  middleware = [],
 }: StartHeadlessDevServerOptions) => {
   const controller = new RequestHandlerController(
     headlessEventEmitter,
-    middlewares,
+    middleware,
     initialBundlePath
   )
 

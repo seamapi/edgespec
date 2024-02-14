@@ -43,10 +43,10 @@ export type GetTestServerOptions = {
    */
   rootDirectory?: string
   /**
-   * Middlewares that run before any other middleware.
+   * Middleware that run before any other middleware.
    * This is often used for dependency injection.
    */
-  middlewares?: Middleware[]
+  middleware?: Middleware[]
 }
 
 /**
@@ -85,7 +85,7 @@ export const getTestServer = async (
     config: await loadConfig(rootDirectory),
     headlessEventEmitter: eventEmitter as any,
     initialBundlePath: msg.bundlePath,
-    middlewares: options?.middlewares ?? [],
+    middleware: options?.middleware ?? [],
   })
 
   const messageHandlerAbortController = new AbortController()
