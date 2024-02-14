@@ -5,6 +5,7 @@ import { Mutex } from "async-mutex"
 import TypedEmitter from "typed-emitter"
 import { makeRequestAgainstEdgeSpec } from "src/types/edge-spec"
 import { HeadlessBuildEvents } from "./types"
+import { Middleware } from "src/middleware"
 import { loadBundle } from "src"
 
 export class RequestHandlerController {
@@ -20,6 +21,7 @@ export class RequestHandlerController {
 
   constructor(
     private headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>,
+    private middlewares: Middleware[],
     initialBundlePath?: string
   ) {
     headlessEventEmitter.on(
@@ -53,8 +55,13 @@ export class RequestHandlerController {
           await this.bundlePathPromise,
           "utf-8"
         )
+        const { middlewares } = this
         this.cachedWinterCGRuntime = new EdgeRuntime({
           initialCode: contents,
+          extend(context) {
+            context._injectedEdgeSpecMiddlewares = middlewares
+            return context
+          },
         })
         return this.cachedWinterCGRuntime
       })

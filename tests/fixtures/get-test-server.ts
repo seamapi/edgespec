@@ -4,6 +4,7 @@ import defaultAxios from "axios"
 import { fileURLToPath } from "node:url"
 import getPort from "@ava/get-port"
 import { startDevServer } from "src/dev/dev-server"
+import type { Middleware } from "src/middleware"
 
 /**
  * Starts a dev server using the same function that's exported to consumers & used in the CLI.
@@ -13,7 +14,10 @@ import { startDevServer } from "src/dev/dev-server"
  */
 export const getTestServer = async (
   t: ExecutionContext,
-  testFileUrl: string
+  testFileUrl: string,
+  options?: {
+    middleware?: Middleware[]
+  }
 ) => {
   const routesDirectory = path.join(
     path.dirname(fileURLToPath(testFileUrl)),
@@ -21,12 +25,13 @@ export const getTestServer = async (
   )
 
   const { stop, port } = await startDevServer({
+    rootDirectory: path.join(routesDirectory, ".."),
     config: {
-      rootDirectory: path.join(routesDirectory, ".."),
       routesDirectory,
       platform: "wintercg-minimal",
     },
     port: await getPort(),
+    middleware: options?.middleware,
   })
 
   t.teardown(async () => {

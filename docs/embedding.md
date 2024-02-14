@@ -17,6 +17,9 @@ export default withEdgeSpec({
   const shipsApi = await loadBundle("@acme/star-wars-ships")
 
   // The /ships base path is automatically removed from the request path that the ships API sees.
-  return shipsApi.makeRequest(req)
+  return shipsApi.makeRequest(req, {
+    // This is optional, you can add middleware if you want that runs before any other middleware in the ships API. This is often useful for dependency injection.
+    middleware: [],
+  })
 })
 ```

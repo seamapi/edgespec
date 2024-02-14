@@ -1,6 +1,6 @@
+import type { Middleware } from "src/middleware/types.js"
 import {
   createEdgeSpecRequest,
-  SerializableToResponse,
   type EdgeSpecRouteFn,
   type EdgeSpecRouteParams,
   EdgeSpecRequest,
@@ -8,6 +8,7 @@ import {
 } from "./web-handler.js"
 
 import type { ReadonlyDeep } from "type-fest"
+import { wrapMiddlewares } from "src/create-with-edge-spec.js"
 
 export type EdgeSpecRouteMatcher = (pathname: string) =>
   | {
@@ -37,6 +38,8 @@ interface MakeRequestOptions {
    * If you want to manually remove a pathname prefix, you can specify it here. `automaticallyRemovePathnamePrefix` must be false when specifying this option.
    */
   removePathnamePrefix?: string
+
+  middleware?: Middleware[]
 }
 
 // make this deeply immutable to force usage through helper functions
@@ -109,7 +112,7 @@ export function makeRequestAgainstEdgeSpec(
 
     const { matchedRoute, routeParams } = routeMatcher(pathname) ?? {}
 
-    const routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]
+    let routeFn = matchedRoute && routeMapWithHandlers[matchedRoute]
 
     const edgeSpecRequest = createEdgeSpecRequest(request, {
       edgeSpec,
@@ -121,6 +124,6 @@ export function makeRequestAgainstEdgeSpec(
       return await handle404(edgeSpecRequest)
     }
 
-    return await routeFn(edgeSpecRequest)
+    return wrapMiddlewares(options.middleware ?? [], routeFn, edgeSpecRequest)
   }
 }

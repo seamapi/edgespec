@@ -6,12 +6,14 @@ import { HeadlessBuildEvents } from "./types"
 import { ResolvedEdgeSpecConfig } from "src/config/utils"
 import chalk from "chalk"
 import { RequestHandlerController } from "./request-handler-controller"
+import { Middleware } from "src/middleware"
 
 export interface StartHeadlessDevServerOptions {
   port: number
   config: ResolvedEdgeSpecConfig
   headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
   initialBundlePath?: string
+  middlewares?: Middleware[]
 }
 
 /**
@@ -24,9 +26,11 @@ export const startHeadlessDevServer = async ({
   config,
   headlessEventEmitter,
   initialBundlePath,
+  middlewares = [],
 }: StartHeadlessDevServerOptions) => {
   const controller = new RequestHandlerController(
     headlessEventEmitter,
+    middlewares,
     initialBundlePath
   )
 
