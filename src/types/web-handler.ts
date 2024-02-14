@@ -2,6 +2,7 @@ import type { FetchEvent } from "@edge-runtime/primitives"
 import { EdgeSpecRouteBundle } from "./edge-spec"
 import { Primitive } from "type-fest"
 import { z } from "zod"
+import { ResponseTypeToContext } from "./context"
 
 export type HTTPMethods =
   | "GET"
@@ -173,8 +174,10 @@ export class EdgeSpecMultiPartFormDataResponse<
 export type EdgeSpecRouteFn<
   RequestOptions = EdgeSpecInitializationOptions,
   ResponseType extends SerializableToResponse | Response = Response,
+  Context = ResponseTypeToContext<ResponseType>,
 > = (
-  req: EdgeSpecRequest<RequestOptions>
+  req: EdgeSpecRequest<RequestOptions>,
+  ctx: Context
 ) => ResponseType | Promise<ResponseType>
 
 export type EdgeSpecFetchEvent = FetchEvent & {

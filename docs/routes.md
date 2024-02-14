@@ -17,14 +17,12 @@ export default withEdgeSpec({
   jsonResponse: z.object({
     sum: z.number(),
   }),
-})((req) => {
-  const { a, b } = await req.json()
+})((req, ctx) => {
+  const { a, b } = await req.jsonBody
 
-  return new Response(
-    JSON.stringify({
-      sum: a + b,
-    })
-  )
+  return ctx.json({
+    sum: a + b,
+  })
 })
 ```
 

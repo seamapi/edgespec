@@ -4,6 +4,7 @@ import { expectTypeOf } from "expect-type"
 import { EdgeSpecResponse } from "src/types/web-handler"
 import { z } from "zod"
 import { Middleware } from "src/middleware"
+import { DEFAULT_CONTEXT } from "src/types/context"
 
 const withSessionToken: Middleware<
   {},
@@ -216,7 +217,7 @@ test.skip("custom response map types are enforced", () => {
     // @ts-expect-error
   })(() => {
     return EdgeSpecResponse.custom("not a number", "custom/response")
-  })({} as any)
+  })({} as any, DEFAULT_CONTEXT)
 })
 
 test.skip("route param types", () => {
@@ -235,7 +236,7 @@ test.skip("route param types", () => {
   })((req) => {
     expectTypeOf(req.routeParams.id).toBeNumber()
     return new Response()
-  })({} as any)
+  })({} as any, DEFAULT_CONTEXT)
 })
 
 const middlewareWithInputs: Middleware<{ x: number }, { y: number }> = (
@@ -261,5 +262,28 @@ test.skip("allows middleware with inputs", () => {
   })((req) => {
     expectTypeOf(req.y).toBeNumber()
     return new Response()
-  })({} as any)
+  })({} as any, DEFAULT_CONTEXT)
+})
+
+test.skip("typed ctx.json()", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    apiName: "hello-world",
+    productionServerUrl: "https://example.com",
+
+    authMiddlewareMap: {
+      test: middlewareWithInputs,
+    },
+    globalMiddlewares: [],
+  })
+
+  withEdgeSpec({
+    auth: "test",
+    methods: ["GET"],
+    jsonResponse: z.object({
+      id: z.number(),
+    }),
+    routeParams: z.object({ id: z.coerce.number() }),
+  })((_, ctx) => {
+    return ctx.json({ id: 1 })
+  })({} as any, DEFAULT_CONTEXT)
 })

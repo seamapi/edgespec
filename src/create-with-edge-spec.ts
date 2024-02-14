@@ -16,6 +16,7 @@ import { withMethods } from "./middleware/with-methods.js"
 import { withInputValidation } from "./middleware/with-input-validation.js"
 import { withUnhandledExceptionHandling } from "./middleware/with-unhandled-exception-handling.js"
 import { ResponseValidationError } from "./middleware/http-exceptions.js"
+import { DEFAULT_CONTEXT } from "./types/context.js"
 
 export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
@@ -123,7 +124,7 @@ function serializeResponse(
 
 export async function wrapMiddlewares(
   middlewares: MiddlewareChain,
-  routeFn: EdgeSpecRouteFn<any, any>,
+  routeFn: EdgeSpecRouteFn<any, any, any>,
   request: EdgeSpecRequest
 ) {
   return await middlewares.reduceRight(
@@ -132,7 +133,7 @@ export async function wrapMiddlewares(
         return middleware(next, req)
       }
     },
-    async (request: EdgeSpecRequest) => routeFn(request)
+    async (request: EdgeSpecRequest) => routeFn(request, DEFAULT_CONTEXT)
   )(request)
 }
 

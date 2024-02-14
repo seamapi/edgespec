@@ -192,6 +192,44 @@ test("can set headers, status", async (t) => {
   t.deepEqual(response.data, { hello: "world" })
 })
 
+test("can set headers, status w/ context", async (t) => {
+  const { axios } = await getTestRoute(t, {
+    ...defaultSpecs,
+    routeSpec: {
+      auth: "none",
+      methods: ["GET"],
+      multipartFormDataResponse: z.object({
+        hello: z.string(),
+      }),
+    },
+    routeFn: (_, ctx) => {
+      return ctx
+        .json({
+          hello: "world",
+        })
+        .status(201)
+        .header("x-hello", "world")
+        .headers({
+          "x-hello-2": "world2",
+          "x-hello": "world2",
+        })
+    },
+    routePath: "/hello",
+  })
+
+  const response = await axios.get("/hello")
+
+  t.is(response.status, 201)
+  // @ts-expect-error
+  t.is(response.headers.get("content-type"), "application/json")
+  // @ts-expect-error
+  t.is(response.headers.get("x-hello"), "world2")
+  // @ts-expect-error
+  t.is(response.headers.get("x-hello-2"), "world2")
+
+  t.deepEqual(response.data, { hello: "world" })
+})
+
 test("can return custom response types", async (t) => {
   const { axios } = await getTestRoute(t, {
     ...defaultSpecs,
