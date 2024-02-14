@@ -25,9 +25,10 @@ export const startHeadlessDevBundler = async ({
   const { stop } = await bundleAndWatch({
     rootDirectory: config.rootDirectory,
     routesDirectory: config.routesDirectory,
-    bundledAdapter: config.emulateWinterCG ? "wintercg-minimal" : undefined,
+    bundledAdapter:
+      config.platform === "wintercg-minimal" ? "wintercg-minimal" : undefined,
     esbuild: {
-      platform: config.emulateWinterCG ? "browser" : "node",
+      platform: config.platform === "wintercg-minimal" ? "browser" : "node",
       outfile: devBundlePath,
       write: true,
       plugins: [

@@ -24,7 +24,7 @@ export const getTestServer = async (
     config: {
       rootDirectory: path.join(routesDirectory, ".."),
       routesDirectory,
-      emulateWinterCG: true,
+      platform: "wintercg-minimal",
     },
     port: await getPort(),
   })
