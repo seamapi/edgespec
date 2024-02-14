@@ -89,15 +89,17 @@ type GetMiddlewareRequestOptions<
 > &
   (RS["auth"] extends "none"
     ? {}
-    : AccumulateMiddlewareChainResultOptions<
-        MapMiddlewares<
-          GS["authMiddleware"],
-          RS["auth"] extends undefined | null
-            ? "none"
-            : Exclude<RS["auth"], undefined | null>
-        >,
-        "union"
-      >) &
+    : undefined extends RS["auth"]
+      ? {}
+      : AccumulateMiddlewareChainResultOptions<
+          MapMiddlewares<
+            GS["authMiddleware"],
+            RS["auth"] extends undefined | null
+              ? "none"
+              : Exclude<RS["auth"], undefined | null>
+          >,
+          "union"
+        >) &
   AccumulateMiddlewareChainResultOptions<
     GS["afterAuthMiddleware"] extends MiddlewareChain
       ? GS["afterAuthMiddleware"]
