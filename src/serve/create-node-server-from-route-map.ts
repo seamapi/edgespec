@@ -12,7 +12,7 @@ import {
   handleRequestWithEdgeSpec,
 } from "src/types/edge-spec.js"
 
-export const createEdgeSpecFromRouteMap = (
+const createEdgeSpecFromRouteMap = (
   routeMap: Record<string, EdgeSpecRouteFn>,
   edgeSpecOptions?: Partial<EdgeSpecOptions>
 ): EdgeSpecRouteBundle => {
@@ -26,11 +26,15 @@ export const createEdgeSpecFromRouteMap = (
     ])
   )
 
-  return {
+  const edgeSpec = {
     routeMatcher,
     routeMapWithHandlers,
+    makeRequest: async (req: Request) =>
+      handleRequestWithEdgeSpec(edgeSpec)(req),
     ...edgeSpecOptions,
   }
+
+  return edgeSpec
 }
 
 export const createNodeServerFromRouteMap = async (
