@@ -4,11 +4,12 @@ import { getTestServer } from "tests/fixtures/get-test-server"
 
 test("wintercg middleware injection", async (t) => {
   const sampleMiddleware: Middleware<{}, { middlewareType: string }> = (
-    next,
-    req
+    req,
+    ctx,
+    next
   ) => {
     req.middlewareType = "wintercg"
-    return next(req)
+    return next(req, ctx)
   }
 
   const fixture = await getTestServer(t, import.meta.url, {

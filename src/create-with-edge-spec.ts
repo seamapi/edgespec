@@ -93,8 +93,8 @@ function serializeResponse(
   routeSpec: RouteSpec<any>,
   skipValidation: boolean = false
 ): Middleware {
-  return async (next, req) => {
-    const rawResponse = await next(req)
+  return async (req, ctx, next) => {
+    const rawResponse = await next(req, ctx)
 
     const statusCode =
       rawResponse instanceof EdgeSpecResponse
@@ -130,7 +130,7 @@ export async function wrapMiddlewares(
   return await middlewares.reduceRight(
     (next, middleware) => {
       return async (req) => {
-        return middleware(next, req)
+        return middleware(req, DEFAULT_CONTEXT, next)
       }
     },
     async (request: EdgeSpecRequest) => routeFn(request, DEFAULT_CONTEXT)
@@ -178,9 +178,9 @@ function firstAuthMiddlewareThatSucceeds(
     | null
     | undefined
 ): Middleware {
-  return async (next, req) => {
+  return async (req, ctx, next) => {
     if (authMiddlewares.length === 0) {
-      return next(req)
+      return next(req, ctx)
     }
 
     let errors: unknown[] = []
@@ -188,11 +188,11 @@ function firstAuthMiddlewareThatSucceeds(
 
     for (const middleware of authMiddlewares) {
       try {
-        return await middleware((...args) => {
+        return await middleware(req, ctx, (...args) => {
           // Otherwise errors unrelated to auth thrown by built-in middleware (withMethods, withValidation) will be caught here
           didAuthMiddlewareThrow = false
           return next(...args)
-        }, req)
+        })
       } catch (error) {
         if (didAuthMiddlewareThrow) {
           errors.push(error)

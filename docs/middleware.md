@@ -1,6 +1,6 @@
 # Middleware
 
-Middleware in EdgeSpec follows a similar pattern to other libraries like Express/Fastify/Koa. Middleware receives two parameters: the `next` function and the incoming `req` object. It is expected to always call `next`.
+Middleware in EdgeSpec follows a similar pattern to other libraries like Express/Fastify/Koa. Middleware receives three parameters: the incoming `req` object, the `ctx` context object, and the `next` function. It is expected to always call `next`.
 
 Here's a few example use cases:
 
@@ -11,9 +11,9 @@ Mutate the passed `req` object. For example:
 ```typescript
 import type { Middleware } from "edgespec"
 
-export const exampleMiddleware: Middleware = (next, req) => {
+export const exampleMiddleware: Middleware = (req, ctx, next) => {
   req.foo = "bar"
-  return next(req)
+  return next(req, ctx)
 }
 
 // Later, in a route...
@@ -38,9 +38,9 @@ const baseResponse = new Response(null, {
   },
 })
 
-export const exampleMiddleware: Middleware = (next, req) => {
+export const exampleMiddleware: Middleware = (req, ctx, next) => {
   req.responseDefaults = baseResponse
-  return next(req)
+  return next(req, ctx)
 }
 ```
 
@@ -58,10 +58,10 @@ export const databaseMiddleware: Middleware<
   {
     db: DatabaseClient
   }
-> = async (next, req) => {
+> = async (req, ctx, next) => {
   const db = await connectToDatabase()
   req.db = db
-  return next(req)
+  return next(req, ctx)
 }
 
 export const bearerAuthMiddleware: Middleware<
@@ -73,7 +73,7 @@ export const bearerAuthMiddleware: Middleware<
   {
     is_authenticated: boolean
   }
-> = (next, req) => {
+> = (req, ctx, next) => {
   const authToken = req.headers.get("authorization")?.split("Bearer ")?.[1]
   if (!authToken) {
     // EdgeSpec will attach returned properties to the Request object
@@ -88,7 +88,7 @@ export const bearerAuthMiddleware: Middleware<
 
   req.is_authenticated = Boolean(user)
 
-  return next(req)
+  return next(req, ctx)
 }
 ```
 

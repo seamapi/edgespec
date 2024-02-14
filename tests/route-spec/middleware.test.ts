@@ -5,9 +5,9 @@ import { getTestRoute } from "tests/fixtures/get-test-route"
 const withSessionToken: Middleware<
   {},
   { auth: { session_token: { user: "lucille" } } }
-> = (next, req) => {
+> = (req, ctx, next) => {
   req.auth = { ...req.auth, session_token: { user: "lucille" } }
-  return next(req)
+  return next(req, ctx)
 }
 
 const withPat: Middleware<{}, { auth: { pat: { user: "lucille" } } }> = () => {
@@ -21,9 +21,9 @@ const withApiToken: Middleware<
   throw new Error("Unauthorized")
 }
 
-const withName: Middleware<{}, { name: string }> = (next, req) => {
+const withName: Middleware<{}, { name: string }> = (req, ctx, next) => {
   req.name = "lucille"
-  return next(req)
+  return next(req, ctx)
 }
 
 test("receives auth middleware", async (t) => {
@@ -72,9 +72,9 @@ test("fails if all auth middleware fail", async (t) => {
         api_token: withApiToken,
       },
       globalMiddlewares: [
-        async (next, req) => {
+        async (req, ctx, next) => {
           try {
-            return await next(req)
+            return await next(req, ctx)
           } catch (err: any) {
             return new Response(err.message, { status: 500 })
           }
@@ -116,23 +116,23 @@ test("middlewares run in correct order", async (t) => {
       productionServerUrl: "https://example.com",
 
       globalMiddlewares: [
-        (next, req) => {
+        (req, ctx, next) => {
           t.is(counter++, 0)
-          return next(req)
+          return next(req, ctx)
         },
       ],
 
       authMiddlewareMap: {
-        pat: (next, req) => {
+        pat: (req, ctx, next) => {
           t.is(counter++, 1)
-          return next(req)
+          return next(req, ctx)
         },
       },
 
       globalMiddlewaresAfterAuth: [
-        (next, req) => {
+        (req, ctx, next) => {
           t.is(counter++, 2)
-          return next(req)
+          return next(req, ctx)
         },
       ],
     },
@@ -140,9 +140,9 @@ test("middlewares run in correct order", async (t) => {
       auth: ["pat"],
       methods: ["GET"],
       middlewares: [
-        (next, req) => {
+        (req, ctx, next) => {
           t.is(counter++, 3)
-          return next(req)
+          return next(req, ctx)
         },
       ],
     },
@@ -211,11 +211,11 @@ test("responseDefaults are passed", async (t) => {
 
       authMiddlewareMap: {},
       globalMiddlewares: [
-        (next, req) => {
+        (req, ctx, next) => {
           req.responseDefaults.headers.set("x-test", "test")
           req.responseDefaults.headers.set("x-test2", "test2")
 
-          return next(req)
+          return next(req, ctx)
         },
       ],
     },
@@ -223,10 +223,10 @@ test("responseDefaults are passed", async (t) => {
       auth: "none",
       methods: ["GET"],
       middlewares: [
-        (next, req) => {
+        (req, ctx, next) => {
           req.responseDefaults.headers.set("x-test", "test2")
 
-          return next(req)
+          return next(req, ctx)
         },
       ],
     },

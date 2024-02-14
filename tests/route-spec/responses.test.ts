@@ -12,9 +12,9 @@ const defaultSpecs = {
 
     authMiddlewareMap: {},
     globalMiddlewares: [
-      async (next, req) => {
+      async (req, ctx, next) => {
         try {
-          return await next(req)
+          return await next(req, ctx)
         } catch (e: any) {
           return EdgeSpecResponse.json(
             { error_type: e.constructor.name },

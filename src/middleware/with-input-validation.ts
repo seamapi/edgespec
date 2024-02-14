@@ -231,7 +231,7 @@ export const withInputValidation =
       urlEncodedFormData: z.output<UrlEncodedFormData>
     }
   > =>
-  async (next, req) => {
+  async (req, ctx, next) => {
     const { supportedArrayFormats } = input
 
     if (
@@ -388,5 +388,5 @@ export const withInputValidation =
       throw new InputParsingError("Error while parsing input")
     }
 
-    return next(req)
+    return next(req, ctx)
   }

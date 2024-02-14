@@ -9,30 +9,31 @@ import { DEFAULT_CONTEXT } from "src/types/context"
 const withSessionToken: Middleware<
   {},
   { auth: { session_token: { user: "lucille" } } }
-> = (next, req) => {
+> = (req, ctx, next) => {
   req.auth = { ...req.auth, session_token: { user: "lucille" } }
-  return next(req)
+  return next(req, ctx)
 }
 
 const withPat: Middleware<{}, { auth: { pat: { user: "lucille" } } }> = (
-  next,
-  req
+  req,
+  ctx,
+  next
 ) => {
   req.auth = { ...req.auth, pat: { user: "lucille" } }
-  return next(req)
+  return next(req, ctx)
 }
 
 const withApiToken: Middleware<
   {},
   { auth: { api_token: { user: "lucille" } } }
-> = (next, req) => {
+> = (req, ctx, next) => {
   req.auth = { ...req.auth, api_token: { user: "lucille" } }
-  return next(req)
+  return next(req, ctx)
 }
 
-const withName: Middleware<{}, { name: string }> = (next, req) => {
+const withName: Middleware<{}, { name: string }> = (req, ctx, next) => {
   req.name = "lucille"
-  return next(req)
+  return next(req, ctx)
 }
 
 test.skip("auth none is always supported", () => {
@@ -90,7 +91,7 @@ test.skip("can select existing middleware", () => {
     productionServerUrl: "https://example.com",
 
     authMiddlewareMap: {
-      session_token: (next, req) => next(req),
+      session_token: (req, ctx, next) => next(req, ctx),
     },
     globalMiddlewares: [],
   })
@@ -240,9 +241,10 @@ test.skip("route param types", () => {
 })
 
 const middlewareWithInputs: Middleware<{ x: number }, { y: number }> = (
-  next,
-  req
-) => next(req)
+  req,
+  ctx,
+  next
+) => next(req, ctx)
 
 test.skip("allows middleware with inputs", () => {
   const withEdgeSpec = createWithEdgeSpec({

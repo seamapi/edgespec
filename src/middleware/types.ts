@@ -4,11 +4,17 @@ import type {
   SerializableToResponse,
 } from "../types/web-handler"
 
-export type Middleware<RequiredOptions = {}, ResultOptions = object> = (
+export type Middleware<
+  RequiredOptions = {},
+  ResultOptions = object,
+  Context = {},
+> = (
+  request: EdgeSpecRequest<RequiredOptions & Partial<ResultOptions>>,
+  ctx: Context,
   next: (
-    request: EdgeSpecRequest<RequiredOptions & Partial<ResultOptions>>
-  ) => Promise<Response>,
-  request: EdgeSpecRequest<RequiredOptions & Partial<ResultOptions>>
+    request: EdgeSpecRequest<RequiredOptions & Partial<ResultOptions>>,
+    ctx: Context
+  ) => Promise<Response>
 ) =>
   | Response
   | SerializableToResponse
