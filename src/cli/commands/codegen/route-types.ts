@@ -1,5 +1,5 @@
 import { Option } from "clipanion"
-import { Project, Type, ts, Symbol } from "ts-morph"
+import { Project, Type, ts, Symbol, TypeFormatFlags } from "ts-morph"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
@@ -16,9 +16,21 @@ export class CodeGenRouteTypes extends BaseCommand {
 
   async run(config: ResolvedEdgeSpecConfig) {
     const project = new Project({
-      compilerOptions: { declaration: true },
+      compilerOptions: {
+        declaration: true,
+        noEmit: false,
+        emitDeclarationOnly: true,
+      },
       tsConfigFilePath: config.tsconfigPath,
     })
+
+    const diagnostics = project.getPreEmitDiagnostics()
+    if (diagnostics.length > 0) {
+      this.context.stderr.write(
+        project.formatDiagnosticsWithColorAndContext(diagnostics)
+      )
+      throw new Error("Type generation failed (existing type errors)")
+    }
 
     const routeMap = await createRouteMapFromDirectory(config.routesDirectory)
 
@@ -153,7 +165,8 @@ ${filteredNodes
   }`
     }
   )
-  .join("\n")}`
+  .join("\n")}
+  }`
     )
 
     const result = project.emitToMemory({ emitOnlyDtsFiles: true })
