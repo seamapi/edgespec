@@ -9,7 +9,7 @@ import { EdgeSpecRouteFn } from "src/types/web-handler.js"
 import {
   EdgeSpecRouteBundle,
   EdgeSpecOptions,
-  handleRequestWithEdgeSpec,
+  makeRequestAgainstEdgeSpec,
 } from "src/types/edge-spec.js"
 
 const createEdgeSpecFromRouteMap = (
@@ -30,7 +30,7 @@ const createEdgeSpecFromRouteMap = (
     routeMatcher,
     routeMapWithHandlers,
     makeRequest: async (req: Request) =>
-      handleRequestWithEdgeSpec(edgeSpec)(req),
+      makeRequestAgainstEdgeSpec(edgeSpec)(req),
     ...edgeSpecOptions,
   }
 
@@ -47,7 +47,7 @@ export const createNodeServerFromRouteMap = async (
   const transformToNode = transformToNodeBuilder(transformToNodeOptions)
 
   const server = createServer(
-    transformToNode(handleRequestWithEdgeSpec(edgeSpec))
+    transformToNode(makeRequestAgainstEdgeSpec(edgeSpec))
   )
 
   return server

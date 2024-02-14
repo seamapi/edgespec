@@ -3,7 +3,7 @@ import fs from "node:fs/promises"
 import { EdgeRuntime } from "edge-runtime"
 import { Mutex } from "async-mutex"
 import TypedEmitter from "typed-emitter"
-import { handleRequestWithEdgeSpec } from "src/types/edge-spec"
+import { makeRequestAgainstEdgeSpec } from "src/types/edge-spec"
 import { HeadlessBuildEvents } from "./types"
 import { loadBundle } from "src"
 
@@ -11,7 +11,7 @@ export class RequestHandlerController {
   // This is so we know if the bundler is currently building when we need to load the runtime
   private bundlerState: "building" | "idle" = "idle"
   private cachedWinterCGRuntime?: EdgeRuntime
-  private cachedNodeHandler?: ReturnType<typeof handleRequestWithEdgeSpec>
+  private cachedNodeHandler?: ReturnType<typeof makeRequestAgainstEdgeSpec>
 
   private bundlePathPromise: Promise<string>
 
