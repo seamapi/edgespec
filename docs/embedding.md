@@ -13,7 +13,7 @@ export default withEdgeSpec({
   auth: "none",
   methods: ["GET"],
 })((req) => {
-  // This is a thin wrapper over `await import()` to enable types, you can use `import()` directly if you want.
+  // This is a thin wrapper over `await import()` to enable types, you can use `import * as shipsApi from "@acme/star-wars-ships` directly if you want.
   const shipsApi = await loadBundle("@acme/star-wars-ships")
 
   return shipsApi.makeRequest(req, {
