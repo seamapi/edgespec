@@ -83,7 +83,10 @@ export class RequestHandlerController {
           `file:${await this.bundlePathPromise}#${Date.now()}`
         )
 
-        this.cachedNodeHandler = edgeSpecModule.makeRequest
+        this.cachedNodeHandler = async (req) =>
+          edgeSpecModule.makeRequest(req, {
+            middleware: this.middleware,
+          })
 
         return this.cachedNodeHandler
       })
