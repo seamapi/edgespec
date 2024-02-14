@@ -15,7 +15,7 @@ export interface StartDevServerOptions {
   onListening?: (port: number) => void
   onBuildStart?: () => void
   onBuildEnd?: () => void
-  middlewares?: Middleware[]
+  middleware?: Middleware[]
 }
 
 /**
@@ -45,7 +45,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
       port,
       config,
       headlessEventEmitter: eventEmitter,
-      middlewares: options.middlewares,
+      middlewares: options.middleware,
     }),
     startHeadlessDevBundler({
       config,

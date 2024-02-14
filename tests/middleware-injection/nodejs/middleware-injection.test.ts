@@ -12,7 +12,7 @@ test("Node.js middleware injection", async (t) => {
   }
 
   const fixture = await getTestServer(t, import.meta.url, {
-    middlewares: [sampleMiddleware],
+    middleware: [sampleMiddleware],
   })
 
   const response = await fixture.axios.get("/get-middleware-type")

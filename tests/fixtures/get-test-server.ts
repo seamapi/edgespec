@@ -16,7 +16,7 @@ export const getTestServer = async (
   t: ExecutionContext,
   testFileUrl: string,
   options?: {
-    middlewares?: Middleware[]
+    middleware?: Middleware[]
   }
 ) => {
   const routesDirectory = path.join(
@@ -31,7 +31,7 @@ export const getTestServer = async (
       platform: "wintercg-minimal",
     },
     port: await getPort(),
-    middlewares: options?.middlewares,
+    middleware: options?.middleware,
   })
 
   t.teardown(async () => {
