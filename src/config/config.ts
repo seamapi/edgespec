@@ -15,11 +15,16 @@ const edgeSpecConfigSchema = z
      */
     routesDirectory: z.string().optional(),
     /**
-     * Emulate the WinterCG runtime. When true, native APIs are unavailable.
+     * The platform you're targeting.
      *
-     * Defaults to true.
+     * Defaults to `wintercg-minimal`, and you should use this whenever possible for maximal compatibility.
+     *
+     * Check [the docs](https://github.com/seamapi/edgespec/blob/main/docs/edgespec-config.md) for more information.
      */
-    emulateWinterCG: z.boolean().default(true).optional(),
+    platform: z
+      .enum(["node", "wintercg-minimal"])
+      .default("wintercg-minimal")
+      .optional(),
   })
   .strict()
 

@@ -28,6 +28,7 @@ export const constructManifest = async (options: ConstructManifestOptions) => {
 
   return `
 import {getRouteMatcher} from "next-route-matcher"
+import { makeRequestAgainstEdgeSpec } from "edgespec"
 
 ${routes
   .map(
@@ -44,7 +45,8 @@ const routeMapWithHandlers = {
 
 const edgeSpec = {
   routeMatcher: getRouteMatcher(Object.keys(routeMapWithHandlers)),
-  routeMapWithHandlers
+  routeMapWithHandlers,
+  makeRequest: async (req, options) => makeRequestAgainstEdgeSpec(edgeSpec, options)(req)
 }
 
 ${

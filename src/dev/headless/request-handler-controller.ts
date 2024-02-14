@@ -3,15 +3,16 @@ import fs from "node:fs/promises"
 import { EdgeRuntime } from "edge-runtime"
 import { Mutex } from "async-mutex"
 import TypedEmitter from "typed-emitter"
-import { handleRequestWithEdgeSpec } from "src/types/edge-spec"
+import { makeRequestAgainstEdgeSpec } from "src/types/edge-spec"
 import { HeadlessBuildEvents } from "./types"
 import { Middleware } from "src/middleware"
+import { loadBundle } from "src"
 
 export class RequestHandlerController {
   // This is so we know if the bundler is currently building when we need to load the runtime
   private bundlerState: "building" | "idle" = "idle"
   private cachedWinterCGRuntime?: EdgeRuntime
-  private cachedNodeHandler?: ReturnType<typeof handleRequestWithEdgeSpec>
+  private cachedNodeHandler?: ReturnType<typeof makeRequestAgainstEdgeSpec>
 
   private bundlePathPromise: Promise<string>
 
@@ -78,16 +79,11 @@ export class RequestHandlerController {
 
       return await this.executeCallbackWhenBundleIsReady(async () => {
         // We append the timestamp to the path to bust the cache
-        const edgeSpecModule = await import(
+        const edgeSpecModule = await loadBundle(
           `file:${await this.bundlePathPromise}#${Date.now()}`
         )
-        // If the file is imported as CJS, the default export is nested.
-        // Naming this with .mjs seems to break some on-the-fly transpiling tools downstream.
-        const defaultExport =
-          edgeSpecModule.default.default ?? edgeSpecModule.default
-        this.cachedNodeHandler = handleRequestWithEdgeSpec(defaultExport, {
-          middlewares: this.middlewares,
-        })
+
+        this.cachedNodeHandler = edgeSpecModule.makeRequest
 
         return this.cachedNodeHandler
       })
