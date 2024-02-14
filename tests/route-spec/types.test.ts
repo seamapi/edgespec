@@ -45,6 +45,17 @@ test.skip("auth none is always supported", () => {
   })
 })
 
+test.skip("auth none is optional", () => {
+  createWithEdgeSpec({
+    authMiddleware: {},
+  })({
+    methods: ["GET"],
+  })((req, _) => {
+    expectTypeOf(req).not.toBeNever()
+    return new Response()
+  })
+})
+
 test.skip("auth none cannot be provided in an array", () => {
   createWithEdgeSpec({
     authMiddleware: {},
