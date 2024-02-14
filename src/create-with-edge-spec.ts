@@ -34,7 +34,7 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           : [routeSpec.auth]
     )
 
-    const authMiddlewares = Object.entries(globalSpec.authMiddlewareMap)
+    const authMiddlewares = Object.entries(globalSpec.authMiddlewares)
       .filter(([k, _]) => supportedAuthMiddlewares.has(k))
       .map(([_, v]) => v)
 
@@ -48,12 +48,12 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           : []),
         withUnhandledExceptionHandling,
         serializeResponse(globalSpec, routeSpec, false),
-        ...globalSpec.globalMiddlewares,
+        ...globalSpec.beforeAuthMiddlewares,
         firstAuthMiddlewareThatSucceeds(
           authMiddlewares,
           onMultipleAuthMiddlewareFailures
         ),
-        ...(globalSpec.globalMiddlewaresAfterAuth ?? []),
+        ...(globalSpec.afterAuthMiddlewares ?? []),
         ...(routeSpec.middlewares ?? []),
         withMethods(routeSpec.methods),
         withInputValidation({

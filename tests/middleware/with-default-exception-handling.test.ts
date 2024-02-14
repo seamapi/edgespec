@@ -9,8 +9,8 @@ test("handles internal middleware issues", async (t) => {
       apiName: "hello-world",
       productionServerUrl: "https://example.com",
 
-      authMiddlewareMap: {},
-      globalMiddlewares: [withDefaultExceptionHandling],
+      authMiddlewares: {},
+      beforeAuthMiddlewares: [withDefaultExceptionHandling],
     },
     routeSpec: {
       auth: "none",
@@ -38,8 +38,8 @@ test("handles custom http exceptions", async (t) => {
       apiName: "hello-world",
       productionServerUrl: "https://example.com",
 
-      authMiddlewareMap: {},
-      globalMiddlewares: [withDefaultExceptionHandling],
+      authMiddlewares: {},
+      beforeAuthMiddlewares: [withDefaultExceptionHandling],
     },
     routeSpec: {
       auth: "none",

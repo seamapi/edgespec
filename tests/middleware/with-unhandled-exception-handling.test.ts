@@ -7,8 +7,8 @@ test("unhandled exception doesn't explode", async (t) => {
       apiName: "hello-world",
       productionServerUrl: "https://example.com",
 
-      authMiddlewareMap: {},
-      globalMiddlewares: [],
+      authMiddlewares: {},
+      beforeAuthMiddlewares: [],
     },
     routeSpec: {
       auth: "none",

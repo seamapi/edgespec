@@ -15,8 +15,8 @@ import { createWithEdgeSpec } from "edgespec"
 export const withEdgeSpec = createWithEdgeSpec({
   apiName: "hello-world",
 
-  authMiddlewareMap: {},
-  globalMiddlewares: [],
+  authMiddlewares: {},
+  beforeAuthMiddlewares: [],
 
   productionServerUrl: "https://example.com",
 

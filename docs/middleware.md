@@ -65,7 +65,7 @@ export const databaseMiddleware: Middleware<
 }
 
 export const bearerAuthMiddleware: Middleware<
-  // Required request options (Middleware "input"). Assumes that the database middleware has already been called, maybe as part of `globalMiddlewares[]` in `createWithEdgeSpec`.
+  // Required request options (Middleware "input"). Assumes that the database middleware has already been called, maybe as part of `beforeAuthMiddlewares[]` in `createWithEdgeSpec`.
   {
     db: DatabaseClient
   },
@@ -94,7 +94,7 @@ export const bearerAuthMiddleware: Middleware<
 
 ## Authentication Middleware
 
-Authentication middleware is just like any other middleware, except by passing it to `authMiddlewareMap` in `createWithEdgeSpec`, you can specify it as a valid `auth` option on a route. Using the `auth` option is usually simpler and will also affect code generation.
+Authentication middleware is just like any other middleware, except by passing it to `authMiddlewares` in `createWithEdgeSpec`, you can specify it as a valid `auth` option on a route. Using the `auth` option is usually simpler and will also affect code generation.
 
 For example:
 
@@ -106,11 +106,11 @@ import { withApiKey, withBrowserSession } from "src/middlewares"
 export const withEdgeSpec = createWithEdgeSpec({
   apiName: "hello-world",
 
-  authMiddlewareMap: {
+  authMiddlewares: {
     apiKey: withApiKey,
     browserSession: withBrowserSession,
   },
-  globalMiddlewares: [],
+  beforeAuthMiddlewares: [],
 
   productionServerUrl: "https://example.com",
 })

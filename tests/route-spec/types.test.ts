@@ -41,8 +41,8 @@ test.skip("auth none is always supported", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [],
   })({
     auth: "none",
     methods: ["GET"],
@@ -54,8 +54,8 @@ test.skip("auth none cannot be provided in an array", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [],
   })({
     // @ts-expect-error
     auth: ["none"],
@@ -68,8 +68,8 @@ test.skip("cannot select non-existent auth methods", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -90,10 +90,10 @@ test.skip("can select existing middleware", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {
+    authMiddlewares: {
       session_token: (req, ctx, next) => next(req, ctx),
     },
-    globalMiddlewares: [],
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -112,8 +112,8 @@ test.skip("middleware objects are available", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [withName],
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [withName],
   })
 
   withEdgeSpec({
@@ -131,10 +131,10 @@ test.skip("auth middleware objects are available as singleton", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {
+    authMiddlewares: {
       session_token: withSessionToken,
     },
-    globalMiddlewares: [],
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -154,12 +154,12 @@ test.skip("auth middleware objects are available as union", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {
+    authMiddlewares: {
       session_token: withSessionToken,
       pat: withPat,
       api_token: withApiToken,
     },
-    globalMiddlewares: [],
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -184,8 +184,8 @@ test.skip("route-local middlewares are available to request", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -204,8 +204,8 @@ test.skip("custom response map types are enforced", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -226,8 +226,8 @@ test.skip("route param types", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [],
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -251,10 +251,10 @@ test.skip("allows middleware with inputs", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {
+    authMiddlewares: {
       test: middlewareWithInputs,
     },
-    globalMiddlewares: [],
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({
@@ -272,10 +272,10 @@ test.skip("typed ctx.json()", () => {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {
+    authMiddlewares: {
       test: middlewareWithInputs,
     },
-    globalMiddlewares: [],
+    beforeAuthMiddlewares: [],
   })
 
   withEdgeSpec({

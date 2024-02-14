@@ -5,6 +5,6 @@ export const withEdgeSpec = createWithEdgeSpec({
   apiName: "hello-world",
   productionServerUrl: "https://example.com",
 
-  authMiddlewareMap: {},
-  globalMiddlewares: [withDefaultExceptionHandling],
+  authMiddlewares: {},
+  beforeAuthMiddlewares: [withDefaultExceptionHandling],
 })

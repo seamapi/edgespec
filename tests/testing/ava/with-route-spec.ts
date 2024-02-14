@@ -1,8 +1,8 @@
 import { createWithEdgeSpec } from "../../../src"
 
 export const withRouteSpec = createWithEdgeSpec({
-  globalMiddlewares: [],
-  authMiddlewareMap: {},
+  beforeAuthMiddlewares: [],
+  authMiddlewares: {},
   apiName: "Example",
   productionServerUrl: "https://example.com",
 })

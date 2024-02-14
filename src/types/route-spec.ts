@@ -82,14 +82,14 @@ type GetMiddlewareRequestOptions<
   GS extends GlobalSpec,
   RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
 > = AccumulateMiddlewareChainResultOptions<
-  GS["globalMiddlewares"],
+  GS["beforeAuthMiddlewares"],
   "intersection"
 > &
   (RS["auth"] extends "none"
     ? {}
     : AccumulateMiddlewareChainResultOptions<
         MapMiddlewares<
-          GS["authMiddlewareMap"],
+          GS["authMiddlewares"],
           RS["auth"] extends undefined | null
             ? "none"
             : Exclude<RS["auth"], undefined | null>
@@ -97,8 +97,8 @@ type GetMiddlewareRequestOptions<
         "union"
       >) &
   AccumulateMiddlewareChainResultOptions<
-    GS["globalMiddlewaresAfterAuth"] extends MiddlewareChain
-      ? GS["globalMiddlewaresAfterAuth"]
+    GS["afterAuthMiddlewares"] extends MiddlewareChain
+      ? GS["afterAuthMiddlewares"]
       : readonly [],
     "intersection"
   > &

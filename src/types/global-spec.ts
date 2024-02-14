@@ -12,9 +12,9 @@ export type QueryArrayFormat = "brackets" | "comma" | "repeat"
 export type QueryArrayFormats = readonly QueryArrayFormat[]
 
 export type GlobalSpec = {
-  authMiddlewareMap: Record<string, Middleware<any, any>>
-  globalMiddlewares: readonly Middleware<unknown, unknown, {}>[]
-  globalMiddlewaresAfterAuth?: readonly Middleware<any, any>[]
+  authMiddlewares: Record<string, Middleware<any, any>>
+  beforeAuthMiddlewares: readonly Middleware<unknown, unknown, {}>[]
+  afterAuthMiddlewares?: readonly Middleware<any, any>[]
 
   // These improve OpenAPI generation
   apiName: string
@@ -37,4 +37,4 @@ export type GlobalSpec = {
 }
 
 export type GetAuthMiddlewaresFromGlobalSpec<GS extends GlobalSpec> =
-  InferRecordKey<GS["authMiddlewareMap"]>
+  InferRecordKey<GS["authMiddlewares"]>

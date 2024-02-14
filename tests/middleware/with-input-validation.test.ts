@@ -10,8 +10,8 @@ const defaultSpecs = {
     apiName: "hello-world",
     productionServerUrl: "https://example.com",
 
-    authMiddlewareMap: {},
-    globalMiddlewares: [
+    authMiddlewares: {},
+    beforeAuthMiddlewares: [
       async (req, ctx, next) => {
         try {
           return await next(req, ctx)
