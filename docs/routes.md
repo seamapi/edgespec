@@ -4,7 +4,7 @@ Each API route is defined in a separate file within a specific directory (by def
 
 ```ts
 // api/index.ts
-import { withEdgeSpec } from "../src/with-edge-spec"
+import { withEdgeSpec } from "../with-edge-spec"
 import { z } from "zod"
 
 export default withEdgeSpec({
