@@ -31,7 +31,12 @@ test("test bundle with Node adapter", async (t) => {
     import {startServer} from "../../dist/adapters/node.js"
     import bundle from "./bundled.js"
 
-    startServer(bundle, { port: ${port} })
+    const fooMiddleware = (req, ctx, next) => {
+      req.foo = "bar"
+      return next(req, ctx)
+    }
+
+    startServer(bundle, { port: ${port}, middleware: [fooMiddleware] })
   `,
     "utf-8"
   )
@@ -62,9 +67,7 @@ test("test bundle with Node adapter", async (t) => {
       try {
         const response = await axios.get(`http://localhost:${port}/health`)
 
-        t.deepEqual(response.data, {
-          ok: true,
-        })
+        t.true(response.data.ok)
       } catch (e: any) {
         t.log("axios failed (a few failures expected): " + e.message)
         throw e
@@ -75,5 +78,6 @@ test("test bundle with Node adapter", async (t) => {
     }
   )
 
-  t.pass()
+  const response = await axios.get(`http://localhost:${port}/health`)
+  t.is(response.data.foo, "bar")
 })
