@@ -14,6 +14,7 @@ export interface StartHeadlessDevServerOptions {
   headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
   initialBundlePath?: string
   middleware?: Middleware[]
+  onListening?: (port: number) => void
 }
 
 /**
@@ -27,6 +28,7 @@ export const startHeadlessDevServer = async ({
   headlessEventEmitter,
   initialBundlePath,
   middleware = [],
+  onListening,
 }: StartHeadlessDevServerOptions) => {
   const controller = new RequestHandlerController(
     headlessEventEmitter,
@@ -71,6 +73,7 @@ export const startHeadlessDevServer = async ({
   const listeningPromise = once(server, "listening")
   server.listen(port)
   await listeningPromise
+  onListening?.(port)
 
   return {
     server,
