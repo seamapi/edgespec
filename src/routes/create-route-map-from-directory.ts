@@ -14,12 +14,13 @@ export const createRouteMapFromDirectory = async (
     if (!path.startsWith("/")) {
       routeWithSlash = `/${path}`
     }
-    routes[`${routeWithSlash.replace(/\.ts$/g, "")}`] = {
-      relativePath: path,
-    }
 
     if (path.endsWith("index.ts")) {
-      routes[`${routeWithSlash.replace(/index\.ts$/g, "")}`] = {
+      routes[`${routeWithSlash.replace(/\/index\.ts$/g, "")}`] = {
+        relativePath: path,
+      }
+    } else {
+      routes[`${routeWithSlash.replace(/\.ts$/g, "")}`] = {
         relativePath: path,
       }
     }

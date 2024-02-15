@@ -47,7 +47,8 @@ test("CLI codegen route-types command produces the expected route types", async 
     type ExpectedRoutes = {
       // Basic smoke test
       "/foo": {
-        methods: "GET" | "POST"
+        route: "/foo"
+        method: "GET" | "POST"
         jsonResponse: {
           foo: {
             id: string
@@ -60,7 +61,8 @@ test("CLI codegen route-types command produces the expected route types", async 
       }
       // A route that imports part of its spec from /foo
       "/importer": {
-        methods: "PUT"
+        route: "/importer"
+        method: "PUT"
         jsonResponse: {
           foo: {
             id: string
@@ -70,12 +72,46 @@ test("CLI codegen route-types command produces the expected route types", async 
       }
       // Route that uses z.union
       "/union": {
-        methods: "GET" | "POST"
+        route: "/union"
+        method: "GET" | "POST"
         jsonResponse: {
           foo_id: string
         } | boolean[]
         jsonBody: {
           foo_id: string
+        }
+      }
+      // Route with many parameters to make sure they're not truncated
+      "/many-params": {
+        route: "/many-params"
+        method: "GET" | "POST"
+        jsonResponse: {
+          foo: {
+            id: string
+            name: string
+          }
+        }
+        jsonBody: {
+          this_has: string
+          many: string
+          params: string
+          to: string
+          make: string
+          sure: string
+          type_is: string
+          fully: string
+          expanded: string
+          and: {
+            this_has: string
+            many: string
+            params: string
+            to: string
+            make: string
+            sure: string
+            type_is: string
+            fully: string
+            expanded: string
+          }
         }
       }
     }

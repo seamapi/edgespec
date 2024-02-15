@@ -5,6 +5,7 @@ import fs from "node:fs/promises"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
 import { BaseCommand } from "src/cli/base-command"
 import { ResolvedEdgeSpecConfig } from "src/config/utils"
+import { normalizeRouteMap } from "src/lib/normalize-route-map"
 
 export class CodeGenRouteTypes extends BaseCommand {
   static paths = [[`codegen`, `route-types`]]
@@ -43,6 +44,7 @@ export class CodeGenRouteTypes extends BaseCommand {
         .getExportedDeclarations()
         .get("default")?.[0]
       if (!defaultExportDeclaration) {
+        console.warn(`No default export found for ${route}`)
         return
       }
 
@@ -115,7 +117,11 @@ export class CodeGenRouteTypes extends BaseCommand {
     const renderType = <TType extends ts.Type>(type: Type<TType>) => {
       return project
         .getTypeChecker()
-        .compilerObject.typeToString(type.compilerType)
+        .compilerObject.typeToString(
+          type.compilerType,
+          undefined,
+          TypeFormatFlags.NoTruncation
+        )
     }
 
     project.createSourceFile(
@@ -136,7 +142,8 @@ ${filteredNodes
       urlEncodedFormDataZodInputType,
     }) => {
       return `  "${route}": {
-    methods: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
+    route: "${route}"
+    method: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
     ${
       jsonResponseZodOutputType
         ? `jsonResponse: ${renderType(jsonResponseZodOutputType)}`
