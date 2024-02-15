@@ -47,7 +47,8 @@ test("CLI codegen route-types command produces the expected route types", async 
     type ExpectedRoutes = {
       // Basic smoke test
       "/foo": {
-        methods: "GET" | "POST"
+        route: "/foo"
+        method: "GET" | "POST"
         jsonResponse: {
           foo: {
             id: string
@@ -60,7 +61,8 @@ test("CLI codegen route-types command produces the expected route types", async 
       }
       // A route that imports part of its spec from /foo
       "/importer": {
-        methods: "PUT"
+        route: "/importer"
+        method: "PUT"
         jsonResponse: {
           foo: {
             id: string
@@ -70,7 +72,8 @@ test("CLI codegen route-types command produces the expected route types", async 
       }
       // Route that uses z.union
       "/union": {
-        methods: "GET" | "POST"
+        route: "/union"
+        method: "GET" | "POST"
         jsonResponse: {
           foo_id: string
         } | boolean[]

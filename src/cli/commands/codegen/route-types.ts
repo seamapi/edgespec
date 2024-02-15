@@ -5,6 +5,7 @@ import fs from "node:fs/promises"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
 import { BaseCommand } from "src/cli/base-command"
 import { ResolvedEdgeSpecConfig } from "src/config/utils"
+import { normalizeRouteMap } from "src/lib/normalize-route-map"
 
 export class CodeGenRouteTypes extends BaseCommand {
   static paths = [[`codegen`, `route-types`]]
@@ -136,7 +137,8 @@ ${filteredNodes
       urlEncodedFormDataZodInputType,
     }) => {
       return `  "${route}": {
-    methods: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
+    route: "${route}"
+    method: ${httpMethods.map((m) => `"${m}"`).join(" | ")}
     ${
       jsonResponseZodOutputType
         ? `jsonResponse: ${renderType(jsonResponseZodOutputType)}`
