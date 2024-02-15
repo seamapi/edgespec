@@ -1,6 +1,6 @@
 {
   "name": "edgespec",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
   "main": "./dist/index.js",
