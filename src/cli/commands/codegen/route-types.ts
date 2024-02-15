@@ -191,7 +191,7 @@ function getZodTypeOfSymbol(project: Project, symbol: Symbol | undefined) {
     .getTypeChecker()
     .getTypeOfSymbolAtLocation(symbol, symbol.getValueDeclarationOrThrow())
 
-  const innerType = outerType.getProperty("_output")
+  const innerType = outerType.getProperty("_input")
   if (!innerType) {
     throw new Error(`${symbol.getName()} must be a zod schema`)
   }

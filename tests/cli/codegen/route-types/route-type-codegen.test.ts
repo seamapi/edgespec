@@ -114,6 +114,17 @@ test("CLI codegen route-types command produces the expected route types", async 
           }
         }
       }
+      // Route that uses .transform()
+      "/param-transform": {
+        route: "/param-transform"
+        method: "GET" | "POST"
+        jsonResponse: {
+          ok: boolean
+        }
+        jsonBody: {
+          foo_id: string
+        }
+      }
     }
 
     expectTypeOf<Routes>().toEqualTypeOf<ExpectedRoutes>()
@@ -123,16 +134,7 @@ test("CLI codegen route-types command produces the expected route types", async 
   const diagnostics = project.getPreEmitDiagnostics()
 
   if (diagnostics.length > 0) {
-    for (const diagnostic of diagnostics) {
-      let message = diagnostic.getMessageText()
-      message = typeof message === "string" ? message : message.getMessageText()
-
-      t.log(
-        `${diagnostic.getCategory()} ${message} (${diagnostic
-          .getSourceFile()
-          ?.getFilePath()}:${diagnostic.getLineNumber()})`
-      )
-    }
+    t.log(project.formatDiagnosticsWithColorAndContext(diagnostics))
 
     t.fail(
       "Test TypeScript project using generated routes threw compile errors"
