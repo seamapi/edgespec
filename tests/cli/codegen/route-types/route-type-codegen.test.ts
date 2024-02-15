@@ -81,6 +81,39 @@ test("CLI codegen route-types command produces the expected route types", async 
           foo_id: string
         }
       }
+      // Route with many parameters to make sure they're not truncated
+      "/many-params": {
+        route: "/many-params"
+        method: "GET" | "POST"
+        jsonResponse: {
+          foo: {
+            id: string
+            name: string
+          }
+        }
+        jsonBody: {
+          this_has: string
+          many: string
+          params: string
+          to: string
+          make: string
+          sure: string
+          type_is: string
+          fully: string
+          expanded: string
+          and: {
+            this_has: string
+            many: string
+            params: string
+            to: string
+            make: string
+            sure: string
+            type_is: string
+            fully: string
+            expanded: string
+          }
+        }
+      }
     }
 
     expectTypeOf<Routes>().toEqualTypeOf<ExpectedRoutes>()

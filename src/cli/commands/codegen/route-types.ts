@@ -44,6 +44,7 @@ export class CodeGenRouteTypes extends BaseCommand {
         .getExportedDeclarations()
         .get("default")?.[0]
       if (!defaultExportDeclaration) {
+        console.warn(`No default export found for ${route}`)
         return
       }
 
@@ -116,7 +117,11 @@ export class CodeGenRouteTypes extends BaseCommand {
     const renderType = <TType extends ts.Type>(type: Type<TType>) => {
       return project
         .getTypeChecker()
-        .compilerObject.typeToString(type.compilerType)
+        .compilerObject.typeToString(
+          type.compilerType,
+          undefined,
+          TypeFormatFlags.NoTruncation
+        )
     }
 
     project.createSourceFile(
