@@ -14,7 +14,7 @@ import { EdgeSpecRouteFnFromSpecs, RouteSpec } from "src/types/route-spec.ts"
 
 export const getTestRoute = async <
   const GS extends GlobalSpec,
-  const RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
+  const RS extends RouteSpec<GS>,
 >(
   t: ExecutionContext,
   opts: {
