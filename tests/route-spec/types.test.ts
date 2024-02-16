@@ -201,9 +201,41 @@ test.skip("route-local middleware with request dependencies works", () => {
   })
 
   withEdgeSpec({
-    // todo: should not work with none
     auth: "simple",
     methods: ["GET"],
+    middleware: [withName],
+  })((req) => {
+    expectTypeOf<(typeof req)["name"]>().toBeString()
+
+    return new Response()
+  })
+})
+
+test.skip("request dependencies for route-level middleware are narrowed by auth", () => {
+  const withFoo: Middleware<{}, { foo: string }> = (req, ctx, next) => {
+    req.foo = "bar"
+    return next(req, ctx)
+  }
+
+  const withName: Middleware<{ foo: string }, { name: string }> = (
+    req,
+    ctx,
+    next
+  ) => {
+    req.name = "lucille"
+    return next(req, ctx)
+  }
+
+  const withEdgeSpec = createWithEdgeSpec({
+    authMiddleware: {
+      simple: withFoo,
+    },
+  })
+
+  withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    // @ts-expect-error .foo should not be available here
     middleware: [withName],
   })((req) => {
     expectTypeOf<(typeof req)["name"]>().toBeString()
