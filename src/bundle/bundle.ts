@@ -1,6 +1,6 @@
 import esbuild from "esbuild"
-import { constructManifest } from "./construct-manifest"
-import { BundleOptions } from "./types"
+import { constructManifest } from "./construct-manifest.ts"
+import { BundleOptions } from "./types.ts"
 
 export const bundle = async (options: BundleOptions) => {
   const result = await esbuild.build({

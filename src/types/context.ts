@@ -4,7 +4,7 @@ import {
   EdgeSpecMultiPartFormDataResponse,
   EdgeSpecResponse,
   SerializableToResponse,
-} from "./web-handler"
+} from "./web-handler.ts"
 
 export type ResponseTypeToContext<
   ResponseType extends SerializableToResponse | Response,

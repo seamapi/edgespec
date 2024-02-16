@@ -1,4 +1,4 @@
-import { Middleware } from "src/middleware/types"
+import { Middleware } from "src/middleware/types.ts"
 
 export const withUnhandledExceptionHandling: Middleware = async (
   req,

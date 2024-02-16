@@ -1,5 +1,4 @@
-import { z } from "zod"
-import { createWithEdgeSpec } from "../../../../src"
+import { createWithEdgeSpec } from "../../../../src/index.ts"
 
 export const withEdgeSpec = createWithEdgeSpec({
   apiName: "hello-world",

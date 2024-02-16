@@ -1,8 +1,8 @@
 import test from "ava"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
-import { getTestServer } from "src/testing/ava/fixture"
-import { Middleware } from "src/middleware"
+import { getTestServer } from "src/testing/ava/fixture.ts"
+import { Middleware } from "src/middleware/index.ts"
 
 test("AVA fixture works", async (t) => {
   const { port } = await getTestServer(t, {

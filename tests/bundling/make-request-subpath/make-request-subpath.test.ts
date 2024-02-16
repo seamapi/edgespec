@@ -1,10 +1,8 @@
 import test, { ExecutionContext } from "ava"
-import { getTestCLI } from "tests/fixtures/get-test-cli"
-import os from "node:os"
+import { getTestCLI } from "tests/fixtures/get-test-cli.ts"
 import path from "node:path"
-import { randomUUID } from "node:crypto"
 import { fileURLToPath } from "node:url"
-import { loadBundle } from "src"
+import { loadBundle } from "src/helpers.ts"
 import fs from "node:fs/promises"
 
 const createChildBundle = async (t: ExecutionContext) => {

@@ -16,7 +16,7 @@ export default defineConfig({
     "testing/ava": "src/testing/ava/index.ts",
     "testing/ava/worker-wrapper": "src/testing/ava/worker-wrapper.ts",
   },
-  format: "esm",
+  format: ["esm", "cjs"],
   treeshake: true,
   dts: false,
   sourcemap: true,

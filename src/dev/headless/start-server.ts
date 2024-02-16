@@ -1,17 +1,17 @@
 import { once } from "node:events"
 import { createServer } from "node:http"
 import TypedEmitter from "typed-emitter"
-import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
-import { HeadlessBuildEvents } from "./types"
-import { ResolvedEdgeSpecConfig } from "src/config/utils"
+import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.ts"
+import { HeadlessBuildEvents } from "./types.ts"
+import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 import chalk from "chalk"
-import { RequestHandlerController } from "./request-handler-controller"
-import { Middleware } from "src/middleware"
+import { RequestHandlerController } from "./request-handler-controller.ts"
+import { Middleware } from "src/middleware/index.ts"
 
 export interface StartHeadlessDevServerOptions {
   port: number
   config: ResolvedEdgeSpecConfig
-  headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
+  headlessEventEmitter: TypedEmitter.default<HeadlessBuildEvents>
   initialBundlePath?: string
   middleware?: Middleware[]
   onListening?: (port: number) => void

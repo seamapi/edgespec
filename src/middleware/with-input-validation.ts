@@ -1,14 +1,14 @@
 import { z, ZodFirstPartyTypeKind } from "zod"
 
-import type { QueryArrayFormats } from "src/types/global-spec"
-import { Middleware } from "src/middleware"
+import type { QueryArrayFormats } from "src/types/global-spec.ts"
+import { Middleware } from "src/middleware/index.ts"
 import {
   BadRequestError,
   InputParsingError,
   InputValidationError,
   InvalidContentTypeError,
   InvalidQueryParamsError,
-} from "./http-exceptions"
+} from "./http-exceptions.ts"
 
 const getZodObjectSchemaFromZodEffectSchema = (
   isZodEffect: boolean,

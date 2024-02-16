@@ -2,10 +2,9 @@ import { Option } from "clipanion"
 import { Project, Type, ts, Symbol, TypeFormatFlags } from "ts-morph"
 import path from "node:path"
 import fs from "node:fs/promises"
-import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
-import { BaseCommand } from "src/cli/base-command"
-import { ResolvedEdgeSpecConfig } from "src/config/utils"
-import { normalizeRouteMap } from "src/lib/normalize-route-map"
+import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory.ts"
+import { BaseCommand } from "src/cli/base-command.ts"
+import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 
 export class CodeGenRouteTypes extends BaseCommand {
   static paths = [[`codegen`, `route-types`]]

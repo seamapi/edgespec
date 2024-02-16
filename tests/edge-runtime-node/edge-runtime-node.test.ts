@@ -2,7 +2,7 @@ import test from "ava"
 
 import { once } from "node:events"
 import { createServer } from "node:http"
-import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
+import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.ts"
 
 // 1. builds a transformer, using Node.js@18 globals, and a base url for URL constructor.
 const transformToNode = transformToNodeBuilder({

@@ -1,6 +1,6 @@
-import { startDevServer } from "./dev-server"
-import { startHeadlessDevBundler } from "./headless/start-bundler"
-import { startHeadlessDevServer } from "./headless/start-server"
+import { startDevServer } from "./dev-server.ts"
+import { startHeadlessDevBundler } from "./headless/start-bundler.ts"
+import { startHeadlessDevServer } from "./headless/start-server.ts"
 
 export const devServer = {
   startDevServer,
@@ -10,4 +10,4 @@ export const devServer = {
   },
 }
 
-export type { HeadlessBuildEvents } from "./headless/types"
+export type { HeadlessBuildEvents } from "./headless/types.ts"

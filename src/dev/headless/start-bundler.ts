@@ -1,13 +1,13 @@
 import path from "path"
-import { getTempPathInApp } from "src/bundle/get-temp-path-in-app"
-import { bundleAndWatch } from "src/bundle/watch"
-import { ResolvedEdgeSpecConfig } from "src/config/utils"
+import { getTempPathInApp } from "src/bundle/get-temp-path-in-app.ts"
+import { bundleAndWatch } from "src/bundle/watch.ts"
+import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 import TypedEmitter from "typed-emitter"
-import { HeadlessBuildEvents } from "./types"
+import { HeadlessBuildEvents } from "./types.ts"
 
 export interface StartHeadlessDevBundlerOptions {
   config: ResolvedEdgeSpecConfig
-  headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>
+  headlessEventEmitter: TypedEmitter.default<HeadlessBuildEvents>
 }
 
 /**

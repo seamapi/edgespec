@@ -3,10 +3,10 @@ import fs from "node:fs/promises"
 import { EdgeRuntime } from "edge-runtime"
 import { Mutex } from "async-mutex"
 import TypedEmitter from "typed-emitter"
-import { makeRequestAgainstEdgeSpec } from "src/types/edge-spec"
-import { HeadlessBuildEvents } from "./types"
-import { Middleware } from "src/middleware"
-import { loadBundle } from "src"
+import { makeRequestAgainstEdgeSpec } from "src/types/edge-spec.ts"
+import { HeadlessBuildEvents } from "./types.ts"
+import { Middleware } from "src/middleware/index.ts"
+import { loadBundle } from "src/helpers.ts"
 
 export class RequestHandlerController {
   // This is so we know if the bundler is currently building when we need to load the runtime
@@ -20,7 +20,7 @@ export class RequestHandlerController {
   private loaderPromiseChain = new Mutex()
 
   constructor(
-    private headlessEventEmitter: TypedEmitter<HeadlessBuildEvents>,
+    private headlessEventEmitter: TypedEmitter.default<HeadlessBuildEvents>,
     private middleware: Middleware[],
     initialBundlePath?: string
   ) {

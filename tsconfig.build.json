@@ -14,5 +14,6 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "noEmit": false
-  }
+  },
+  "exclude": ["tests", "examples", "dist"]
 }

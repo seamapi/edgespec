@@ -1,6 +1,6 @@
 import { Command, Option } from "clipanion"
 import * as t from "typanion"
-import { ResolvedEdgeSpecConfig, loadConfig } from "src/config/utils"
+import { ResolvedEdgeSpecConfig, loadConfig } from "src/config/utils.ts"
 
 export abstract class BaseCommand extends Command {
   rootDirectory = Option.String("--root", {

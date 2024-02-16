@@ -1,5 +1,5 @@
 import test from "ava"
-import { getTestCLI } from "tests/fixtures/get-test-cli"
+import { getTestCLI } from "tests/fixtures/get-test-cli.ts"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import getPort from "@ava/get-port"

@@ -1,12 +1,12 @@
 import { EventEmitter } from "node:events"
 import { AddressInfo } from "node:net"
-import { EdgeSpecConfig } from "src"
-import { loadConfig } from "src/config/utils"
+import { EdgeSpecConfig } from "src/config/config.ts"
+import { loadConfig } from "src/config/utils.ts"
 import TypedEventEmitter from "typed-emitter"
-import { startHeadlessDevServer } from "./headless/start-server"
-import { HeadlessBuildEvents } from "./headless/types"
-import { startHeadlessDevBundler } from "./headless/start-bundler"
-import type { Middleware } from "src/middleware"
+import { startHeadlessDevServer } from "./headless/start-server.ts"
+import { HeadlessBuildEvents } from "./headless/types.ts"
+import { startHeadlessDevBundler } from "./headless/start-bundler.ts"
+import type { Middleware } from "src/middleware/index.ts"
 
 export interface StartDevServerOptions {
   rootDirectory?: string
@@ -30,7 +30,7 @@ export const startDevServer = async (options: StartDevServerOptions) => {
   )
 
   const eventEmitter =
-    new EventEmitter() as TypedEventEmitter<HeadlessBuildEvents>
+    new EventEmitter() as TypedEventEmitter.default<HeadlessBuildEvents>
   eventEmitter.on("started-building", () => {
     options.onBuildStart?.()
   })
