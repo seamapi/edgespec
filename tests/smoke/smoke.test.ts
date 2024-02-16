@@ -1,5 +1,5 @@
 import test from "ava"
-import { getTestServer } from "tests/fixtures/get-test-server"
+import { getTestServer } from "tests/fixtures/get-test-server.ts"
 
 test("request passes through method, body, and headers", async (t) => {
   const { axios } = await getTestServer(t, import.meta.url)

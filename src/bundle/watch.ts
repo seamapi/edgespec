@@ -2,9 +2,9 @@ import Watcher from "watcher"
 import * as esbuild from "esbuild"
 import fs from "node:fs/promises"
 import path from "node:path"
-import { constructManifest } from "./construct-manifest"
-import { BundleOptions } from "./types"
-import { getTempPathInApp } from "./get-temp-path-in-app"
+import { constructManifest } from "./construct-manifest.ts"
+import { BundleOptions } from "./types.ts"
+import { getTempPathInApp } from "./get-temp-path-in-app.ts"
 import { isGitIgnored } from "globby"
 
 /**
@@ -18,7 +18,7 @@ export const bundleAndWatch = async (options: BundleOptions) => {
   const watcher = new Watcher(options.rootDirectory, {
     recursive: true,
     ignoreInitial: true,
-    ignore: (filePath) => {
+    ignore: (filePath: string) => {
       // globby breaks when the path being tested is not within the current working directory (cwd/rootDirectory)
       if (!path.relative(options.rootDirectory, filePath).startsWith("..")) {
         return ignore(filePath)

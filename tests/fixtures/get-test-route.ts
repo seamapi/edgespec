@@ -3,15 +3,14 @@ import type { AxiosInstance } from "axios"
 import getPort from "@ava/get-port"
 import defaultAxios from "redaxios"
 import { createNodeServerFromRouteMap } from "src/serve/create-node-server-from-route-map.js"
-import { EdgeSpecRouteFn } from "src/types/web-handler"
 import { ExecutionContext } from "ava"
 import { once } from "events"
-import { EdgeSpecOptions } from "src/types/edge-spec"
+import { EdgeSpecOptions } from "src/types/edge-spec.ts"
 import {
   GetAuthMiddlewaresFromGlobalSpec,
   GlobalSpec,
-} from "src/types/global-spec"
-import { EdgeSpecRouteFnFromSpecs, RouteSpec } from "src/types/route-spec"
+} from "src/types/global-spec.ts"
+import { EdgeSpecRouteFnFromSpecs, RouteSpec } from "src/types/route-spec.ts"
 
 export const getTestRoute = async <
   const GS extends GlobalSpec,
@@ -78,7 +77,7 @@ export const getTestRoute = async <
   })
   const serverUrl = `http://localhost:${port}`
 
-  const axios: any = defaultAxios.create({
+  const axios: any = defaultAxios.default.create({
     baseURL: serverUrl,
   })
 

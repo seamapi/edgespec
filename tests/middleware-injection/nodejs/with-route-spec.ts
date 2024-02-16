@@ -1,5 +1,5 @@
-import { createWithEdgeSpec } from "../../../src"
-import type { Middleware } from "../../../src/middleware"
+import { createWithEdgeSpec } from "../../../src/index.js"
+import type { Middleware } from "../../../src/middleware/index.js"
 
 const sampleMiddleware: Middleware<{}, { middlewareType: string }> = (
   req,

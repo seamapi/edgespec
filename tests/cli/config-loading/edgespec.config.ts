@@ -1,4 +1,4 @@
-import { defineConfig } from "src"
+import { defineConfig } from "src/index.ts"
 
 export default defineConfig({
   routesDirectory: "./api",

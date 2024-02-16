@@ -1,8 +1,8 @@
 import type { FetchEvent } from "@edge-runtime/primitives"
-import { EdgeSpecRouteBundle } from "./edge-spec"
+import { EdgeSpecRouteBundle } from "./edge-spec.ts"
 import { Primitive } from "type-fest"
 import { z } from "zod"
-import { ResponseTypeToContext } from "./context"
+import { ResponseTypeToContext } from "./context.ts"
 
 export type HTTPMethods =
   | "GET"

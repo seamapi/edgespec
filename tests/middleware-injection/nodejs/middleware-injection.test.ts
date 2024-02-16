@@ -1,6 +1,6 @@
 import test from "ava"
-import { Middleware } from "../../../src/middleware"
-import { getTestServer } from "../../../tests/fixtures/get-test-server"
+import { Middleware } from "../../../src/middleware/index.js"
+import { getTestServer } from "../../../tests/fixtures/get-test-server.js"
 
 test("Node.js middleware injection", async (t) => {
   const sampleMiddleware: Middleware<{}, { middlewareType: string }> = (

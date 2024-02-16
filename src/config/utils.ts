@@ -1,7 +1,7 @@
 import path from "node:path"
 import fs from "node:fs/promises"
 import { bundleRequire } from "bundle-require"
-import { EdgeSpecConfig } from "src/config/config"
+import { EdgeSpecConfig } from "src/config/config.ts"
 import { SetRequired } from "type-fest"
 
 const cloneObjectAndDeleteUndefinedKeys = <T extends Record<string, any>>(

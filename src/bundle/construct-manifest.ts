@@ -1,5 +1,5 @@
 import path from "node:path"
-import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory"
+import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory.ts"
 
 const alphabet = "zyxwvutsrqponmlkjihgfedcba"
 

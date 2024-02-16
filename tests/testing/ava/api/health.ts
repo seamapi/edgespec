@@ -1,4 +1,4 @@
-import { withRouteSpec } from "../with-route-spec"
+import { withRouteSpec } from "../with-route-spec.ts"
 
 export default withRouteSpec({
   methods: ["GET"],

@@ -1,7 +1,7 @@
 import http from "node:http"
-import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node"
-import type { Middleware } from "src/middleware"
-import type { EdgeSpecAdapter } from "src/types/edge-spec"
+import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.ts"
+import type { Middleware } from "src/middleware/index.ts"
+import type { EdgeSpecAdapter } from "src/types/edge-spec.ts"
 
 export interface EdgeSpecNodeAdapterOptions {
   middleware?: Middleware[]

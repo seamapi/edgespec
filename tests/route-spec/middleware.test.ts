@@ -1,6 +1,6 @@
 import test from "ava"
-import { Middleware } from "src/middleware"
-import { getTestRoute } from "tests/fixtures/get-test-route"
+import { Middleware } from "src/middleware/index.ts"
+import { getTestRoute } from "tests/fixtures/get-test-route.ts"
 
 const withSessionToken: Middleware<
   {},

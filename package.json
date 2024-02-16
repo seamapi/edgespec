@@ -3,8 +3,8 @@
   "version": "0.0.42",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "types": "./dist-types/src/index.d.ts",
   "files": [
     "dist",
     "dist-types"
@@ -13,37 +13,37 @@
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.js",
-      "types": "./dist-types/index.d.ts"
+      "types": "./dist-types/src/index.d.ts"
     },
     "./config": {
       "import": "./dist/config.js",
       "require": "./dist/config.js",
-      "types": "./dist-types/config/config.d.ts"
+      "types": "./dist-types/src/config/config.d.ts"
     },
     "./dev": {
       "import": "./dist/dev.js",
       "require": "./dist/dev.js",
-      "types": "./dist-types/dev/dev.d.ts"
+      "types": "./dist-types/src/dev/dev.d.ts"
     },
     "./middleware": {
       "import": "./dist/middleware.js",
       "require": "./dist/middleware.js",
-      "types": "./dist-types/middleware/index.d.ts"
+      "types": "./dist-types/src/middleware/index.d.ts"
     },
     "./adapters/node": {
       "import": "./dist/adapters/node.js",
       "require": "./dist/adapters/node.js",
-      "types": "./dist-types/adapters/node.d.ts"
+      "types": "./dist-types/src/adapters/node.d.ts"
     },
     "./adapters/wintercg-minimal": {
       "import": "./dist/adapters/wintercg-minimal.js",
       "require": "./dist/adapters/wintercg-minimal.js",
-      "types": "./dist-types/adapters/wintercg-minimal.d.ts"
+      "types": "./dist-types/src/adapters/wintercg-minimal.d.ts"
     },
     "./testing/ava": {
       "import": "./dist/testing/ava.js",
       "require": "./dist/testing/ava.js",
-      "types": "./dist-types/testing/ava/index.d.ts"
+      "types": "./dist-types/src/testing/ava/index.d.ts"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",

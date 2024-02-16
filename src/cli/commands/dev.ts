@@ -1,9 +1,9 @@
 import { Command, Option } from "clipanion"
 import { durationFormatter } from "human-readable"
 import ora from "ora"
-import { startDevServer } from "src/dev/dev-server"
-import { BaseCommand } from "../base-command"
-import { ResolvedEdgeSpecConfig } from "src/config/utils"
+import { startDevServer } from "src/dev/dev-server.ts"
+import { BaseCommand } from "../base-command.ts"
+import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 
 export class DevCommand extends BaseCommand {
   static paths = [[`dev`]]

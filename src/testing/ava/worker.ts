@@ -1,8 +1,12 @@
-import EventEmitter2 from "eventemitter2"
-import { InitialWorkerData, MessageFromWorker, MessageToWorker } from "./types"
-import { HeadlessBuildEvents, devServer } from "src/dev/dev"
+import { EventEmitter2 } from "eventemitter2"
+import {
+  InitialWorkerData,
+  MessageFromWorker,
+  MessageToWorker,
+} from "./types.ts"
+import { HeadlessBuildEvents, devServer } from "src/dev/dev.ts"
 import { SharedWorker } from "ava/plugin"
-import { loadConfig } from "src/config"
+import { loadConfig } from "src/config/index.ts"
 
 export class Worker {
   private headlessEventEmitter: EventEmitter2

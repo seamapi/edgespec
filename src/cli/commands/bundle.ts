@@ -1,13 +1,13 @@
 import { Command, Option } from "clipanion"
-import { bundle } from "src/bundle/bundle"
+import { bundle } from "src/bundle/bundle.ts"
 import fs, { readFile } from "node:fs/promises"
 import path from "node:path"
 import { durationFormatter, sizeFormatter } from "human-readable"
 import ora from "ora"
-import { BaseCommand } from "../base-command"
-import { ResolvedEdgeSpecConfig } from "src/config/utils"
+import { BaseCommand } from "../base-command.ts"
+import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 
-import { BundleOptions } from "src/bundle/types"
+import { BundleOptions } from "src/bundle/types.ts"
 import { join as joinPath } from "node:path"
 
 export class BundleCommand extends BaseCommand {
