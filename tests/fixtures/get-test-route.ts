@@ -1,7 +1,7 @@
 import { createWithEdgeSpec } from "src/create-with-edge-spec.js"
+import axios from "axios"
 import type { AxiosInstance } from "axios"
 import getPort from "@ava/get-port"
-import defaultAxios from "redaxios"
 import { createNodeServerFromRouteMap } from "src/serve/create-node-server-from-route-map.js"
 import { ExecutionContext } from "ava"
 import { once } from "events"
@@ -77,12 +77,10 @@ export const getTestRoute = async <
   })
   const serverUrl = `http://localhost:${port}`
 
-  const axios: any = defaultAxios.default.create({
-    baseURL: serverUrl,
-  })
-
   return {
     serverUrl,
-    axios,
+    axios: axios.create({
+      baseURL: serverUrl,
+    }),
   }
 }

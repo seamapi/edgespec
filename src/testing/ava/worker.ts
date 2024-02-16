@@ -1,4 +1,4 @@
-import { EventEmitter2 } from "eventemitter2"
+import { EventEmitter2 } from "src/vendor/eventemitter.ts"
 import {
   InitialWorkerData,
   MessageFromWorker,

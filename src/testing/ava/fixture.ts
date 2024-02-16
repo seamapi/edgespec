@@ -1,7 +1,7 @@
 import path from "node:path"
 import hash from "object-hash"
 import getPort from "@ava/get-port"
-import { EventEmitter2 } from "eventemitter2"
+import { EventEmitter2 } from "src/vendor/eventemitter.ts"
 import { registerSharedWorker } from "ava/plugin"
 import { devServer } from "src/dev/dev.ts"
 import { InitialWorkerData, MessageFromWorker } from "./types.ts"
