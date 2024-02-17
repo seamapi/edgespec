@@ -25,7 +25,8 @@ export type Middleware<
   | SerializableToResponse
   | Promise<Response | SerializableToResponse>
 
-export type MiddlewareChain = readonly Middleware[]
+export type MiddlewareChain<RequiredOptions = {}> =
+  readonly Middleware<RequiredOptions>[]
 
 /**
  * Collect all result options from a middleware chain
