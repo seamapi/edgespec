@@ -38,7 +38,7 @@ export type RouteSpec<AuthMiddlewares extends string> = {
     | null
     | undefined
 
-  middleware?: MiddlewareChain
+  middleware?: MiddlewareChain<any>
 
   openApiMetadata?: any
 
@@ -107,7 +107,9 @@ type GetMiddlewareRequestOptions<
     "intersection"
   > &
   AccumulateMiddlewareChainResultOptions<
-    RS["middleware"] extends MiddlewareChain ? RS["middleware"] : readonly [],
+    RS["middleware"] extends MiddlewareChain<any>
+      ? RS["middleware"]
+      : readonly [],
     "intersection"
   > &
   (RS["jsonBody"] extends infer ZT extends z.ZodTypeAny

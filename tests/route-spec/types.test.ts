@@ -179,6 +179,39 @@ test.skip("route-local middlewares are available to request", () => {
   })
 })
 
+test.skip("route-local middleware with request dependencies works", () => {
+  const withFoo: Middleware<{}, { foo: string }> = (req, ctx, next) => {
+    req.foo = "bar"
+    return next(req, ctx)
+  }
+
+  const withName: Middleware<{ foo: string }, { name: string }> = (
+    req,
+    ctx,
+    next
+  ) => {
+    req.name = "lucille"
+    return next(req, ctx)
+  }
+
+  const withEdgeSpec = createWithEdgeSpec({
+    authMiddleware: {
+      simple: withFoo,
+    },
+  })
+
+  withEdgeSpec({
+    // todo: should not work with none
+    auth: "simple",
+    methods: ["GET"],
+    middleware: [withName],
+  })((req) => {
+    expectTypeOf<(typeof req)["name"]>().toBeString()
+
+    return new Response()
+  })
+})
+
 test.skip("custom response map types are enforced", () => {
   const withEdgeSpec = createWithEdgeSpec({
     authMiddleware: {},
