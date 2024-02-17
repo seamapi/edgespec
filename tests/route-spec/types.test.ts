@@ -333,3 +333,24 @@ test.skip("middlewares have routeParams which can be typed", () => {
     return next(req, ctx)
   }
 })
+
+test.skip("urlEncodedFormData can be .refine()ed", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    authMiddleware: {
+      test: middlewareWithInputs,
+    },
+  })
+
+  withEdgeSpec({
+    auth: "test",
+    methods: ["GET"],
+    urlEncodedFormData: z
+      .object({
+        id: z.number(),
+      })
+      .refine((v) => v.id > 0, "id must be positive"),
+  })((req) => {
+    expectTypeOf(req.urlEncodedFormData.id).toBeNumber()
+    return new Response()
+  })({} as any, {} as any)
+})

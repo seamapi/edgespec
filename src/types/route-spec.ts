@@ -26,14 +26,14 @@ export type RouteSpec<
   methods: readonly HTTPMethods[]
 
   jsonBody?: z.ZodTypeAny
-  multiPartFormData?: z.ZodObject<any>
-  queryParams?: z.ZodObject<any>
-  commonParams?: z.ZodObject<any>
-  urlEncodedFormData?: z.ZodObject<any>
-  routeParams?: z.ZodObject<any>
+  multiPartFormData?: z.ZodTypeAny
+  queryParams?: z.ZodTypeAny
+  commonParams?: z.ZodTypeAny
+  urlEncodedFormData?: z.ZodTypeAny
+  routeParams?: z.ZodTypeAny
 
   jsonResponse?: z.ZodTypeAny
-  multipartFormDataResponse?: z.ZodObject<any>
+  multipartFormDataResponse?: z.ZodTypeAny
   customResponseMap?: Record<string, z.ZodTypeAny>
 
   auth?:
@@ -128,19 +128,19 @@ type GetMiddlewareRequestOptions<
   (RS["jsonBody"] extends infer ZT extends z.ZodTypeAny
     ? { jsonBody: z.output<ZT> }
     : {}) &
-  (RS["multiPartFormData"] extends infer ZT extends z.ZodObject<any>
+  (RS["multiPartFormData"] extends infer ZT extends z.ZodTypeAny
     ? { multiPartFormData: z.output<ZT> }
     : {}) &
-  (RS["queryParams"] extends infer ZT extends z.ZodObject<any>
+  (RS["queryParams"] extends infer ZT extends z.ZodTypeAny
     ? { query: z.output<ZT> }
     : {}) &
-  (RS["commonParams"] extends infer ZT extends z.ZodObject<any>
+  (RS["commonParams"] extends infer ZT extends z.ZodTypeAny
     ? { commonParams: z.output<ZT> }
     : {}) &
-  (RS["urlEncodedFormData"] extends infer ZT extends z.ZodObject<any>
+  (RS["urlEncodedFormData"] extends infer ZT extends z.ZodTypeAny
     ? { urlEncodedFormData: z.output<ZT> }
     : {}) &
-  (RS["routeParams"] extends infer ZT extends z.ZodObject<any>
+  (RS["routeParams"] extends infer ZT extends z.ZodTypeAny
     ? { routeParams: z.output<ZT> }
     : { routeParams: EdgeSpecRouteParams })
 
