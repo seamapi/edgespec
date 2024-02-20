@@ -46,6 +46,10 @@ export const exampleMiddleware: Middleware = (req, ctx, next) => {
 
 ### Returning a response early [Soon]
 
+## Notes
+
+**All** middleware runs **before** EdgeSpec's internal input validation middleware, which means that properties like `req.jsonBody` are not available in middleware. Instead, use the `req.unvalidated*` variants, e.g. `req.unvalidatedJsonBody`. These properties have not been validated or transformed by Zod, but are available for use in middleware.
+
 ## Advanced typing
 
 The `Middleware` type accepts two type parameters: the first is the additional context required on the incoming `Request` object, and the second is the output context that the middleware will return. Both are optional, but specifying the input context is very helpful when you have middlewares that depend on each other. For example:

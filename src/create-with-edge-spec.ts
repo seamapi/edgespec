@@ -17,6 +17,7 @@ import { withInputValidation } from "./middleware/with-input-validation.js"
 import { withUnhandledExceptionHandling } from "./middleware/with-unhandled-exception-handling.js"
 import { ResponseValidationError } from "./middleware/http-exceptions.js"
 import { DEFAULT_CONTEXT } from "./types/context.js"
+import { withInputParsing } from "./middleware/with-input-parsing.ts"
 
 export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
@@ -49,6 +50,18 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
         withUnhandledExceptionHandling,
         serializeResponse(globalSpec, routeSpec, false),
         ...(globalSpec.beforeAuthMiddleware ?? []),
+        withInputParsing({
+          hasJsonBody: Boolean(routeSpec.jsonBody),
+          hasCommonParams: Boolean(routeSpec.commonParams),
+          hasUrlEncodedFormData: Boolean(routeSpec.urlEncodedFormData),
+          hasFormData: Boolean(routeSpec.multiPartFormData),
+        }),
+        firstAuthMiddlewareThatSucceeds(
+          authMiddlewares,
+          onMultipleAuthMiddlewareFailures
+        ),
+        ...(globalSpec.afterAuthMiddleware ?? []),
+        ...(routeSpec.middleware ?? []),
         withMethods(routeSpec.methods),
         withInputValidation({
           supportedArrayFormats: globalSpec.supportedArrayFormats ?? [
@@ -64,12 +77,6 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           urlEncodedFormData: routeSpec.urlEncodedFormData,
           shouldValidateGetRequestBody: globalSpec.shouldValidateGetRequestBody,
         }),
-        firstAuthMiddlewareThatSucceeds(
-          authMiddlewares,
-          onMultipleAuthMiddlewareFailures
-        ),
-        ...(globalSpec.afterAuthMiddleware ?? []),
-        ...(routeSpec.middleware ?? []),
         serializeResponse(globalSpec, routeSpec),
       ],
       routeFn,

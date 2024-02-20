@@ -6,9 +6,9 @@ import { z } from "zod"
 
 test("auth middleware has access to route parameters (withInputValidation() runs before user middleware)", async (t) => {
   const authTokenMiddleware: Middleware<{
-    urlEncodedFormData: { authToken: string }
+    unvalidatedUrlEncodedFormData: { authToken: string }
   }> = async (req, ctx, next) => {
-    if (req.urlEncodedFormData.authToken !== "foo") {
+    if (req.unvalidatedUrlEncodedFormData.authToken !== "foo") {
       return EdgeSpecResponse.json(
         { message: "invalid token" },
         { status: 401 }

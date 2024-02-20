@@ -222,7 +222,12 @@ export const withInputValidation =
       RouteParams
     >
   ): Middleware<
-    {},
+    {
+      unvalidatedJsonBody: any
+      unvalidatedMultiPartFormData: any
+      unvalidatedQuery: any
+      unvalidatedUrlEncodedFormData: any
+    },
     {
       jsonBody: z.output<JsonBody>
       multiPartFormData: z.output<FormData>
@@ -234,87 +239,18 @@ export const withInputValidation =
   async (req, ctx, next) => {
     const { supportedArrayFormats } = input
 
-    if (
-      (input.formData && input.jsonBody) ||
-      (input.formData && input.commonParams)
-    ) {
-      throw new Error("Cannot use formData with jsonBody or commonParams")
-    }
-
-    if (
-      (req.method === "POST" || req.method === "PATCH") &&
-      (input.jsonBody || input.commonParams) &&
-      !req.headers.get("content-type")?.includes("application/json")
-    ) {
-      throw new InvalidContentTypeError(
-        `${req.method} requests must have Content-Type header with "application/json"`
-      )
-    }
-
-    if (
-      input.urlEncodedFormData &&
-      req.method !== "GET" &&
-      !req.headers
-        .get("content-type")
-        ?.includes("application/x-www-form-urlencoded")
-    ) {
-      throw new InvalidContentTypeError(
-        `Must have Content-Type header with "application/x-www-form-urlencoded"`
-      )
-    }
-
-    if (
-      input.formData &&
-      (req.method === "POST" || req.method === "PATCH") &&
-      !req.headers.get("content-type")?.includes("multipart/form-data")
-    ) {
-      throw new InvalidContentTypeError(
-        `${req.method} requests must have Content-Type header with "multipart/form-data"`
-      )
-    }
-
     // TODO eventually we should support multipart/form-data
 
     const originalParams = Object.fromEntries(
       new URL(req.url).searchParams.entries()
     )
 
-    let jsonBody: any
-
-    if (input.jsonBody || input.commonParams) {
-      try {
-        jsonBody = await req.clone().json()
-      } catch (e: any) {
-        throw new InputParsingError("Error while parsing JSON body")
-      }
-    }
-
-    let multiPartFormData = undefined
-
-    if (input.formData) {
-      try {
-        multiPartFormData = await req.clone().formData()
-        multiPartFormData = Object.fromEntries(multiPartFormData.entries())
-      } catch (e: any) {
-        throw new InputParsingError("Error while parsing form data")
-      }
-    }
-
-    let urlEncodedFormData = undefined
-
-    if (input.urlEncodedFormData) {
-      try {
-        const params = new URLSearchParams(await req.clone().text())
-        urlEncodedFormData = Object.fromEntries(params.entries())
-      } catch (e: any) {
-        throw new InputParsingError("Error while parsing url encoded form data")
-      }
-    }
-
     try {
       const originalCombinedParams = {
         ...originalParams,
-        ...(typeof jsonBody === "object" ? jsonBody : {}),
+        ...(typeof req.unvalidatedJsonBody === "object"
+          ? req.unvalidatedJsonBody
+          : {}),
       }
 
       const willValidateRequestBody = input.shouldValidateGetRequestBody
@@ -322,16 +258,19 @@ export const withInputValidation =
         : req.method !== "GET" && req.method !== "DELETE"
 
       if (Boolean(input.formData) && willValidateRequestBody) {
-        req.multiPartFormData = input.formData?.parse(multiPartFormData)
+        req.multiPartFormData = input.formData?.parse(
+          req.unvalidatedMultiPartFormData
+        )
       }
 
       if (Boolean(input.jsonBody) && willValidateRequestBody) {
-        req.jsonBody = input.jsonBody?.parse(jsonBody)
+        req.jsonBody = input.jsonBody?.parse(req.unvalidatedJsonBody)
       }
 
       if (Boolean(input.urlEncodedFormData) && willValidateRequestBody) {
-        req.urlEncodedFormData =
-          input.urlEncodedFormData?.parse(urlEncodedFormData)
+        req.urlEncodedFormData = input.urlEncodedFormData?.parse(
+          req.unvalidatedUrlEncodedFormData
+        )
       }
 
       if (Boolean(input.routeParams) && "routeParams" in req) {
