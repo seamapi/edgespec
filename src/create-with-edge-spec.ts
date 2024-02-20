@@ -49,12 +49,6 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
         withUnhandledExceptionHandling,
         serializeResponse(globalSpec, routeSpec, false),
         ...(globalSpec.beforeAuthMiddleware ?? []),
-        firstAuthMiddlewareThatSucceeds(
-          authMiddlewares,
-          onMultipleAuthMiddlewareFailures
-        ),
-        ...(globalSpec.afterAuthMiddleware ?? []),
-        ...(routeSpec.middleware ?? []),
         withMethods(routeSpec.methods),
         withInputValidation({
           supportedArrayFormats: globalSpec.supportedArrayFormats ?? [
@@ -70,6 +64,12 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           urlEncodedFormData: routeSpec.urlEncodedFormData,
           shouldValidateGetRequestBody: globalSpec.shouldValidateGetRequestBody,
         }),
+        firstAuthMiddlewareThatSucceeds(
+          authMiddlewares,
+          onMultipleAuthMiddlewareFailures
+        ),
+        ...(globalSpec.afterAuthMiddleware ?? []),
+        ...(routeSpec.middleware ?? []),
         serializeResponse(globalSpec, routeSpec),
       ],
       routeFn,
