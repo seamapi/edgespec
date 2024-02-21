@@ -1,3 +1,4 @@
+import { formatZodError } from "src/lib/format-zod-error.ts"
 import { z } from "zod"
 
 export interface HttpException {
@@ -59,19 +60,13 @@ export class InputParsingError extends BadRequestError {
 }
 
 export class InputValidationError extends BadRequestError {
-  constructor(
-    message: string,
-    public error?: z.ZodError<any>
-  ) {
-    super(message)
+  constructor(error: z.ZodError<any>) {
+    super(formatZodError(error))
   }
 }
 
 export class ResponseValidationError extends EdgeSpecMiddlewareError {
-  constructor(
-    message: string,
-    public error?: z.ZodError<any>
-  ) {
-    super(message, 500)
+  constructor(error: z.ZodError<any>) {
+    super(formatZodError(error), 500)
   }
 }

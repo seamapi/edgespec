@@ -114,10 +114,7 @@ function serializeResponse(
 
       return mergeResponses(req.responseDefaults, response)
     } catch (err: any) {
-      throw new ResponseValidationError(
-        "the response does not match with jsonResponse",
-        err
-      )
+      throw new ResponseValidationError(err)
     }
   }
 }
