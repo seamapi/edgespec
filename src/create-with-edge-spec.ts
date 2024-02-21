@@ -47,6 +47,7 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
             _injectedEdgeSpecMiddleware
           : []),
         withUnhandledExceptionHandling,
+        // todo: remove
         serializeResponse(globalSpec, routeSpec, false),
         ...(globalSpec.beforeAuthMiddleware ?? []),
         firstAuthMiddlewareThatSucceeds(

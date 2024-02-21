@@ -1,10 +1,10 @@
 import { once } from "node:events"
 import { createServer } from "node:http"
 import TypedEmitter from "typed-emitter"
+import kleur from "kleur"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.ts"
 import { HeadlessBuildEvents } from "./types.ts"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
-import chalk from "chalk"
 import { RequestHandlerController } from "./request-handler-controller.ts"
 import { Middleware } from "src/middleware/index.ts"
 
@@ -53,7 +53,7 @@ export const startHeadlessDevServer = async ({
       } catch (error) {
         if (error instanceof Error) {
           process.stderr.write(
-            chalk.bgRed("\nUnhandled exception:\n") +
+            kleur.bgRed("\nUnhandled exception:\n") +
               (error.stack ?? error.message) +
               "\n"
           )

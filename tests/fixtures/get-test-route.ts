@@ -36,6 +36,7 @@ export const getTestRoute = async <
   const withRouteSpec = createWithEdgeSpec({
     ...opts.globalSpec,
     beforeAuthMiddleware: [
+      ...(opts.globalSpec.beforeAuthMiddleware ?? []),
       // Proxy logger
       createWithLogger({
         debug: (...args: any[]) => {

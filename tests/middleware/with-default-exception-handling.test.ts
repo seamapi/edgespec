@@ -1,13 +1,13 @@
 import test from "ava"
 import { getTestRoute } from "../fixtures/get-test-route.js"
-import { withDefaultExceptionHandling } from "src/middleware/with-default-exception-handling.js"
+import { createWithDefaultExceptionHandling } from "src/middleware/with-default-exception-handling.js"
 import { HttpException } from "src/middleware/http-exceptions.js"
 
 test("handles internal middleware issues", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
       authMiddleware: {},
-      beforeAuthMiddleware: [withDefaultExceptionHandling],
+      beforeAuthMiddleware: [createWithDefaultExceptionHandling()],
     },
     routeSpec: {
       auth: "none",
@@ -33,7 +33,7 @@ test("handles custom http exceptions", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
       authMiddleware: {},
-      beforeAuthMiddleware: [withDefaultExceptionHandling],
+      beforeAuthMiddleware: [createWithDefaultExceptionHandling()],
     },
     routeSpec: {
       auth: "none",
