@@ -11,6 +11,7 @@ import {
   GlobalSpec,
 } from "src/types/global-spec.ts"
 import { EdgeSpecRouteFnFromSpecs, RouteSpec } from "src/types/route-spec.ts"
+import { createWithLogger } from "src/middleware/with-logger.ts"
 
 export const getTestRoute = async <
   const GS extends GlobalSpec,
@@ -24,10 +25,41 @@ export const getTestRoute = async <
     routeFn: EdgeSpecRouteFnFromSpecs<GS, RS>
     edgeSpecOptions?: Partial<EdgeSpecOptions>
   }
-): Promise<{ serverUrl: string; axios: AxiosInstance }> => {
-  const withRouteSpec = createWithEdgeSpec(opts.globalSpec)
+) => {
+  const logs = {
+    debug: [] as any[][],
+    info: [] as any[][],
+    warn: [] as any[][],
+    error: [] as any[][],
+  }
 
-  const wrappedRouteFn = withRouteSpec(opts.routeSpec)(opts.routeFn)
+  const withRouteSpec = createWithEdgeSpec({
+    ...opts.globalSpec,
+    beforeAuthMiddleware: [
+      ...(opts.globalSpec.beforeAuthMiddleware ?? []),
+      // Proxy logger
+      createWithLogger({
+        debug: (...args: any[]) => {
+          console.debug(...args)
+          logs.debug.push(args)
+        },
+        info: (...args: any[]) => {
+          console.info(...args)
+          logs.info.push(args)
+        },
+        warn: (...args: any[]) => {
+          console.warn(...args)
+          logs.warn.push(args)
+        },
+        error: (...args: any[]) => {
+          console.error(...args)
+          logs.error.push(args)
+        },
+      }),
+    ],
+  })
+
+  const wrappedRouteFn = withRouteSpec(opts.routeSpec)(opts.routeFn as any)
 
   const port = await getPort()
 
@@ -40,34 +72,6 @@ export const getTestRoute = async <
     },
     opts.edgeSpecOptions
   )
-
-  // const app = http.createServer(async (nReq, nRes) => {
-  //   try {
-  //     const webReq = new Request(`http://localhost${nReq.url}`, {
-  //       headers: nReq.headers as any,
-  //       method: nReq.method,
-  //       body: ["GET", "HEAD"].includes(nReq.method!)
-  //         ? undefined
-  //         : (nReq as any),
-  //     })
-
-  //     const res: Response = await wrappedRouteFn(webReq)
-  //     nRes.statusCode = res.status ?? 200
-  //     const json = res.json && (await res.json().catch((e) => null))
-  //     const text = res.text && (await res.text().catch((e) => null))
-  //     if (json) {
-  //       nRes.setHeader("Content-Type", "application/json")
-  //       nRes.end(JSON.stringify(json))
-  //     } else if (text) {
-  //       nRes.end(text)
-  //     } else {
-  //       throw new Error("Couldn't read response body")
-  //     }
-  //   } catch (e: any) {
-  //     nRes.statusCode = 500
-  //     nRes.end(e.toString())
-  //   }
-  // })
 
   app.listen(port)
   t.teardown(async () => {
@@ -82,5 +86,6 @@ export const getTestRoute = async <
     axios: axios.create({
       baseURL: serverUrl,
     }),
+    getLogs: () => logs,
   }
 }

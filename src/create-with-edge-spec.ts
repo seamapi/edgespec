@@ -47,6 +47,7 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
             _injectedEdgeSpecMiddleware
           : []),
         withUnhandledExceptionHandling,
+        // todo: remove
         serializeResponse(globalSpec, routeSpec, false),
         ...(globalSpec.beforeAuthMiddleware ?? []),
         firstAuthMiddlewareThatSucceeds(
@@ -114,10 +115,7 @@ function serializeResponse(
 
       return mergeResponses(req.responseDefaults, response)
     } catch (err: any) {
-      throw new ResponseValidationError(
-        "the response does not match with jsonResponse",
-        err
-      )
+      throw new ResponseValidationError(err)
     }
   }
 }
