@@ -12,12 +12,12 @@ export type Logger = {
  * `ctx.logger` is used by internal EdgeSpec middleware when provided (instead of `console`).
  */
 export const createWithLogger =
-  (
-    logger: Logger
+  <L extends Logger>(
+    logger: L
   ): Middleware<
     {},
     {
-      logger: Logger
+      logger: L
     }
   > =>
   (req, ctx, next) => {
