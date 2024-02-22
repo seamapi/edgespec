@@ -5,38 +5,8 @@ import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 import { createBirpcGroup } from "birpc"
 import type { BundlerRpcFunctions } from "./types.ts"
 import type { BuildResult } from "esbuild"
-import EventEmitter from "node:events"
 import * as esbuild from "esbuild"
-
-// todo: extract into new file
-class AsyncWorkTracker<Result> extends EventEmitter {
-  private state: "idle" | "pending" | "resolved" = "idle"
-  private lastResult: Result | undefined
-
-  async waitForResult(): Promise<Result> {
-    if (this.state === "pending" || !this.lastResult) {
-      return new Promise<Result>((resolve) => {
-        this.once("result", resolve)
-      })
-    }
-
-    if (!this.lastResult) {
-      throw new Error("No last result (this should never happen)")
-    }
-
-    return this.lastResult
-  }
-
-  beginAsyncWork() {
-    this.state = "pending"
-  }
-
-  finishAsyncWork(result: Result) {
-    this.state = "resolved"
-    this.emit("result", result)
-    this.lastResult = result
-  }
-}
+import { AsyncWorkTracker } from "src/lib/async-work-tracker.ts"
 
 export interface StartHeadlessDevBundlerOptions {
   config: ResolvedEdgeSpecConfig
