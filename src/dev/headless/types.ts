@@ -16,3 +16,14 @@ export type WaitForAvailableBuildResponse = {
 export type BundlerRpcFunctions = {
   waitForAvailableBuild: () => Promise<WaitForAvailableBuildResponse>
 }
+
+export type HttpServerRpcFunctions = {
+  onBuildStart: () => void
+  onBuildEnd: ({
+    success,
+    errorMessage,
+  }: {
+    success: boolean
+    errorMessage?: string
+  }) => void
+}
