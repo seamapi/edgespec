@@ -3,6 +3,7 @@ import { devServer } from "src/dev/dev.ts"
 import { SharedWorker } from "ava/plugin"
 import { loadConfig } from "src/config/index.ts"
 import { ChannelOptions } from "birpc"
+import { once } from "node:events"
 
 export class Worker {
   private startBundlerPromise: ReturnType<
@@ -16,16 +17,28 @@ export class Worker {
   public async handleTestWorker(testWorker: SharedWorker.TestWorker) {
     const bundler = await this.startBundlerPromise
 
+    let workerRpcCallback: (data: any) => void
+
     const channel: ChannelOptions = {
       post: (data) => testWorker.publish(data),
       on: (data) => {
-        ;(async () => {
-          for await (const msg of testWorker.subscribe()) {
-            data(msg.data)
-          }
-        })()
+        workerRpcCallback = data
       },
     }
+
+    const messageHandlerAbortController = new AbortController()
+    const messageHandlerPromise = Promise.race([
+      once(messageHandlerAbortController.signal, "abort"),
+      (async () => {
+        for await (const msg of testWorker.subscribe()) {
+          workerRpcCallback!(msg.data)
+
+          if (messageHandlerAbortController.signal.aborted) {
+            break
+          }
+        }
+      })(),
+    ])
 
     bundler.birpc.updateChannels((channels) => channels.push(channel))
 
@@ -33,10 +46,12 @@ export class Worker {
       type: "ready",
     })
 
-    testWorker.teardown(() => {
+    testWorker.teardown(async () => {
       bundler.birpc.updateChannels((channels) =>
         channels.filter((c) => c !== channel)
       )
+      messageHandlerAbortController.abort()
+      await messageHandlerPromise
     })
   }
 
