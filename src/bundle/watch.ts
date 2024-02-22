@@ -31,9 +31,17 @@ export const bundleAndWatch = async (options: BundleOptions) => {
   const tempDir = await getTempPathInApp(options.rootDirectory)
   const manifestPath = path.join(tempDir, "dev-manifest.ts")
 
+  const rebuildWithErrorHandling = async () => {
+    try {
+      await ctx?.rebuild()
+    } catch {
+      // Error is ignored here because it's assumed the caller handles it in the build.onEnd() callback
+    }
+  }
+
   const invalidateManifest = async () => {
     await fs.writeFile(manifestPath, await constructManifest(options), "utf-8")
-    await ctx?.rebuild()
+    await rebuildWithErrorHandling()
   }
 
   const ctx = await esbuild.context({
@@ -42,13 +50,14 @@ export const bundleAndWatch = async (options: BundleOptions) => {
     format: "esm",
     write: false,
     sourcemap: "inline",
+    logLevel: "silent",
     ...options.esbuild,
   })
 
   await invalidateManifest()
 
   watcher.on("change", async () => {
-    await ctx.rebuild()
+    await rebuildWithErrorHandling()
   })
 
   watcher.on("add", async () => {

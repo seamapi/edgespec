@@ -2,12 +2,22 @@ import path from "path"
 import { getTempPathInApp } from "src/bundle/get-temp-path-in-app.ts"
 import { bundleAndWatch } from "src/bundle/watch.ts"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
-import TypedEmitter from "typed-emitter"
-import { HeadlessBuildEvents } from "./types.ts"
+import { createBirpcGroup } from "birpc"
+import type { BundlerRpcFunctions } from "./types.ts"
+import type { BuildResult } from "esbuild"
+import * as esbuild from "esbuild"
+import { AsyncWorkTracker } from "src/lib/async-work-tracker.ts"
 
 export interface StartHeadlessDevBundlerOptions {
   config: ResolvedEdgeSpecConfig
-  headlessEventEmitter: TypedEmitter.default<HeadlessBuildEvents>
+  onBuildStart?: () => void
+  onBuildEnd?: ({
+    success,
+    errorMessage,
+  }: {
+    success: boolean
+    errorMessage?: string
+  }) => void
 }
 
 /**
@@ -17,10 +27,36 @@ export interface StartHeadlessDevBundlerOptions {
  */
 export const startHeadlessDevBundler = async ({
   config,
-  headlessEventEmitter,
+  onBuildStart,
+  onBuildEnd,
 }: StartHeadlessDevBundlerOptions) => {
   const tempDir = await getTempPathInApp(config.rootDirectory)
   const devBundlePath = path.join(tempDir, "dev-bundle.js")
+
+  const buildTracker = new AsyncWorkTracker<
+    BuildResult & { buildUpdatedAtMs: number }
+  >()
+
+  const rpcFunctions: BundlerRpcFunctions = {
+    async waitForAvailableBuild() {
+      const result = await buildTracker.waitForResult()
+      return {
+        buildUpdatedAtMs: Date.now(),
+        build:
+          result.errors.length === 0
+            ? {
+                type: "success",
+                bundlePath: devBundlePath,
+              }
+            : {
+                type: "failure",
+                errors: result.errors,
+              },
+      }
+    },
+  }
+
+  const birpc = createBirpcGroup(rpcFunctions, [])
 
   const { stop } = await bundleAndWatch({
     rootDirectory: config.rootDirectory,
@@ -36,12 +72,20 @@ export const startHeadlessDevBundler = async ({
           name: "watch",
           setup(build) {
             build.onStart(() => {
-              headlessEventEmitter.emit("started-building")
+              onBuildStart?.()
+              buildTracker.beginAsyncWork()
             })
 
-            build.onEnd(async () => {
-              headlessEventEmitter.emit("finished-building", {
-                bundlePath: devBundlePath,
+            build.onEnd(async (result) => {
+              buildTracker.finishAsyncWork({
+                ...result,
+                buildUpdatedAtMs: Date.now(),
+              })
+              onBuildEnd?.({
+                success: result.errors.length === 0,
+                errorMessage: (
+                  await esbuild.formatMessages(result.errors, { kind: "error" })
+                ).join("\n"),
               })
             })
           },
@@ -50,5 +94,8 @@ export const startHeadlessDevBundler = async ({
     },
   })
 
-  return { stop }
+  return {
+    stop,
+    birpc,
+  }
 }

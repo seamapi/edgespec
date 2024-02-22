@@ -1,18 +1,17 @@
 import { once } from "node:events"
 import { createServer } from "node:http"
-import TypedEmitter from "typed-emitter"
 import kleur from "kleur"
 import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.ts"
-import { HeadlessBuildEvents } from "./types.ts"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 import { RequestHandlerController } from "./request-handler-controller.ts"
 import { Middleware } from "src/middleware/index.ts"
+import { createBirpc, type ChannelOptions } from "birpc"
+import { BundlerRpcFunctions } from "./types.ts"
 
 export interface StartHeadlessDevServerOptions {
   port: number
   config: ResolvedEdgeSpecConfig
-  headlessEventEmitter: TypedEmitter.default<HeadlessBuildEvents>
-  initialBundlePath?: string
+  rpcChannel: ChannelOptions
   middleware?: Middleware[]
   onListening?: (port: number) => void
 }
@@ -25,16 +24,12 @@ export interface StartHeadlessDevServerOptions {
 export const startHeadlessDevServer = async ({
   port,
   config,
-  headlessEventEmitter,
-  initialBundlePath,
+  rpcChannel,
   middleware = [],
   onListening,
 }: StartHeadlessDevServerOptions) => {
-  const controller = new RequestHandlerController(
-    headlessEventEmitter,
-    middleware,
-    initialBundlePath
-  )
+  const birpc = createBirpc<BundlerRpcFunctions>({}, rpcChannel)
+  const controller = new RequestHandlerController(birpc, middleware)
 
   const server = createServer(
     transformToNodeBuilder({
@@ -81,7 +76,6 @@ export const startHeadlessDevServer = async ({
       const closePromise = once(server, "close")
       server.close()
       await closePromise
-      controller.teardown()
     },
   }
 }
