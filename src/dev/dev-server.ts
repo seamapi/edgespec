@@ -1,11 +1,13 @@
-import { EventEmitter } from "node:events"
+import { MessageChannel } from "node:worker_threads"
 import { AddressInfo } from "node:net"
-import { EdgeSpecConfig } from "src/config/config.ts"
+import type { ChannelOptions } from "birpc"
+import type { EdgeSpecConfig } from "src/config/config.ts"
 import { loadConfig } from "src/config/utils.ts"
-import TypedEventEmitter from "typed-emitter"
 import { startHeadlessDevServer } from "./headless/start-server.ts"
-import { HeadlessBuildEvents } from "./headless/types.ts"
-import { startHeadlessDevBundler } from "./headless/start-bundler.ts"
+import {
+  StartHeadlessDevBundlerOptions,
+  startHeadlessDevBundler,
+} from "./headless/start-bundler.ts"
 import type { Middleware } from "src/middleware/index.ts"
 
 export interface StartDevServerOptions {
@@ -14,7 +16,7 @@ export interface StartDevServerOptions {
   port?: number
   onListening?: (port: number) => void
   onBuildStart?: () => void
-  onBuildEnd?: () => void
+  onBuildEnd?: StartHeadlessDevBundlerOptions["onBuildEnd"]
   middleware?: Middleware[]
 }
 
@@ -29,28 +31,37 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     options.config
   )
 
-  const eventEmitter =
-    new EventEmitter() as TypedEventEmitter.default<HeadlessBuildEvents>
-  eventEmitter.on("started-building", () => {
-    options.onBuildStart?.()
-  })
-  eventEmitter.on("finished-building", () => {
-    options.onBuildEnd?.()
-  })
-
   const port = options.port ?? 3000
 
-  const [headlessServer, headlessBundler] = await Promise.all([
+  const headlessBundler = await startHeadlessDevBundler({
+    config,
+    onBuildStart: options.onBuildStart,
+    onBuildEnd: options.onBuildEnd,
+  })
+
+  const messageChannel = new MessageChannel()
+
+  const bundlerRpcChannel: ChannelOptions = {
+    post: (data) => messageChannel.port1.postMessage(data),
+    on: (data) => messageChannel.port1.on("message", data),
+  }
+
+  const httpServerRpcChannel: ChannelOptions = {
+    post: (data) => messageChannel.port2.postMessage(data),
+    on: (data) => messageChannel.port2.on("message", data),
+  }
+
+  headlessBundler.birpc.updateChannels((channels) =>
+    channels.push(bundlerRpcChannel)
+  )
+
+  const [headlessServer] = await Promise.all([
     startHeadlessDevServer({
       port,
       config,
-      headlessEventEmitter: eventEmitter,
+      rpcChannel: httpServerRpcChannel,
       middleware: options.middleware,
       onListening: options.onListening,
-    }),
-    startHeadlessDevBundler({
-      config,
-      headlessEventEmitter: eventEmitter,
     }),
   ])
 
