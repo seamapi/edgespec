@@ -55,15 +55,13 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     channels.push(bundlerRpcChannel)
   )
 
-  const [headlessServer] = await Promise.all([
-    startHeadlessDevServer({
-      port,
-      config,
-      rpcChannel: httpServerRpcChannel,
-      middleware: options.middleware,
-      onListening: options.onListening,
-    }),
-  ])
+  const headlessServer = await startHeadlessDevServer({
+    port,
+    config,
+    rpcChannel: httpServerRpcChannel,
+    middleware: options.middleware,
+    onListening: options.onListening,
+  })
 
   return {
     port: (headlessServer.server.address() as AddressInfo).port.toString(),
