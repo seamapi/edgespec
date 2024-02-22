@@ -69,6 +69,8 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     port: (headlessServer.server.address() as AddressInfo).port.toString(),
     stop: async () => {
       await Promise.all([headlessServer.stop(), headlessBundler.stop()])
+      messageChannel.port1.close()
+      messageChannel.port2.close()
     },
   }
 }
