@@ -1,13 +1,11 @@
 import path from "node:path"
 import hash from "object-hash"
 import getPort from "@ava/get-port"
-import { EventEmitter2 } from "src/vendor/eventemitter.ts"
 import { registerSharedWorker } from "ava/plugin"
 import { devServer } from "src/dev/dev.ts"
-import { InitialWorkerData, MessageFromWorker } from "./types.ts"
+import { InitialWorkerData } from "./types.ts"
 import { loadConfig } from "src/config/index.ts"
 import { ExecutionContext } from "ava"
-import { once } from "node:events"
 import { fileURLToPath } from "node:url"
 import { Middleware } from "src/middleware/types.ts"
 
@@ -66,47 +64,31 @@ export const getTestServer = async (
   })
   await worker.available
 
-  const reply = await worker
-    .publish({ type: "get-initial-bundle" })
-    .replies()
-    .next()
-  if (reply.done) {
-    throw new Error("No reply from worker")
-  }
-  const msg = reply.value.data as MessageFromWorker
-  if (msg.type !== "initial-bundle") {
-    throw new Error("Unexpected message from worker")
+  const [firstMessage, port] = await Promise.all([
+    worker.subscribe().next(),
+    getPort(),
+  ])
+  if (firstMessage.value.data.type !== "ready") {
+    throw new Error("Unexpected message from AVA test worker")
   }
 
-  const eventEmitter = new EventEmitter2({ wildcard: true })
-  const port = await getPort()
   const serverFixture = await devServer.headless.startServer({
     port,
     config: await loadConfig(rootDirectory),
-    headlessEventEmitter: eventEmitter as any,
-    initialBundlePath: msg.bundlePath,
+    rpcChannel: {
+      post: (data) => worker.publish(data),
+      on: (data) => {
+        ;(async () => {
+          for await (const msg of worker.subscribe()) {
+            data(msg.data)
+          }
+        })()
+      },
+    },
     middleware: options?.middleware ?? [],
   })
 
-  const messageHandlerAbortController = new AbortController()
-  const messageHandlerPromise = Promise.race([
-    once(messageHandlerAbortController.signal, "abort"),
-    (async () => {
-      for await (const msg of worker.subscribe()) {
-        if (messageHandlerAbortController.signal.aborted) {
-          break
-        }
-
-        if (msg.data.type === "from-headless-dev-bundler") {
-          eventEmitter.emit(msg.data.originalEventType, ...msg.data)
-        }
-      }
-    })(),
-  ])
-
   t.teardown(async () => {
-    messageHandlerAbortController.abort()
-    await messageHandlerPromise
     await serverFixture.stop()
   })
 
