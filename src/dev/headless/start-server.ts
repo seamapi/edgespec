@@ -91,5 +91,8 @@ export const startHeadlessDevServer = async ({
       server.close()
       await closePromise
     },
+    getBuildResult: async () => {
+      return birpc.waitForAvailableBuild()
+    },
   }
 }

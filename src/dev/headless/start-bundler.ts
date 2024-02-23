@@ -8,8 +8,7 @@ import {
   type BundlerRpcFunctions,
   BundlerBuildResult,
 } from "./types.ts"
-import type { BuildResult } from "esbuild"
-import * as esbuild from "esbuild"
+import { formatMessages } from "esbuild"
 import { AsyncWorkTracker } from "src/lib/async-work-tracker.ts"
 
 export interface StartHeadlessDevBundlerOptions {
@@ -33,7 +32,7 @@ export const startHeadlessDevBundler = async ({
 
   const rpcFunctions: BundlerRpcFunctions = {
     async waitForAvailableBuild() {
-      return await buildTracker.waitForResult()
+      return buildTracker.waitForResult()
     },
   }
 
@@ -62,7 +61,6 @@ export const startHeadlessDevBundler = async ({
             })
 
             build.onEnd(async (result) => {
-
               let build: BundlerBuildResult
               if (result.errors.length === 0) {
                 build = {
@@ -74,7 +72,7 @@ export const startHeadlessDevBundler = async ({
                 build = {
                   type: "failure",
                   errorMessage: (
-                    await esbuild.formatMessages(result.errors, {
+                    await formatMessages(result.errors, {
                       kind: "error",
                     })
                   ).join("\n"),
