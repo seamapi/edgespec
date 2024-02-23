@@ -32,23 +32,11 @@ export class BundleCommand extends BaseCommand {
 
     let platformBundleOptions: Partial<BundleOptions> = {}
 
-    const rootDirPackageJson = await readFile(
-      joinPath(config.rootDirectory, "package.json")
-    )
-      .then((r) => JSON.parse(r.toString()))
-      .catch((e) => {
-        throw new Error(
-          `Could not read package.json in ${
-            config.rootDirectory
-          }\n\n${e.toString()}`
-        )
-      })
-
     if (config.platform === "node") {
       platformBundleOptions = {
         esbuild: {
           platform: "node",
-          external: Object.keys(rootDirPackageJson.dependencies || {}),
+          packages: "external",
         },
       }
     }

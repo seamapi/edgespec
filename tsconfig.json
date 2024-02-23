@@ -13,7 +13,7 @@
       "src/*": ["./src/*"]
     },
     "resolveJsonModule": true,
-    "rootDir": "./"
+    "rootDir": "./",
   },
   "exclude": [
     "node_modules",
