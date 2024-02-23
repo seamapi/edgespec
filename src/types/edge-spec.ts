@@ -115,7 +115,6 @@ export function makeRequestAgainstEdgeSpec(
     const edgeSpecRequest = createEdgeSpecRequest(request, {
       edgeSpec,
       routeParams: routeParams ?? {},
-      responseDefaults: new Response(),
     })
 
     if (!routeFn) {

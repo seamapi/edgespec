@@ -27,20 +27,15 @@ withEdgeSpec({
 
 ### Modifying the base HTTP response
 
-Set the property `responseDefaults` on the `req` object. This can be a full `Response` instance or the options normally passed to the second argument of `new Response()`. For example:
+Wait for a Response to be returned from the `next` callback, then modify it directly. For example:
 
 ```typescript
 import type { Middleware } from "edgespec"
 
-const baseResponse = new Response(null, {
-  headers: {
-    Server: "edgespec",
-  },
-})
-
 export const exampleMiddleware: Middleware = (req, ctx, next) => {
-  req.responseDefaults = baseResponse
-  return next(req, ctx)
+  const response = await next(req, ctx)
+  response.headers.set("X-Example", "Hello, world!")
+  return response
 }
 ```
 

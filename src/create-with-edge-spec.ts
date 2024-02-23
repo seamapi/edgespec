@@ -10,7 +10,6 @@ import {
   EdgeSpecRouteFn,
   EdgeSpecCustomResponse,
   SerializableToResponse,
-  mergeResponses,
 } from "./types/web-handler.js"
 import { withMethods } from "./middleware/with-methods.js"
 import { withInputValidation } from "./middleware/with-input-validation.js"
@@ -113,7 +112,7 @@ function serializeResponse(
         rawResponse
       )
 
-      return mergeResponses(req.responseDefaults, response)
+      return response
     } catch (err: any) {
       throw new ResponseValidationError(err)
     }
