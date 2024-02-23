@@ -3,20 +3,20 @@ import { AddressInfo } from "node:net"
 import type { ChannelOptions } from "birpc"
 import type { EdgeSpecConfig } from "src/config/config.ts"
 import { loadConfig } from "src/config/utils.ts"
-import { startHeadlessDevServer } from "./headless/start-server.ts"
+import {
+  StartHeadlessDevServerOptions,
+  startHeadlessDevServer,
+} from "./headless/start-server.ts"
 import { startHeadlessDevBundler } from "./headless/start-bundler.ts"
-import type { Middleware } from "src/middleware/index.ts"
-import { HttpServerRpcFunctions } from "./headless/types.ts"
 
-export interface StartDevServerOptions {
+export type StartDevServerOptions = {
   rootDirectory?: string
   config?: EdgeSpecConfig
   port?: number
-  onListening?: (port: number) => void
-  onBuildStart?: HttpServerRpcFunctions["onBuildStart"]
-  onBuildEnd?: HttpServerRpcFunctions["onBuildEnd"]
-  middleware?: Middleware[]
-}
+} & Pick<
+  StartHeadlessDevServerOptions,
+  "middleware" | "onListening" | "onBuildStart" | "onBuildEnd"
+>
 
 /**
  * Start an EdgeSpec dev server. It will continuously watch your code and rebuild on changes. (This is the same function called by `edgespec dev`.)

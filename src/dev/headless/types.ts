@@ -1,29 +1,21 @@
-import { Message } from "esbuild"
-
-export type WaitForAvailableBuildResponse = {
+export type BundlerBuildResult = {
   buildUpdatedAtMs: number
-  build:
-    | {
-        type: "success"
-        bundlePath: string
-      }
-    | {
-        type: "failure"
-        errors: Message[]
-      }
-}
+} & (
+  | {
+      type: "success"
+      bundlePath: string
+    }
+  | {
+      type: "failure"
+      errorMessage: string
+    }
+)
 
 export type BundlerRpcFunctions = {
-  waitForAvailableBuild: () => Promise<WaitForAvailableBuildResponse>
+  waitForAvailableBuild: () => Promise<BundlerBuildResult>
 }
 
 export type HttpServerRpcFunctions = {
   onBuildStart: () => void
-  onBuildEnd: ({
-    success,
-    errorMessage,
-  }: {
-    success: boolean
-    errorMessage?: string
-  }) => void
+  onBuildEnd: (build: BundlerBuildResult) => void
 }

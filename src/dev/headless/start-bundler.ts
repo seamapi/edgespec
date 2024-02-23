@@ -3,7 +3,11 @@ import { getTempPathInApp } from "src/bundle/get-temp-path-in-app.ts"
 import { bundleAndWatch } from "src/bundle/watch.ts"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 import { ChannelOptions, createBirpcGroup } from "birpc"
-import { HttpServerRpcFunctions, type BundlerRpcFunctions } from "./types.ts"
+import {
+  HttpServerRpcFunctions,
+  type BundlerRpcFunctions,
+  BundlerBuildResult,
+} from "./types.ts"
 import type { BuildResult } from "esbuild"
 import * as esbuild from "esbuild"
 import { AsyncWorkTracker } from "src/lib/async-work-tracker.ts"
@@ -25,26 +29,11 @@ export const startHeadlessDevBundler = async ({
   const tempDir = await getTempPathInApp(config.rootDirectory)
   const devBundlePath = path.join(tempDir, "dev-bundle.js")
 
-  const buildTracker = new AsyncWorkTracker<
-    BuildResult & { buildUpdatedAtMs: number }
-  >()
+  const buildTracker = new AsyncWorkTracker<BundlerBuildResult>()
 
   const rpcFunctions: BundlerRpcFunctions = {
     async waitForAvailableBuild() {
-      const result = await buildTracker.waitForResult()
-      return {
-        buildUpdatedAtMs: Date.now(),
-        build:
-          result.errors.length === 0
-            ? {
-                type: "success",
-                bundlePath: devBundlePath,
-              }
-            : {
-                type: "failure",
-                errors: result.errors,
-              },
-      }
+      return await buildTracker.waitForResult()
     },
   }
 
@@ -73,16 +62,28 @@ export const startHeadlessDevBundler = async ({
             })
 
             build.onEnd(async (result) => {
-              buildTracker.finishAsyncWork({
-                ...result,
-                buildUpdatedAtMs: Date.now(),
-              })
-              await birpc.broadcast.onBuildEnd({
-                success: result.errors.length === 0,
-                errorMessage: (
-                  await esbuild.formatMessages(result.errors, { kind: "error" })
-                ).join("\n"),
-              })
+
+              let build: BundlerBuildResult
+              if (result.errors.length === 0) {
+                build = {
+                  type: "success",
+                  bundlePath: devBundlePath,
+                  buildUpdatedAtMs: Date.now(),
+                }
+              } else {
+                build = {
+                  type: "failure",
+                  errorMessage: (
+                    await esbuild.formatMessages(result.errors, {
+                      kind: "error",
+                    })
+                  ).join("\n"),
+                  buildUpdatedAtMs: Date.now(),
+                }
+              }
+
+              buildTracker.finishAsyncWork(build)
+              await birpc.broadcast.onBuildEnd(build)
             })
           },
         },
