@@ -8,7 +8,7 @@ test("wintercg middleware injection", async (t) => {
     ctx,
     next
   ) => {
-    req.middlewareType = "wintercg"
+    ctx.middlewareType = "wintercg"
     return next(req, ctx)
   }
 

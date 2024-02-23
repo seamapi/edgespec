@@ -7,7 +7,7 @@ export const withUnhandledExceptionHandling: Middleware<{
   try {
     return await next(req, ctx)
   } catch (e: any) {
-    const logger = req.logger ?? console
+    const logger = ctx.logger ?? console
 
     if ("_isHttpException" in e) {
       logger.warn(

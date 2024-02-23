@@ -8,7 +8,7 @@ test("Node.js middleware injection", async (t) => {
     ctx,
     next
   ) => {
-    req.middlewareType = "nodejs"
+    ctx.middlewareType = "nodejs"
     return next(req, ctx)
   }
 
