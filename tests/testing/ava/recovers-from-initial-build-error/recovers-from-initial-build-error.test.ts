@@ -46,9 +46,12 @@ test("if build is initially broken, it recovers (when in watch mode)", async (t)
     throw new Error("Message not found")
   }
 
-  const child = execa("ava", ["--config", avaConfigPath, "-w"]).pipeStderr!(
-    outputStream
-  ).pipeStdout!(outputStream)
+  const child = execa("ava", ["--config", avaConfigPath, "-w"], {
+    env: {
+      // AVA refuses to use watch mode in CI
+      CI: "false",
+    },
+  }).pipeStderr!(outputStream).pipeStdout!(outputStream)
 
   t.teardown(async () => {
     outputStream.end()
