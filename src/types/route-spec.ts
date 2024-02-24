@@ -16,6 +16,7 @@ import type {
   HTTPMethods,
   EdgeSpecRouteParams,
 } from "./web-handler.ts"
+import { ResponseTypeToContext } from "./context.ts"
 
 export type RouteSpec<AuthMiddlewares extends string> = {
   methods: readonly HTTPMethods[]
@@ -81,6 +82,28 @@ type GetRouteSpecResponseType<
 type GetMiddlewareRequestOptions<
   GS extends GlobalSpec,
   RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
+> = (RS["jsonBody"] extends infer ZT extends z.ZodTypeAny
+  ? { jsonBody: z.output<ZT> }
+  : {}) &
+  (RS["multiPartFormData"] extends infer ZT extends z.ZodTypeAny
+    ? { multiPartFormData: z.output<ZT> }
+    : {}) &
+  (RS["queryParams"] extends infer ZT extends z.ZodTypeAny
+    ? { query: z.output<ZT> }
+    : {}) &
+  (RS["commonParams"] extends infer ZT extends z.ZodTypeAny
+    ? { commonParams: z.output<ZT> }
+    : {}) &
+  (RS["urlEncodedFormData"] extends infer ZT extends z.ZodTypeAny
+    ? { urlEncodedFormData: z.output<ZT> }
+    : {}) &
+  (RS["routeParams"] extends infer ZT extends z.ZodTypeAny
+    ? { routeParams: z.output<ZT> }
+    : { routeParams: EdgeSpecRouteParams })
+
+type GetMiddlewareRequestContext<
+  GS extends GlobalSpec,
+  RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
 > = AccumulateMiddlewareChainResultOptions<
   GS["beforeAuthMiddleware"] extends MiddlewareChain
     ? GS["beforeAuthMiddleware"]
@@ -111,32 +134,16 @@ type GetMiddlewareRequestOptions<
       ? RS["middleware"]
       : readonly [],
     "intersection"
-  > &
-  (RS["jsonBody"] extends infer ZT extends z.ZodTypeAny
-    ? { jsonBody: z.output<ZT> }
-    : {}) &
-  (RS["multiPartFormData"] extends infer ZT extends z.ZodTypeAny
-    ? { multiPartFormData: z.output<ZT> }
-    : {}) &
-  (RS["queryParams"] extends infer ZT extends z.ZodTypeAny
-    ? { query: z.output<ZT> }
-    : {}) &
-  (RS["commonParams"] extends infer ZT extends z.ZodTypeAny
-    ? { commonParams: z.output<ZT> }
-    : {}) &
-  (RS["urlEncodedFormData"] extends infer ZT extends z.ZodTypeAny
-    ? { urlEncodedFormData: z.output<ZT> }
-    : {}) &
-  (RS["routeParams"] extends infer ZT extends z.ZodTypeAny
-    ? { routeParams: z.output<ZT> }
-    : { routeParams: EdgeSpecRouteParams })
+  >
 
 export type EdgeSpecRouteFnFromSpecs<
   GS extends GlobalSpec,
   RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
 > = EdgeSpecRouteFn<
   GetMiddlewareRequestOptions<GS, RS>,
-  GetRouteSpecResponseType<GS, RS>
+  GetRouteSpecResponseType<GS, RS>,
+  GetMiddlewareRequestContext<GS, RS> &
+    ResponseTypeToContext<GetRouteSpecResponseType<GS, RS>>
 >
 
 export type CreateWithRouteSpecFn<GS extends GlobalSpec> = <

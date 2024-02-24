@@ -40,25 +40,40 @@ It's unlikely you'll need to use this API directly—check out the built-in fixt
 
 ```typescript
 import { EventEmitter } from "node:events"
+import { MessageChannel } from "node:worker_threads"
 import { loadConfig } from "edgespec/config"
 import { devServer, HeadlessBuildEvents } from "edgespec/dev"
+import type { ChannelOptions } from "birpc"
 
 const config = await loadConfig({ configPath: "./edgespec.config.ts" })
 
-// This can be any compatible event emitter implementation
-const headlessEventEmitter = new EventEmitter() as HeadlessBuildEvents
+const messageChannel = new MessageChannel()
 
-devServer.headless.startBundler({
+// Under the hood, EdgeSpec uses https://www.npmjs.com/package/birpc.
+// A MessageChannel is one of the simplest possible transports, but you can use any transport you want.
+const bundlerRpcChannel: ChannelOptions = {
+  post: (data) => messageChannel.port1.postMessage(data),
+  on: (data) => messageChannel.port1.on("message", data),
+}
+
+const httpServerRpcChannel: ChannelOptions = {
+  post: (data) => messageChannel.port2.postMessage(data),
+  on: (data) => messageChannel.port2.on("message", data),
+}
+
+const bundler = devServer.headless.startBundler({
   config,
-  headlessEventEmitter,
 })
 
-// Can be run cheaply many times
-const server = devServer.headless.startServer({
+/* Can be run cheaply many times */
+
+// Register the HTTP server message channel with the bundler
+bundler.birpc.updateChannels((channels) => channels.push(bundlerRpcChannel))
+
+// Start the HTTP server
+const server = await devServer.headless.startServer({
   port: 3000,
   config,
-  headlessEventEmitter,
+  rpcChannel: httpServerRpcChannel,
 })
-
-server.listen(3000)
 ```

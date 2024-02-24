@@ -1,68 +1,64 @@
-import { EventEmitter2 } from "src/vendor/eventemitter.ts"
-import {
-  InitialWorkerData,
-  MessageFromWorker,
-  MessageToWorker,
-} from "./types.ts"
-import { HeadlessBuildEvents, devServer } from "src/dev/dev.ts"
+import { InitialWorkerData } from "./types.ts"
+import { devServer } from "src/dev/dev.ts"
 import { SharedWorker } from "ava/plugin"
 import { loadConfig } from "src/config/index.ts"
+import { ChannelOptions } from "birpc"
+import { once } from "node:events"
 
 export class Worker {
-  private headlessEventEmitter: EventEmitter2
-  private firstFinishedBuildingEventPromise: Promise<
-    Parameters<HeadlessBuildEvents["finished-building"]>
-  >
   private startBundlerPromise: ReturnType<
     typeof devServer.headless.startBundler
   >
 
   constructor(private initialData: InitialWorkerData) {
-    this.headlessEventEmitter = new EventEmitter2({ wildcard: true })
-
-    this.firstFinishedBuildingEventPromise = EventEmitter2.once(
-      this.headlessEventEmitter,
-      "finished-building"
-    ).then(
-      (data) => data as Parameters<HeadlessBuildEvents["finished-building"]>
-    )
-
     this.startBundlerPromise = this.startBundler()
   }
 
-  public async handleTestWorker(
-    testWorker: SharedWorker.TestWorker<MessageToWorker | MessageFromWorker>
-  ) {
-    const listener = function (...args: any[]) {
-      const message: MessageFromWorker = {
-        type: "from-headless-dev-bundler",
-        // @ts-expect-error
-        originalEventType: this.event,
-        data: args,
-      }
-      testWorker.publish(message)
+  public async handleTestWorker(testWorker: SharedWorker.TestWorker) {
+    const bundler = await this.startBundlerPromise
+
+    let workerRpcCallback: (data: any) => void
+
+    const channel: ChannelOptions = {
+      post: (data) => testWorker.publish(data),
+      on: (data) => {
+        workerRpcCallback = data
+      },
     }
 
-    this.headlessEventEmitter.on("*", listener)
+    const messageHandlerAbortController = new AbortController()
+    const messageHandlerPromise = Promise.race([
+      once(messageHandlerAbortController.signal, "abort"),
+      (async () => {
+        for await (const msg of testWorker.subscribe()) {
+          workerRpcCallback!(msg.data)
 
-    testWorker.teardown(() => {
-      this.headlessEventEmitter.off("*", listener)
+          if (messageHandlerAbortController.signal.aborted) {
+            break
+          }
+        }
+      })(),
+    ])
+
+    bundler.birpc.updateChannels((channels) => channels.push(channel))
+
+    testWorker.publish({
+      type: "ready",
     })
 
-    for await (const message of testWorker.subscribe()) {
-      if (message.data.type === "get-initial-bundle") {
-        await this.startBundlerPromise
-        const [{ bundlePath }] = await this.firstFinishedBuildingEventPromise
-        message.reply({ type: "initial-bundle", bundlePath })
-      }
-    }
+    testWorker.teardown(async () => {
+      bundler.birpc.updateChannels((channels) =>
+        channels.filter((c) => c !== channel)
+      )
+      messageHandlerAbortController.abort()
+      await messageHandlerPromise
+    })
   }
 
   private async startBundler() {
     const config = await loadConfig(this.initialData.rootDirectory)
     return devServer.headless.startBundler({
       config,
-      headlessEventEmitter: this.headlessEventEmitter as any,
     })
   }
 }

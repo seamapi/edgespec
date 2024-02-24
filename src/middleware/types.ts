@@ -5,20 +5,19 @@ import type {
 } from "../types/web-handler.ts"
 
 export type Middleware<
-  RequiredOptions = {},
-  ResultOptions = object,
-  Context = {},
+  RequiredContext = {},
+  NewContext = {},
+  RequestOptions = {},
 > = (
   request: EdgeSpecRequest<
-    RequiredOptions &
-      Partial<ResultOptions> & {
-        routeParams: Readonly<Record<string, unknown>>
-      }
+    {
+      routeParams: Readonly<Record<string, unknown>>
+    } & RequestOptions
   >,
-  ctx: Context,
+  ctx: RequiredContext & Partial<NewContext>,
   next: (
-    request: EdgeSpecRequest<RequiredOptions & Partial<ResultOptions>>,
-    ctx: Context
+    request: EdgeSpecRequest,
+    ctx: RequiredContext & Partial<NewContext>
   ) => Promise<Response>
 ) =>
   | Response

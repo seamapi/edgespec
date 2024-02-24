@@ -6,8 +6,8 @@ const sampleMiddleware: Middleware<{}, { middlewareType: string }> = (
   ctx,
   next
 ) => {
-  if (!req.middlewareType) {
-    req.middlewareType = "uninjected"
+  if (!ctx.middlewareType) {
+    ctx.middlewareType = "uninjected"
   }
 
   return next(req, ctx)

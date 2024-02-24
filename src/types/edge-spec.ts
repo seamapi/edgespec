@@ -115,13 +115,17 @@ export function makeRequestAgainstEdgeSpec(
     const edgeSpecRequest = createEdgeSpecRequest(request, {
       edgeSpec,
       routeParams: routeParams ?? {},
-      responseDefaults: new Response(),
     })
 
     if (!routeFn) {
       return await handle404(edgeSpecRequest, DEFAULT_CONTEXT)
     }
 
-    return wrapMiddlewares(options.middleware ?? [], routeFn, edgeSpecRequest)
+    return wrapMiddlewares(
+      options.middleware ?? [],
+      routeFn,
+      edgeSpecRequest,
+      DEFAULT_CONTEXT
+    )
   }
 }
