@@ -2,22 +2,18 @@ import path from "path"
 import { getTempPathInApp } from "src/bundle/get-temp-path-in-app.ts"
 import { bundleAndWatch } from "src/bundle/watch.ts"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
-import { createBirpcGroup } from "birpc"
-import type { BundlerRpcFunctions } from "./types.ts"
-import type { BuildResult } from "esbuild"
-import * as esbuild from "esbuild"
+import { ChannelOptions, createBirpcGroup } from "birpc"
+import {
+  HttpServerRpcFunctions,
+  type BundlerRpcFunctions,
+  BundlerBuildResult,
+} from "./types.ts"
+import { formatMessages } from "esbuild"
 import { AsyncWorkTracker } from "src/lib/async-work-tracker.ts"
 
 export interface StartHeadlessDevBundlerOptions {
   config: ResolvedEdgeSpecConfig
-  onBuildStart?: () => void
-  onBuildEnd?: ({
-    success,
-    errorMessage,
-  }: {
-    success: boolean
-    errorMessage?: string
-  }) => void
+  initialRpcChannels?: ChannelOptions[]
 }
 
 /**
@@ -27,36 +23,24 @@ export interface StartHeadlessDevBundlerOptions {
  */
 export const startHeadlessDevBundler = async ({
   config,
-  onBuildStart,
-  onBuildEnd,
+  initialRpcChannels,
 }: StartHeadlessDevBundlerOptions) => {
   const tempDir = await getTempPathInApp(config.rootDirectory)
   const devBundlePath = path.join(tempDir, "dev-bundle.js")
 
-  const buildTracker = new AsyncWorkTracker<
-    BuildResult & { buildUpdatedAtMs: number }
-  >()
+  const buildTracker = new AsyncWorkTracker<BundlerBuildResult>()
 
   const rpcFunctions: BundlerRpcFunctions = {
     async waitForAvailableBuild() {
-      const result = await buildTracker.waitForResult()
-      return {
-        buildUpdatedAtMs: Date.now(),
-        build:
-          result.errors.length === 0
-            ? {
-                type: "success",
-                bundlePath: devBundlePath,
-              }
-            : {
-                type: "failure",
-                errors: result.errors,
-              },
-      }
+      return buildTracker.waitForResult()
     },
   }
 
-  const birpc = createBirpcGroup(rpcFunctions, [])
+  const birpc = createBirpcGroup<HttpServerRpcFunctions, BundlerRpcFunctions>(
+    rpcFunctions,
+    initialRpcChannels ?? [],
+    { eventNames: ["onBuildStart", "onBuildEnd"] }
+  )
 
   const { stop } = await bundleAndWatch({
     rootDirectory: config.rootDirectory,
@@ -71,22 +55,33 @@ export const startHeadlessDevBundler = async ({
         {
           name: "watch",
           setup(build) {
-            build.onStart(() => {
-              onBuildStart?.()
+            build.onStart(async () => {
               buildTracker.beginAsyncWork()
+              await birpc.broadcast.onBuildStart()
             })
 
             build.onEnd(async (result) => {
-              buildTracker.finishAsyncWork({
-                ...result,
-                buildUpdatedAtMs: Date.now(),
-              })
-              onBuildEnd?.({
-                success: result.errors.length === 0,
-                errorMessage: (
-                  await esbuild.formatMessages(result.errors, { kind: "error" })
-                ).join("\n"),
-              })
+              let build: BundlerBuildResult
+              if (result.errors.length === 0) {
+                build = {
+                  type: "success",
+                  bundlePath: devBundlePath,
+                  buildUpdatedAtMs: Date.now(),
+                }
+              } else {
+                build = {
+                  type: "failure",
+                  errorMessage: (
+                    await formatMessages(result.errors, {
+                      kind: "error",
+                    })
+                  ).join("\n"),
+                  buildUpdatedAtMs: Date.now(),
+                }
+              }
+
+              buildTracker.finishAsyncWork(build)
+              await birpc.broadcast.onBuildEnd(build)
             })
           },
         },

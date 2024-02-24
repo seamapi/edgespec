@@ -18,7 +18,12 @@ export const bundleAndWatch = async (options: BundleOptions) => {
   const watcher = new Watcher(options.rootDirectory, {
     recursive: true,
     ignoreInitial: true,
+    debounce: 0,
     ignore: (filePath: string) => {
+      if (filePath.includes(".edgespec")) {
+        return true
+      }
+
       // globby breaks when the path being tested is not within the current working directory (cwd/rootDirectory)
       if (!path.relative(options.rootDirectory, filePath).startsWith("..")) {
         return ignore(filePath)

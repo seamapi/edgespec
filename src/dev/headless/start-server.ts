@@ -6,7 +6,7 @@ import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
 import { RequestHandlerController } from "./request-handler-controller.ts"
 import { Middleware } from "src/middleware/index.ts"
 import { createBirpc, type ChannelOptions } from "birpc"
-import { BundlerRpcFunctions } from "./types.ts"
+import { BundlerRpcFunctions, HttpServerRpcFunctions } from "./types.ts"
 
 export interface StartHeadlessDevServerOptions {
   port: number
@@ -14,6 +14,8 @@ export interface StartHeadlessDevServerOptions {
   rpcChannel: ChannelOptions
   middleware?: Middleware[]
   onListening?: (port: number) => void
+  onBuildStart?: HttpServerRpcFunctions["onBuildStart"]
+  onBuildEnd?: HttpServerRpcFunctions["onBuildEnd"]
 }
 
 /**
@@ -27,8 +29,20 @@ export const startHeadlessDevServer = async ({
   rpcChannel,
   middleware = [],
   onListening,
+  onBuildStart,
+  onBuildEnd,
 }: StartHeadlessDevServerOptions) => {
-  const birpc = createBirpc<BundlerRpcFunctions>({}, rpcChannel)
+  const birpc = createBirpc<BundlerRpcFunctions, HttpServerRpcFunctions>(
+    {
+      onBuildStart: () => {
+        onBuildStart?.()
+      },
+      onBuildEnd: (result) => {
+        onBuildEnd?.(result)
+      },
+    },
+    rpcChannel
+  )
   const controller = new RequestHandlerController(birpc, middleware)
 
   const server = createServer(
@@ -76,6 +90,9 @@ export const startHeadlessDevServer = async ({
       const closePromise = once(server, "close")
       server.close()
       await closePromise
+    },
+    getBuildResult: async () => {
+      return birpc.waitForAvailableBuild()
     },
   }
 }
