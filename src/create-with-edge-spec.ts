@@ -46,7 +46,14 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
             _injectedEdgeSpecMiddleware
           : []),
         withUnhandledExceptionHandling,
-        // todo: remove
+        // this serializes responses that are returned by middleware WITHOUT
+        // validating them against the routeSpec
+        //
+        // this allows returning EdgeSpecResponse.json or ctx.json in a
+        // middleware, instead of having to return a raw Response
+        //
+        // this is needed, for instance, when an error middleware returns an
+        // error response that does not match the routeSpec's response shape
         serializeResponse(globalSpec, routeSpec, false),
         ...(globalSpec.beforeAuthMiddleware ?? []),
         firstAuthMiddlewareThatSucceeds(
@@ -70,6 +77,8 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           urlEncodedFormData: routeSpec.urlEncodedFormData,
           shouldValidateGetRequestBody: globalSpec.shouldValidateGetRequestBody,
         }),
+        // this serializes responses that are returned by the route function,
+        // validating them against the routeSpec
         serializeResponse(globalSpec, routeSpec),
       ],
       routeFn,
