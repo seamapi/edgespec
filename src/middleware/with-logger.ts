@@ -21,6 +21,6 @@ export const createWithLogger =
     }
   > =>
   (req, ctx, next) => {
-    req.logger = logger
+    ctx.logger = logger
     return next(req, ctx)
   }

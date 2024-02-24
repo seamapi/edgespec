@@ -47,7 +47,7 @@ export const createWithDefaultExceptionHandling =
       }
 
       if (logWhen(response.status, e)) {
-        const logger = req.logger ?? console
+        const logger = ctx.logger ?? console
         kleur.enabled = coloredLogs
 
         const { pathname } = new URL(req.url)

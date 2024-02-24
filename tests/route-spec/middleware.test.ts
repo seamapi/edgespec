@@ -6,7 +6,7 @@ const withSessionToken: Middleware<
   {},
   { auth: { session_token: { user: "lucille" } } }
 > = (req, ctx, next) => {
-  req.auth = { ...req.auth, session_token: { user: "lucille" } }
+  ctx.auth = { ...ctx.auth, session_token: { user: "lucille" } }
   return next(req, ctx)
 }
 
@@ -22,7 +22,7 @@ const withApiToken: Middleware<
 }
 
 const withName: Middleware<{}, { name: string }> = (req, ctx, next) => {
-  req.name = "lucille"
+  ctx.name = "lucille"
   return next(req, ctx)
 }
 
@@ -39,16 +39,16 @@ test("receives auth middleware", async (t) => {
       auth: ["pat", "api_token", "session_token"],
       methods: ["GET"],
     },
-    routeFn: (req) => {
-      if (!("session_token" in req.auth)) {
+    routeFn: (req, ctx) => {
+      if (!("session_token" in ctx.auth)) {
         t.fail("expected session token in req.auth")
         throw new Error()
       }
 
-      t.log(req.auth)
-      t.is(req.auth.session_token.user, "lucille")
+      t.log(ctx.auth)
+      t.is(ctx.auth.session_token.user, "lucille")
 
-      return new Response(req.auth.session_token.user)
+      return new Response(ctx.auth.session_token.user)
     },
     routePath: "/hello",
   })
@@ -156,8 +156,8 @@ test("receives route middleware", async (t) => {
       auth: "none",
       methods: ["GET"],
     },
-    routeFn: (req) => {
-      t.is(req.name, "lucille")
+    routeFn: (req, ctx) => {
+      t.is(ctx.name, "lucille")
       return new Response()
     },
     routePath: "/hello",
@@ -176,8 +176,8 @@ test("receives local middleware", async (t) => {
       methods: ["GET"],
       middleware: [withName],
     },
-    routeFn: (req) => {
-      t.is(req.name, "lucille")
+    routeFn: (req, ctx) => {
+      t.is(ctx.name, "lucille")
       return new Response()
     },
     routePath: "/hello",
@@ -186,16 +186,15 @@ test("receives local middleware", async (t) => {
   await axios.get("/hello")
 })
 
-test("responseDefaults are passed", async (t) => {
+test("can modify response headers after route handler", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
       authMiddleware: {},
       beforeAuthMiddleware: [
-        (req, ctx, next) => {
-          req.responseDefaults.headers.set("x-test", "test")
-          req.responseDefaults.headers.set("x-test2", "test2")
-
-          return next(req, ctx)
+        async (req, ctx, next) => {
+          const response = await next(req, ctx)
+          response.headers.set("x-test2", "test2")
+          return response
         },
       ],
     },
@@ -203,10 +202,10 @@ test("responseDefaults are passed", async (t) => {
       auth: "none",
       methods: ["GET"],
       middleware: [
-        (req, ctx, next) => {
-          req.responseDefaults.headers.set("x-test", "test2")
-
-          return next(req, ctx)
+        async (req, ctx, next) => {
+          const response = await next(req, ctx)
+          response.headers.set("x-test", "test2")
+          return response
         },
       ],
     },

@@ -22,7 +22,6 @@ export type HeadersDescriptor = Headers | HeadersInit
 export interface EdgeSpecRequestOptions {
   routeParams: EdgeSpecRouteParams
   edgeSpec: EdgeSpecRouteBundle
-  responseDefaults: Response
 }
 
 export type EdgeSpecRequest<T = {}> = EdgeSpecRequestOptions & Request & T
@@ -197,24 +196,4 @@ export function mergeHeaders(
         : new Headers(h2 ?? undefined).entries() ?? []),
     ])
   )
-}
-
-/**
- * Merge two responses together, with r2 overriding properties in r1
- *
- * This will merge the body, headers, status, and statusText of the two
- * responses
- */
-export function mergeResponses(
-  r1: Response | SerializableToResponse | undefined | null,
-  r2: Response | SerializableToResponse | undefined | null
-): Response {
-  if (r1 && "serializeToResponse" in r1) r1 = r1.serializeToResponse(z.any())
-  if (r2 && "serializeToResponse" in r2) r2 = r2.serializeToResponse(z.any())
-
-  return new Response(r2?.body ?? r1?.body, {
-    headers: mergeHeaders(r1?.headers, r2?.headers),
-    status: r2?.status ?? r1?.status,
-    statusText: r2?.statusText ?? r1?.statusText,
-  })
 }

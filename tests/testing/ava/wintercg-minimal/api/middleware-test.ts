@@ -3,6 +3,6 @@ import { withRouteSpec } from "../with-route-spec.ts"
 export default withRouteSpec({
   methods: ["GET"],
   auth: "none",
-})((req) => {
-  return new Response((req as any).foo)
+})((req, ctx) => {
+  return new Response((ctx as any).foo)
 })
