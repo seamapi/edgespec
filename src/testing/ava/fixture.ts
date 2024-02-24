@@ -9,6 +9,7 @@ import { ExecutionContext } from "ava"
 import { fileURLToPath } from "node:url"
 import { Middleware } from "src/middleware/types.ts"
 import { once } from "node:events"
+import { BundlerBuildResult } from "src/dev/headless/types.ts"
 
 const getWorker = async (initialData: InitialWorkerData) => {
   const key = hash(initialData)
@@ -75,6 +76,13 @@ export const getTestServer = async (
 
   let httpServerRpcCallback: (data: any) => void
 
+  const onReceivedBuildResult = (build: BundlerBuildResult) => {
+    if (build.type === "failure") {
+      console.error(build.errorMessage)
+      t.fail("Failed to build")
+    }
+  }
+
   const serverFixture = await devServer.headless.startServer({
     port,
     config: await loadConfig(rootDirectory),
@@ -85,6 +93,9 @@ export const getTestServer = async (
       },
     },
     middleware: options?.middleware ?? [],
+    onBuildEnd(build) {
+      onReceivedBuildResult(build)
+    },
   })
 
   const messageHandlerAbortController = new AbortController()
@@ -106,6 +117,9 @@ export const getTestServer = async (
     await messageHandlerPromise
     await serverFixture.stop()
   })
+
+  // Calling .getBuildResult() here handles the case where the build is already ready but the build errored and we need to log & cancel the test
+  onReceivedBuildResult(await serverFixture.getBuildResult())
 
   return {
     port,

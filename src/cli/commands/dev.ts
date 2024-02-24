@@ -68,14 +68,14 @@ export class DevCommand extends BaseCommand {
         await listeningPromise
         spinner.start("Building...")
       },
-      async onBuildEnd({ success, errorMessage }) {
+      async onBuildEnd(build) {
         const durationMs = performance.now() - buildStartedAt
         await listeningPromise
 
-        if (success) {
+        if (build.type === "success") {
           spinner.succeed(`Built in ${timeFormatter(durationMs)}`)
         } else {
-          spinner.fail(`Build failed.\n${errorMessage}`)
+          spinner.fail(`Build failed.\n${build.errorMessage}`)
         }
       },
     })

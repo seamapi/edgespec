@@ -23,7 +23,7 @@ export class RequestHandlerController {
    * You **should not** cache the result of this function. Call it every time you want to use the runtime.
    */
   async getWinterCGRuntime() {
-    const { buildUpdatedAtMs, build } =
+    const { buildUpdatedAtMs, ...build } =
       await this.bundlerRpc.waitForAvailableBuild()
 
     if (
@@ -63,7 +63,7 @@ export class RequestHandlerController {
   async getNodeHandler(): Promise<
     ReturnType<typeof makeRequestAgainstEdgeSpec>
   > {
-    const { buildUpdatedAtMs, build } =
+    const { buildUpdatedAtMs, ...build } =
       await this.bundlerRpc.waitForAvailableBuild()
 
     if (

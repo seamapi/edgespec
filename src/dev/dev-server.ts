@@ -3,22 +3,20 @@ import { AddressInfo } from "node:net"
 import type { ChannelOptions } from "birpc"
 import type { EdgeSpecConfig } from "src/config/config.ts"
 import { loadConfig } from "src/config/utils.ts"
-import { startHeadlessDevServer } from "./headless/start-server.ts"
 import {
-  StartHeadlessDevBundlerOptions,
-  startHeadlessDevBundler,
-} from "./headless/start-bundler.ts"
-import type { Middleware } from "src/middleware/index.ts"
+  StartHeadlessDevServerOptions,
+  startHeadlessDevServer,
+} from "./headless/start-server.ts"
+import { startHeadlessDevBundler } from "./headless/start-bundler.ts"
 
-export interface StartDevServerOptions {
+export type StartDevServerOptions = {
   rootDirectory?: string
   config?: EdgeSpecConfig
   port?: number
-  onListening?: (port: number) => void
-  onBuildStart?: () => void
-  onBuildEnd?: StartHeadlessDevBundlerOptions["onBuildEnd"]
-  middleware?: Middleware[]
-}
+} & Pick<
+  StartHeadlessDevServerOptions,
+  "middleware" | "onListening" | "onBuildStart" | "onBuildEnd"
+>
 
 /**
  * Start an EdgeSpec dev server. It will continuously watch your code and rebuild on changes. (This is the same function called by `edgespec dev`.)
@@ -31,36 +29,32 @@ export const startDevServer = async (options: StartDevServerOptions) => {
     options.config
   )
 
-  const port = options.port ?? 3000
-
-  const headlessBundler = await startHeadlessDevBundler({
-    config,
-    onBuildStart: options.onBuildStart,
-    onBuildEnd: options.onBuildEnd,
-  })
-
   const messageChannel = new MessageChannel()
-
-  const bundlerRpcChannel: ChannelOptions = {
-    post: (data) => messageChannel.port1.postMessage(data),
-    on: (data) => messageChannel.port1.on("message", data),
-  }
 
   const httpServerRpcChannel: ChannelOptions = {
     post: (data) => messageChannel.port2.postMessage(data),
     on: (data) => messageChannel.port2.on("message", data),
   }
 
-  headlessBundler.birpc.updateChannels((channels) =>
-    channels.push(bundlerRpcChannel)
-  )
-
+  const port = options.port ?? 3000
   const headlessServer = await startHeadlessDevServer({
     port,
     config,
     rpcChannel: httpServerRpcChannel,
     middleware: options.middleware,
     onListening: options.onListening,
+    onBuildStart: options.onBuildStart,
+    onBuildEnd: options.onBuildEnd,
+  })
+
+  const bundlerRpcChannel: ChannelOptions = {
+    post: (data) => messageChannel.port1.postMessage(data),
+    on: (data) => messageChannel.port1.on("message", data),
+  }
+
+  const headlessBundler = await startHeadlessDevBundler({
+    config,
+    initialRpcChannels: [bundlerRpcChannel],
   })
 
   return {
