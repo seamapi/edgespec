@@ -186,16 +186,15 @@ test("receives local middleware", async (t) => {
   await axios.get("/hello")
 })
 
-test("responseDefaults are passed", async (t) => {
+test("can modify response headers after route handler", async (t) => {
   const { axios } = await getTestRoute(t, {
     globalSpec: {
       authMiddleware: {},
       beforeAuthMiddleware: [
-        (req, ctx, next) => {
-          req.responseDefaults.headers.set("x-test", "test")
-          req.responseDefaults.headers.set("x-test2", "test2")
-
-          return next(req, ctx)
+        async (req, ctx, next) => {
+          const response = await next(req, ctx)
+          response.headers.set("x-test2", "test2")
+          return response
         },
       ],
     },
@@ -203,10 +202,10 @@ test("responseDefaults are passed", async (t) => {
       auth: "none",
       methods: ["GET"],
       middleware: [
-        (req, ctx, next) => {
-          req.responseDefaults.headers.set("x-test", "test2")
-
-          return next(req, ctx)
+        async (req, ctx, next) => {
+          const response = await next(req, ctx)
+          response.headers.set("x-test", "test2")
+          return response
         },
       ],
     },
