@@ -122,6 +122,11 @@ export function makeRequestAgainstEdgeSpec(
       return await handle404(edgeSpecRequest, DEFAULT_CONTEXT)
     }
 
-    return wrapMiddlewares(options.middleware ?? [], routeFn, edgeSpecRequest)
+    return wrapMiddlewares(
+      options.middleware ?? [],
+      routeFn,
+      edgeSpecRequest,
+      DEFAULT_CONTEXT
+    )
   }
 }

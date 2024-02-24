@@ -213,6 +213,7 @@ export const withInputValidation =
     >
   ): Middleware<
     {},
+    {},
     {
       jsonBody: z.output<JsonBody>
       multiPartFormData: z.output<FormData>

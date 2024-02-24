@@ -16,7 +16,7 @@ test("AVA fixture works", async (t) => {
 
 test("middleware is injected", async (t) => {
   const sampleMiddleware: Middleware<{}, { foo: "bar" }> = (req, ctx, next) => {
-    req.foo = "bar"
+    ctx.foo = "bar"
     return next(req, ctx)
   }
 
