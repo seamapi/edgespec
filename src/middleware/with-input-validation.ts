@@ -276,7 +276,9 @@ export const withInputValidation =
       try {
         jsonBody = await req.clone().json()
       } catch (e: any) {
-        throw new InputParsingError("Error while parsing JSON body")
+        if (!input.jsonBody?.isOptional()) {
+          throw new InputParsingError("Error while parsing JSON body")
+        }
       }
     }
 
@@ -287,7 +289,9 @@ export const withInputValidation =
         multiPartFormData = await req.clone().formData()
         multiPartFormData = Object.fromEntries(multiPartFormData.entries())
       } catch (e: any) {
-        throw new InputParsingError("Error while parsing form data")
+        if (!input.formData?.isOptional()) {
+          throw new InputParsingError("Error while parsing form data")
+        }
       }
     }
 
@@ -298,7 +302,11 @@ export const withInputValidation =
         const params = new URLSearchParams(await req.clone().text())
         urlEncodedFormData = Object.fromEntries(params.entries())
       } catch (e: any) {
-        throw new InputParsingError("Error while parsing url encoded form data")
+        if (!input.urlEncodedFormData?.isOptional()) {
+          throw new InputParsingError(
+            "Error while parsing url encoded form data"
+          )
+        }
       }
     }
 

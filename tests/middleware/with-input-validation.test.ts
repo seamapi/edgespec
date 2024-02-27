@@ -400,3 +400,55 @@ test("allows getting json", async (t) => {
   t.is(status, 200)
   t.is(data.hello, "world")
 })
+
+test("doesn't throw when body is optional", async (t) => {
+  const { axios } = await getTestRoute(t, {
+    ...defaultSpecs,
+    routeSpec: {
+      auth: "none",
+      methods: ["GET", "POST"],
+      jsonBody: z
+        .object({
+          hello: z.string(),
+        })
+        .optional(),
+      jsonResponse: z.object({
+        hello: z.string(),
+      }),
+    },
+    routeFn: async (req, ctx) => {
+      if (req.method === "GET") {
+        return ctx.json({ hello: "world" })
+      }
+
+      return ctx.json({ hello: req.jsonBody?.hello ?? "world" })
+    },
+    routePath: "/hello/world",
+  })
+
+  // GET without body works
+  {
+    const { data, status } = await axios.get("/hello/world", {
+      validateStatus: () => true,
+    })
+
+    t.is(status, 200)
+    t.is(data.hello, "world")
+  }
+
+  // POST with body works
+  {
+    const { data, status } = await axios.post(
+      "/hello/world",
+      {
+        hello: "seam",
+      },
+      {
+        validateStatus: () => true,
+      }
+    )
+
+    t.is(status, 200)
+    t.is(data.hello, "seam")
+  }
+})
