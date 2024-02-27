@@ -64,15 +64,7 @@ export const getTestServer = async (
   const worker = await getWorker({
     rootDirectory,
   })
-  await worker.available
-
-  const [firstMessage, port] = await Promise.all([
-    worker.subscribe().next(),
-    getPort(),
-  ])
-  if (firstMessage.value.data.type !== "ready") {
-    throw new Error("Unexpected message from AVA test worker")
-  }
+  const [port] = await Promise.all([getPort(), worker.available])
 
   let httpServerRpcCallback: (data: any) => void
 

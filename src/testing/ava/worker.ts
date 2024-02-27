@@ -15,10 +15,7 @@ export class Worker {
   }
 
   public async handleTestWorker(testWorker: SharedWorker.TestWorker) {
-    const bundler = await this.startBundlerPromise
-
     let workerRpcCallback: (data: any) => void
-
     const channel: ChannelOptions = {
       post: (data) => testWorker.publish(data),
       on: (data) => {
@@ -30,7 +27,16 @@ export class Worker {
     const messageHandlerPromise = Promise.race([
       once(messageHandlerAbortController.signal, "abort"),
       (async () => {
+        let didAddChannel = false
+
         for await (const msg of testWorker.subscribe()) {
+          if (!didAddChannel) {
+            const bundler = await this.startBundlerPromise
+
+            bundler.birpc.updateChannels((channels) => channels.push(channel))
+            didAddChannel = true
+          }
+
           workerRpcCallback!(msg.data)
 
           if (messageHandlerAbortController.signal.aborted) {
@@ -40,13 +46,8 @@ export class Worker {
       })(),
     ])
 
-    bundler.birpc.updateChannels((channels) => channels.push(channel))
-
-    testWorker.publish({
-      type: "ready",
-    })
-
     testWorker.teardown(async () => {
+      const bundler = await this.startBundlerPromise
       bundler.birpc.updateChannels((channels) =>
         channels.filter((c) => c !== channel)
       )
