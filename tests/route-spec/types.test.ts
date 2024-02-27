@@ -4,7 +4,7 @@ import { expectTypeOf } from "expect-type"
 import { EdgeSpecResponse } from "src/types/web-handler.ts"
 import { z } from "zod"
 import { Middleware } from "src/middleware/index.ts"
-import { DEFAULT_CONTEXT } from "src/types/context.ts"
+import { getDefaultContext } from "src/types/context.ts"
 
 const withSessionToken: Middleware<
   {},
@@ -227,7 +227,7 @@ test.skip("custom response map types are enforced", () => {
     // @ts-expect-error
   })(() => {
     return EdgeSpecResponse.custom("not a number", "custom/response")
-  })({} as any, DEFAULT_CONTEXT)
+  })({} as any, getDefaultContext())
 })
 
 test.skip("route param types", () => {
@@ -242,7 +242,7 @@ test.skip("route param types", () => {
   })((req) => {
     expectTypeOf(req.routeParams.id).toBeNumber()
     return new Response()
-  })({} as any, DEFAULT_CONTEXT)
+  })({} as any, getDefaultContext())
 })
 
 const middlewareWithInputs: Middleware<{ x: number }, { y: number }> = (
@@ -265,7 +265,7 @@ test.skip("allows middleware with inputs", () => {
   })((req, ctx) => {
     expectTypeOf(ctx.y).toBeNumber()
     return new Response()
-  })({} as any, DEFAULT_CONTEXT)
+  })({} as any, getDefaultContext())
 })
 
 test.skip("typed ctx.json()", () => {
