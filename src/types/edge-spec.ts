@@ -8,7 +8,7 @@ import {
 
 import type { ReadonlyDeep } from "type-fest"
 import { wrapMiddlewares } from "src/create-with-edge-spec.js"
-import { DEFAULT_CONTEXT } from "./context.js"
+import { getDefaultContext } from "./context.js"
 
 export type EdgeSpecRouteMatcher = (pathname: string) =>
   | {
@@ -118,14 +118,14 @@ export function makeRequestAgainstEdgeSpec(
     })
 
     if (!routeFn) {
-      return await handle404(edgeSpecRequest, DEFAULT_CONTEXT)
+      return await handle404(edgeSpecRequest, getDefaultContext())
     }
 
     return wrapMiddlewares(
       options.middleware ?? [],
       routeFn,
       edgeSpecRequest,
-      DEFAULT_CONTEXT
+      getDefaultContext()
     )
   }
 }

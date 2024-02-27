@@ -32,8 +32,10 @@ export type ResponseTypeToContext<
           >
         }
 
-export const DEFAULT_CONTEXT = {
+const DEFAULT_CONTEXT = {
   json: EdgeSpecResponse.json,
   multipartFormData: EdgeSpecResponse.multipartFormData,
   custom: EdgeSpecResponse.custom,
 } as const
+
+export const getDefaultContext = () => ({ ...DEFAULT_CONTEXT })
