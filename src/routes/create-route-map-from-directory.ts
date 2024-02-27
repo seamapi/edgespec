@@ -5,7 +5,7 @@ export const createRouteMapFromDirectory = async (
 ): Promise<Record<string, { relativePath: string }>> => {
   const filePaths = await getMatchingFilePaths({
     dirPath: directoryPath,
-    extensions: ["ts"],
+    extensions: ["ts", "tsx"],
   })
 
   const routes: Record<string, { relativePath: string }> = {}
@@ -15,12 +15,12 @@ export const createRouteMapFromDirectory = async (
       routeWithSlash = `/${path}`
     }
 
-    if (path.endsWith("index.ts")) {
-      routes[`${routeWithSlash.replace(/\/index\.ts$/g, "")}`] = {
+    if (path.endsWith("index.ts") || path.endsWith("index.tsx")) {
+      routes[`${routeWithSlash.replace(/\/index\.tsx*$/g, "")}`] = {
         relativePath: path,
       }
     } else {
-      routes[`${routeWithSlash.replace(/\.ts$/g, "")}`] = {
+      routes[`${routeWithSlash.replace(/\.tsx*$/g, "")}`] = {
         relativePath: path,
       }
     }
