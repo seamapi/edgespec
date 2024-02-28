@@ -68,7 +68,11 @@ export const startHeadlessDevServer = async ({
           )
         } else {
           process.stderr.write(
-            "Unhandled exception:\n" + JSON.stringify(error) + "\n"
+            "Unhandled exception:\n" +
+              ((error as any).stack
+                ? (error as any).stack
+                : JSON.stringify(error)) +
+              "\n"
           )
         }
 
