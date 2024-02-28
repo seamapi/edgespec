@@ -50,6 +50,7 @@ export const startHeadlessDevBundler = async ({
     esbuild: {
       platform: config.platform === "wintercg-minimal" ? "browser" : "node",
       packages: config.platform === "node" ? "external" : undefined,
+      format: config.platform === "wintercg-minimal" ? "cjs" : "esm",
       outfile: devBundlePath,
       write: true,
       plugins: [
