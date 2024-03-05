@@ -10,25 +10,25 @@ export type {
   SerializableToResponse,
   EdgeSpecRouteFn,
   EdgeSpecRouteParams,
-} from "./web-handler.ts"
+} from "./web-handler.js"
 
 export type {
   EdgeSpecAdapter,
   EdgeSpecOptions,
   EdgeSpecRouteBundle,
-} from "./edge-spec.ts"
+} from "./edge-spec.js"
 
 export type {
   GetAuthMiddlewaresFromGlobalSpec,
   GlobalSpec,
   QueryArrayFormat,
   QueryArrayFormats,
-} from "./global-spec.ts"
+} from "./global-spec.js"
 
 export type {
   RouteSpec,
   CreateWithRouteSpecFn,
   EdgeSpecRouteFnFromSpecs,
-} from "./route-spec.ts"
+} from "./route-spec.js"
 
-export type { Middleware } from "../middleware/types.ts"
+export type { Middleware } from "../middleware/types.js"

@@ -2,9 +2,9 @@ import Watcher from "watcher"
 import * as esbuild from "esbuild"
 import fs from "node:fs/promises"
 import path from "node:path"
-import { constructManifest } from "./construct-manifest.ts"
-import { BundleOptions } from "./types.ts"
-import { getTempPathInApp } from "./get-temp-path-in-app.ts"
+import { constructManifest } from "./construct-manifest.js"
+import { BundleOptions } from "./types.js"
+import { getTempPathInApp } from "./get-temp-path-in-app.js"
 import { isGitIgnored } from "globby"
 
 /**

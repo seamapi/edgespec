@@ -1,4 +1,4 @@
-import { Middleware } from "./types.ts"
+import { Middleware } from "./types.js"
 
 export type Logger = {
   debug: (...args: any[]) => void

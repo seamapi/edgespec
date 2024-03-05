@@ -1,4 +1,4 @@
-import { EdgeSpecRouteFn } from "src/types/web-handler.ts"
+import { EdgeSpecRouteFn } from "src/types/web-handler.js"
 
 const getUser: EdgeSpecRouteFn = async (request) => {
   return Response.json({

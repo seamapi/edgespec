@@ -1,8 +1,8 @@
 import test, { ExecutionContext } from "ava"
-import { getTestCLI } from "tests/fixtures/get-test-cli.ts"
+import { getTestCLI } from "tests/fixtures/get-test-cli.js"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { loadBundle } from "src/helpers.ts"
+import { loadBundle } from "src/helpers.js"
 import fs from "node:fs/promises"
 
 const createChildBundle = async (t: ExecutionContext) => {

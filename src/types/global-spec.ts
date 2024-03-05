@@ -1,6 +1,6 @@
 import type { z } from "zod"
-import { Middleware } from "../middleware/types.ts"
-import { InferRecordKey } from "./util.ts"
+import { Middleware } from "../middleware/types.js"
+import { InferRecordKey } from "./util.js"
 import type { SecuritySchemeObject } from "openapi3-ts/oas31"
 
 export type QueryArrayFormat = "brackets" | "comma" | "repeat"

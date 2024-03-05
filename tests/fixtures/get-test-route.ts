@@ -5,13 +5,13 @@ import getPort from "@ava/get-port"
 import { createNodeServerFromRouteMap } from "src/serve/create-node-server-from-route-map.js"
 import { ExecutionContext } from "ava"
 import { once } from "events"
-import { EdgeSpecOptions } from "src/types/edge-spec.ts"
+import { EdgeSpecOptions } from "src/types/edge-spec.js"
 import {
   GetAuthMiddlewaresFromGlobalSpec,
   GlobalSpec,
-} from "src/types/global-spec.ts"
-import { EdgeSpecRouteFnFromSpecs, RouteSpec } from "src/types/route-spec.ts"
-import { createWithLogger } from "src/middleware/with-logger.ts"
+} from "src/types/global-spec.js"
+import { EdgeSpecRouteFnFromSpecs, RouteSpec } from "src/types/route-spec.js"
+import { createWithLogger } from "src/middleware/with-logger.js"
 
 export const getTestRoute = async <
   const GS extends GlobalSpec,

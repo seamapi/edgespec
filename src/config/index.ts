@@ -1,1 +1,1 @@
-export { loadConfig } from "./utils.ts"
+export { loadConfig } from "./utils.js"

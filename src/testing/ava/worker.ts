@@ -1,7 +1,7 @@
-import { InitialWorkerData } from "./types.ts"
-import { devServer } from "src/dev/dev.ts"
+import { InitialWorkerData } from "./types.js"
+import { devServer } from "src/dev/dev.js"
 import { SharedWorker } from "ava/plugin"
-import { loadConfig } from "src/config/index.ts"
+import { loadConfig } from "src/config/index.js"
 import { ChannelOptions } from "birpc"
 import { once } from "node:events"
 

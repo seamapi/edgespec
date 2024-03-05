@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { runExit } from "clipanion"
 import { version } from "../../package.json"
-import { BundleCommand } from "./commands/bundle.ts"
-import { DevCommand } from "./commands/dev.ts"
-import { CodeGenRouteTypes } from "./commands/codegen/route-types.ts"
+import { BundleCommand } from "./commands/bundle.js"
+import { DevCommand } from "./commands/dev.js"
+import { CodeGenRouteTypes } from "./commands/codegen/route-types.js"
 
 runExit(
   {

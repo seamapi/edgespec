@@ -1,8 +1,8 @@
 import test from "ava"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
-import { getTestServer } from "src/testing/ava/fixture.ts"
-import { Middleware } from "src/middleware/index.ts"
+import { getTestServer } from "src/testing/ava/fixture.js"
+import { Middleware } from "src/middleware/index.js"
 
 // Runs many tests concurrently to assert there's no race conditions
 for (let i = 0; i < 100; i++) {

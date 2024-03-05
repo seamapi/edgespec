@@ -1,1 +1,1 @@
-export * from "./fixture.ts"
+export * from "./fixture.js"

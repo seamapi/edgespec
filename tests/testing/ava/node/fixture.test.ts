@@ -1,7 +1,7 @@
 import test from "ava"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
-import { getTestServer } from "src/testing/ava/fixture.ts"
+import { getTestServer } from "src/testing/ava/fixture.js"
 
 test("Node.js APIs can be used", async (t) => {
   const { port } = await getTestServer(t, {

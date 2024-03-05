@@ -1,7 +1,7 @@
 import test from "ava"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
-import { getTestServer } from "src/testing/ava/fixture.ts"
+import { getTestServer } from "src/testing/ava/fixture.js"
 
 test("can fetch health endpoint", async (t) => {
   const rootDirectory = path.dirname(fileURLToPath(import.meta.url))

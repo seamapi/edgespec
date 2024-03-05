@@ -1,15 +1,15 @@
 import path from "path"
-import { getTempPathInApp } from "src/bundle/get-temp-path-in-app.ts"
-import { bundleAndWatch } from "src/bundle/watch.ts"
-import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
+import { getTempPathInApp } from "src/bundle/get-temp-path-in-app.js"
+import { bundleAndWatch } from "src/bundle/watch.js"
+import { ResolvedEdgeSpecConfig } from "src/config/utils.js"
 import { ChannelOptions, createBirpcGroup } from "birpc"
 import {
   HttpServerRpcFunctions,
   type BundlerRpcFunctions,
   BundlerBuildResult,
-} from "./types.ts"
+} from "./types.js"
 import { formatMessages } from "esbuild"
-import { AsyncWorkTracker } from "src/lib/async-work-tracker.ts"
+import { AsyncWorkTracker } from "src/lib/async-work-tracker.js"
 
 export interface StartHeadlessDevBundlerOptions {
   config: ResolvedEdgeSpecConfig

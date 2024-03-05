@@ -1,5 +1,5 @@
 import crypto from "node:crypto"
-import { withRouteSpec } from "../with-route-spec.ts"
+import { withRouteSpec } from "../with-route-spec.js"
 
 export default withRouteSpec({
   methods: ["GET"],

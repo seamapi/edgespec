@@ -1,10 +1,10 @@
 import test from "ava"
-import { createWithEdgeSpec } from "src/create-with-edge-spec.ts"
+import { createWithEdgeSpec } from "src/create-with-edge-spec.js"
 import { expectTypeOf } from "expect-type"
-import { EdgeSpecResponse } from "src/types/web-handler.ts"
+import { EdgeSpecResponse } from "src/types/web-handler.js"
 import { z } from "zod"
-import { Middleware } from "src/middleware/index.ts"
-import { getDefaultContext } from "src/types/context.ts"
+import { Middleware } from "src/middleware/index.js"
+import { getDefaultContext } from "src/types/context.js"
 
 const withSessionToken: Middleware<
   {},

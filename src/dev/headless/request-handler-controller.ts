@@ -1,10 +1,10 @@
 import fs from "node:fs/promises"
 import { EdgeRuntime } from "edge-runtime"
 import type { BirpcReturn } from "birpc"
-import { makeRequestAgainstEdgeSpec } from "src/types/edge-spec.ts"
-import { Middleware } from "src/middleware/index.ts"
-import { loadBundle } from "src/helpers.ts"
-import type { BundlerRpcFunctions } from "./types.ts"
+import { makeRequestAgainstEdgeSpec } from "src/types/edge-spec.js"
+import { Middleware } from "src/middleware/index.js"
+import { loadBundle } from "src/helpers.js"
+import type { BundlerRpcFunctions } from "./types.js"
 
 const BUILD_ERROR_MESSAGE =
   "Could not build your app. Check your terminal for more information."

@@ -1,13 +1,13 @@
 import { MessageChannel } from "node:worker_threads"
 import { AddressInfo } from "node:net"
 import type { ChannelOptions } from "birpc"
-import type { EdgeSpecConfig } from "src/config/config.ts"
-import { loadConfig } from "src/config/utils.ts"
+import type { EdgeSpecConfig } from "src/config/config.js"
+import { loadConfig } from "src/config/utils.js"
 import {
   StartHeadlessDevServerOptions,
   startHeadlessDevServer,
-} from "./headless/start-server.ts"
-import { startHeadlessDevBundler } from "./headless/start-bundler.ts"
+} from "./headless/start-server.js"
+import { startHeadlessDevBundler } from "./headless/start-bundler.js"
 
 export type StartDevServerOptions = {
   rootDirectory?: string
