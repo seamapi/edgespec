@@ -30,3 +30,5 @@ export type {
   CreateWithRouteSpecFn,
   EdgeSpecRouteFnFromSpecs,
 } from "./route-spec.ts"
+
+export type { Middleware } from "../middleware/types.ts"
