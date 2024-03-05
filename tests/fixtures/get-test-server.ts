@@ -31,6 +31,15 @@ export const getTestServer = async (
     },
     port: await getPort(),
     middleware: options?.middleware,
+    onBuildEnd(build) {
+      if (build.type === "failure") {
+        // console.error is used here over t.log because t.log doesn't seem to run in time
+        console.error(
+          "Build failed in getTestServer() fixture:",
+          build.errorMessage
+        )
+      }
+    },
   })
 
   t.teardown(async () => {
