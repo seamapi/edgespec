@@ -1,5 +1,5 @@
-import { Middleware } from "src/middleware/types.ts"
-import { Logger } from "./with-logger.ts"
+import { Middleware } from "src/middleware/types.js"
+import { Logger } from "./with-logger.js"
 import kleur from "kleur"
 
 interface CreateWithDefaultExceptionHandlingOptions {

@@ -1,10 +1,10 @@
 import test, { ExecutionContext } from "ava"
-import { getTestCLI } from "tests/fixtures/get-test-cli.ts"
+import { getTestCLI } from "tests/fixtures/get-test-cli.js"
 import os from "node:os"
 import path from "node:path"
 import { randomUUID } from "node:crypto"
 import { fileURLToPath } from "node:url"
-import { loadBundle } from "src/helpers.ts"
+import { loadBundle } from "src/helpers.js"
 
 const createAndLoadBundle = async (t: ExecutionContext) => {
   const cli = await getTestCLI(t)

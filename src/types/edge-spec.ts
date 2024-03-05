@@ -9,6 +9,7 @@ import {
 import type { ReadonlyDeep } from "type-fest"
 import { wrapMiddlewares } from "src/create-with-edge-spec.js"
 import { getDefaultContext } from "./context.js"
+import { Server } from "node:http"
 
 export type EdgeSpecRouteMatcher = (pathname: string) =>
   | {
@@ -58,6 +59,9 @@ export type EdgeSpecAdapter<
   Options extends Array<unknown> = [],
   ReturnValue = void,
 > = (edgeSpec: EdgeSpecRouteBundle, ...options: Options) => ReturnValue
+
+type Foo = EdgeSpecAdapter<[], Promise<Server>>
+type a = ReturnType<Foo>
 
 export function makeRequestAgainstEdgeSpec(
   edgeSpec: EdgeSpecRouteBundle,

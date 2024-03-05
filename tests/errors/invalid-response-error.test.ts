@@ -1,7 +1,7 @@
 import test from "ava"
 import { z } from "zod"
-import { getTestRoute } from "tests/fixtures/get-test-route.ts"
-import { createWithDefaultExceptionHandling } from "src/middleware/with-default-exception-handling.ts"
+import { getTestRoute } from "tests/fixtures/get-test-route.js"
+import { createWithDefaultExceptionHandling } from "src/middleware/with-default-exception-handling.js"
 
 test("sending an invalid response logs a verbose error", async (t) => {
   const { axios, getLogs } = await getTestRoute(t, {

@@ -1,5 +1,5 @@
 import test from "ava"
-import { EdgeSpecResponse } from "src/types/web-handler.ts"
+import { EdgeSpecResponse } from "src/types/web-handler.js"
 import { getTestRoute } from "../fixtures/get-test-route.js"
 import { z } from "zod"
 import { GlobalSpec } from "src/types/global-spec.js"

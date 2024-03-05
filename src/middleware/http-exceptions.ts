@@ -1,4 +1,4 @@
-import { formatZodError } from "src/lib/format-zod-error.ts"
+import { formatZodError } from "src/lib/format-zod-error.js"
 import { z } from "zod"
 
 export interface HttpException {

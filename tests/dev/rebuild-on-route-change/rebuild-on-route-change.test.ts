@@ -2,14 +2,14 @@ import test from "ava"
 import fs from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { getTestServer } from "tests/fixtures/get-test-server.ts"
+import { getTestServer } from "tests/fixtures/get-test-server.js"
 import pRetry from "p-retry"
 
 test("dev server rebuilds upon change to existing route", async (t) => {
   const routePath = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
     "api",
-    "health.ts"
+    "health.js"
   )
 
   await fs.writeFile(

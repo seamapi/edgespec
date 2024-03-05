@@ -1,5 +1,5 @@
 import { SharedWorker } from "ava/plugin"
-import { Worker } from "./worker.ts"
+import { Worker } from "./worker.js"
 
 const needsToNegotiateProtocol = (
   arg: SharedWorker.FactoryOptions | SharedWorker.Protocol

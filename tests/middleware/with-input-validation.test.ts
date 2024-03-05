@@ -1,7 +1,7 @@
 import test from "ava"
-import { GlobalSpec } from "src/types/global-spec.ts"
-import { EdgeSpecResponse } from "src/types/web-handler.ts"
-import { getTestRoute } from "tests/fixtures/get-test-route.ts"
+import { GlobalSpec } from "src/types/global-spec.js"
+import { EdgeSpecResponse } from "src/types/web-handler.js"
+import { getTestRoute } from "tests/fixtures/get-test-route.js"
 import { z } from "zod"
 import formurlencoded from "form-urlencoded"
 

@@ -1,8 +1,8 @@
-import type { MapArray } from "../types/util.ts"
+import type { MapArray } from "../types/util.js"
 import type {
   EdgeSpecRequest,
   SerializableToResponse,
-} from "../types/web-handler.ts"
+} from "../types/web-handler.js"
 
 export type Middleware<
   RequiredContext = {},

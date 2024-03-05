@@ -1,6 +1,6 @@
-import { Middleware } from "src/middleware/types.ts"
-import { HTTPMethods } from "src/types/web-handler.ts"
-import { MethodNotAllowedError } from "./http-exceptions.ts"
+import { Middleware } from "src/middleware/types.js"
+import { HTTPMethods } from "src/types/web-handler.js"
+import { MethodNotAllowedError } from "./http-exceptions.js"
 
 export const withMethods =
   (methods: readonly HTTPMethods[]): Middleware =>

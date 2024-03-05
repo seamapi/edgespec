@@ -1,5 +1,5 @@
-import type { EdgeSpecAdapter } from "src/types/edge-spec.ts"
-import type { EdgeSpecFetchEvent } from "src/types/web-handler.ts"
+import type { EdgeSpecAdapter } from "src/types/edge-spec.js"
+import type { EdgeSpecFetchEvent } from "src/types/web-handler.js"
 
 export const addFetchListener: EdgeSpecAdapter = (edgeSpec) => {
   addEventListener("fetch", async (event) => {

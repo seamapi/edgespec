@@ -3,11 +3,11 @@ import type {
   AccumulateMiddlewareChainResultOptions,
   MiddlewareChain,
   MapMiddlewares,
-} from "../middleware/types.ts"
+} from "../middleware/types.js"
 import type {
   GetAuthMiddlewaresFromGlobalSpec,
   GlobalSpec,
-} from "./global-spec.ts"
+} from "./global-spec.js"
 import type {
   EdgeSpecCustomResponse,
   EdgeSpecMultiPartFormDataResponse,
@@ -15,8 +15,8 @@ import type {
   EdgeSpecRouteFn,
   HTTPMethods,
   EdgeSpecRouteParams,
-} from "./web-handler.ts"
-import { ResponseTypeToContext } from "./context.ts"
+} from "./web-handler.js"
+import { ResponseTypeToContext } from "./context.js"
 
 export type RouteSpec<AuthMiddlewares extends string> = {
   methods: readonly HTTPMethods[]

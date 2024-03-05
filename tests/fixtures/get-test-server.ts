@@ -3,8 +3,8 @@ import path from "node:path"
 import defaultAxios from "axios"
 import { fileURLToPath } from "node:url"
 import getPort from "@ava/get-port"
-import { startDevServer } from "src/dev/dev-server.ts"
-import type { Middleware } from "src/middleware/index.ts"
+import { startDevServer } from "src/dev/dev-server.js"
+import type { Middleware } from "src/middleware/index.js"
 
 /**
  * Starts a dev server using the same function that's exported to consumers & used in the CLI.

@@ -1,5 +1,5 @@
-import { withEdgeSpec } from "../with-edge-spec.ts"
-import { jsonResponse } from "./foo.ts"
+import { withEdgeSpec } from "../with-edge-spec.js"
+import { jsonResponse } from "./foo.js"
 
 export default withEdgeSpec({
   auth: "none",

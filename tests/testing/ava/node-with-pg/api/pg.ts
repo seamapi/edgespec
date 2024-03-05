@@ -1,5 +1,5 @@
 import crypto from "node:crypto"
-import { withRouteSpec } from "../with-route-spec.ts"
+import { withRouteSpec } from "../with-route-spec.js"
 import * as pg from "pg"
 
 export default withRouteSpec({

@@ -3,7 +3,7 @@ import test from "ava"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import pRetry from "p-retry"
-import { getTestCLI } from "tests/fixtures/get-test-cli.ts"
+import { getTestCLI } from "tests/fixtures/get-test-cli.js"
 
 test("Config paths are resolved relative to root directory", async (t) => {
   const cli = await getTestCLI(t)

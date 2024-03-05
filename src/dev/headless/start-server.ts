@@ -1,12 +1,12 @@
 import { once } from "node:events"
 import { createServer } from "node:http"
 import kleur from "kleur"
-import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.ts"
-import { ResolvedEdgeSpecConfig } from "src/config/utils.ts"
-import { RequestHandlerController } from "./request-handler-controller.ts"
-import { Middleware } from "src/middleware/index.ts"
+import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.js"
+import { ResolvedEdgeSpecConfig } from "src/config/utils.js"
+import { RequestHandlerController } from "./request-handler-controller.js"
+import { Middleware } from "src/middleware/index.js"
 import { createBirpc, type ChannelOptions } from "birpc"
-import { BundlerRpcFunctions, HttpServerRpcFunctions } from "./types.ts"
+import { BundlerRpcFunctions, HttpServerRpcFunctions } from "./types.js"
 
 export interface StartHeadlessDevServerOptions {
   port: number

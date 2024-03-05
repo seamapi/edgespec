@@ -1,4 +1,4 @@
-import { createWithEdgeSpec } from "../../../../src/create-with-edge-spec.ts"
+import { createWithEdgeSpec } from "../../../../src/create-with-edge-spec.js"
 
 export const withRouteSpec = createWithEdgeSpec({
   authMiddleware: {},
