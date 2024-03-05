@@ -9,13 +9,13 @@
     "src/config/index.ts",
     "src/testing/ava/index.ts",
     "src/testing/ava/worker-wrapper.ts",
-    "src/cli/cli.ts",
+    "src/cli/cli.ts"
   ],
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
     "noEmit": false,
-    "rootDir": "./src",
+    "rootDir": "./src"
   },
   "exclude": ["tests", "examples", "dist"]
 }
