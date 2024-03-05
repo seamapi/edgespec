@@ -7,13 +7,15 @@
     "src/adapters/wintercg-minimal.ts",
     "src/dev/dev.ts",
     "src/config/index.ts",
-    "src/testing/ava/index.ts"
+    "src/testing/ava/index.ts",
+    "src/testing/ava/worker-wrapper.ts",
+    "src/cli/cli.ts",
   ],
   "compilerOptions": {
-    "outDir": "./dist-types",
-    "emitDeclarationOnly": true,
+    "outDir": "./dist",
     "declaration": true,
-    "noEmit": false
+    "noEmit": false,
+    "rootDir": "./src",
   },
   "exclude": ["tests", "examples", "dist"]
 }
