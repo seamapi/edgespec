@@ -9,7 +9,7 @@ test("dev server rebuilds upon change to existing route", async (t) => {
   const routePath = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
     "api",
-    "health.js"
+    "health.ts"
   )
 
   await fs.writeFile(
