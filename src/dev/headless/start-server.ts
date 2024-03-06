@@ -1,7 +1,7 @@
 import { once } from "node:events"
 import { createServer } from "node:http"
 import kleur from "kleur"
-import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.js"
+import { transformToNodeBuilder } from "src/edge/transform-to-node.js"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.js"
 import { RequestHandlerController } from "./request-handler-controller.js"
 import { Middleware } from "src/middleware/index.js"

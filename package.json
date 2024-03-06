@@ -3,52 +3,52 @@
   "version": "0.0.64",
   "description": "Write Winter-CG compatible routes with filesystem routing and tons of features",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "types": "./dist-types/src/index.d.ts",
   "files": [
-    "dist",
-    "dist-types"
+    "dist"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.js",
-      "types": "./dist-types/src/index.d.ts"
+      "types": "./dist/index.d.ts"
     },
     "./config": {
       "import": "./dist/config.js",
       "require": "./dist/config.js",
-      "types": "./dist-types/src/config/config.d.ts"
+      "types": "./dist/config/config.d.ts"
     },
     "./dev": {
       "import": "./dist/dev.js",
       "require": "./dist/dev.js",
-      "types": "./dist-types/src/dev/dev.d.ts"
+      "types": "./dist/dev.d.ts"
     },
     "./middleware": {
-      "import": "./dist/middleware.js",
-      "require": "./dist/middleware.js",
-      "types": "./dist-types/src/middleware/index.d.ts"
+      "import": "./dist/middleware/index.js",
+      "require": "./dist/middleware/index.js",
+      "types": "./dist/middleware/index.d.ts"
     },
     "./adapters/node": {
       "import": "./dist/adapters/node.js",
       "require": "./dist/adapters/node.js",
-      "types": "./dist-types/src/adapters/node.d.ts"
+      "types": "./dist/adapters/node.d.ts"
     },
     "./adapters/wintercg-minimal": {
       "import": "./dist/adapters/wintercg-minimal.js",
       "require": "./dist/adapters/wintercg-minimal.js",
-      "types": "./dist-types/src/adapters/wintercg-minimal.d.ts"
+      "types": "./dist/adapters/wintercg-minimal.d.ts"
     },
     "./testing/ava": {
-      "import": "./dist/testing/ava.js",
-      "require": "./dist/testing/ava.js",
-      "types": "./dist-types/src/testing/ava/index.d.ts"
+      "import": "./dist/testing/ava/index.js",
+      "require": "./dist/testing/ava/index.js",
+      "types": "./dist/testing/ava/index.d.ts"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
-    "build": "tsup && tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "prebuild": "del dist",
     "pretest": "npm run build",
     "test": "ava",
     "pretypecheck": "npm run build",
@@ -59,7 +59,7 @@
     "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
   "bin": {
-    "edgespec": "./dist/cli.js"
+    "edgespec": "./dist/cli/cli.js"
   },
   "keywords": [
     "☃️",
@@ -83,6 +83,7 @@
     "ava": "^6.1.1",
     "ava-typescript-worker": "^2.0.0",
     "axios": "^1.6.7",
+    "del-cli": "^5.1.0",
     "esbuild-register": "^3.5.0",
     "execa": "^8.0.1",
     "expect-type": "^0.17.3",
@@ -91,7 +92,7 @@
     "p-retry": "^6.1.0",
     "pg": "^8.11.3",
     "prettier": "^3.1.0",
-    "tsup": "^8.0.1",
+    "tsc-alias": "^1.8.8",
     "tsx": "^4.7.0",
     "type-fest": "^4.10.0",
     "typed-emitter": "^2.1.0",

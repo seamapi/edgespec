@@ -1,6 +1,6 @@
 import { NodeHandler } from "@edge-runtime/node-utils"
 import http from "node:http"
-import { transformToNodeBuilder } from "src/edge-runtime/transform-to-node.js"
+import { transformToNodeBuilder } from "src/edge/transform-to-node.js"
 import type { Middleware } from "src/middleware/index.js"
 import type { EdgeSpecAdapter } from "src/types/edge-spec.js"
 

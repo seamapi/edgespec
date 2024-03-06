@@ -4,7 +4,7 @@ import { normalizeRouteMap } from "../lib/normalize-route-map.js"
 import {
   type TransformToNodeOptions,
   transformToNodeBuilder,
-} from "src/edge-runtime/transform-to-node.js"
+} from "src/edge/transform-to-node.js"
 import { EdgeSpecRouteFn } from "src/types/web-handler.js"
 import {
   EdgeSpecRouteBundle,
