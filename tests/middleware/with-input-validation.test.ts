@@ -452,3 +452,30 @@ test("doesn't throw when body is optional", async (t) => {
     t.is(data.hello, "seam")
   }
 })
+
+test("allows get request without parsing request body", async (t) => {
+  const { axios } = await getTestRoute(t, {
+    ...defaultSpecs,
+    routeSpec: {
+      auth: "none",
+      methods: ["GET", "POST"],
+      jsonBody: z.object({
+        val: z.string(),
+      }),
+      jsonResponse: z.object({
+        hello: z.string(),
+      }),
+    },
+    routeFn: async (req) => {
+      return EdgeSpecResponse.json({ hello: "world" })
+    },
+    routePath: "/hello/world",
+  })
+
+  const { data, status } = await axios.get("/hello/world", {
+    validateStatus: () => true,
+  })
+
+  t.is(status, 200)
+  t.is(data.hello, "world")
+})

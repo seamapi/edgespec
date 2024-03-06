@@ -270,13 +270,17 @@ export const withInputValidation =
       new URL(req.url).searchParams.entries()
     )
 
+    const willValidateRequestBody = input.shouldValidateGetRequestBody
+      ? true
+      : req.method !== "GET" && req.method !== "DELETE"
+
     let jsonBody: any
 
     if (input.jsonBody || input.commonParams) {
       try {
         jsonBody = await req.clone().json()
       } catch (e: any) {
-        if (!input.jsonBody?.isOptional()) {
+        if (!input.jsonBody?.isOptional() && willValidateRequestBody) {
           throw new InputParsingError("Error while parsing JSON body")
         }
       }
@@ -315,10 +319,6 @@ export const withInputValidation =
         ...originalParams,
         ...(typeof jsonBody === "object" ? jsonBody : {}),
       }
-
-      const willValidateRequestBody = input.shouldValidateGetRequestBody
-        ? true
-        : req.method !== "GET" && req.method !== "DELETE"
 
       if (Boolean(input.formData) && willValidateRequestBody) {
         req.multiPartFormData = input.formData?.parse(multiPartFormData)
