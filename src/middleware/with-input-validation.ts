@@ -315,7 +315,9 @@ export const withInputValidation =
         ...(typeof jsonBody === "object" ? jsonBody : {}),
       }
 
-      const willValidateRequestBody = !["GET", "DELETE", "HEAD"].includes(req.method)
+      const willValidateRequestBody = !["GET", "DELETE", "HEAD"].includes(
+        req.method
+      )
 
       if (Boolean(input.formData) && willValidateRequestBody) {
         req.multiPartFormData = input.formData?.parse(multiPartFormData)
