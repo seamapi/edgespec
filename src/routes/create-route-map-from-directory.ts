@@ -26,5 +26,11 @@ export const createRouteMapFromDirectory = async (
     }
   }
 
+  // Fix root route
+  if (routes[""]) {
+    routes["/"] = routes[""]
+    delete routes[""]
+  }
+
   return routes
 }
