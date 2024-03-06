@@ -4,6 +4,7 @@ import { version } from "../../package.json"
 import { BundleCommand } from "./commands/bundle.js"
 import { DevCommand } from "./commands/dev.js"
 import { CodeGenRouteTypes } from "./commands/codegen/route-types.js"
+import { CodeGenOpenAPI } from "./commands/codegen/openapi.js"
 
 runExit(
   {
@@ -11,5 +12,5 @@ runExit(
     binaryName: "edgespec",
     binaryVersion: version,
   },
-  [BundleCommand, DevCommand, CodeGenRouteTypes]
+  [BundleCommand, DevCommand, CodeGenRouteTypes, CodeGenOpenAPI]
 )

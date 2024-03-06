@@ -1,6 +1,13 @@
 import path from "node:path"
 import { createRouteMapFromDirectory } from "src/routes/create-route-map-from-directory.js"
-import { Project, Symbol, Type, TypeFormatFlags, ts } from "ts-morph"
+import {
+  ExportedDeclarations,
+  Project,
+  Symbol,
+  Type,
+  TypeFormatFlags,
+  ts,
+} from "ts-morph"
 
 const getZodTypeOfSymbol = (project: Project, symbol: Symbol | undefined) => {
   if (!symbol) return undefined
@@ -46,8 +53,9 @@ export const extractRouteSpecsFromAST = async ({
     throw new Error("Code generation failed (existing type errors)")
   }
 
-  const routeMap = await createRouteMapFromDirectory(routesDirectory)
+  let firstValidRouteDefaultExport: ExportedDeclarations
 
+  const routeMap = await createRouteMapFromDirectory(routesDirectory)
   const routes = Object.entries(routeMap).map(([route, { relativePath }]) => {
     const source = project.getSourceFileOrThrow(
       path.join(routesDirectory, relativePath)
@@ -96,6 +104,10 @@ export const extractRouteSpecsFromAST = async ({
       .getDescendantsOfKind(ts.SyntaxKind.StringLiteral)
       .map((d) => d.getLiteralText())
 
+    if (!firstValidRouteDefaultExport) {
+      firstValidRouteDefaultExport = defaultExportDeclaration
+    }
+
     return {
       route,
       httpMethods: httpMethodLiterals,
@@ -122,6 +134,38 @@ export const extractRouteSpecsFromAST = async ({
     }
   })
 
+  if (!firstValidRouteDefaultExport!) {
+    throw new Error(
+      "Code generation failed (could not find a valid route, you must have at least one route in your project to run code generation)."
+    )
+  }
+
+  const withRouteSpecIdentifier = firstValidRouteDefaultExport
+    .getChildrenOfKind(ts.SyntaxKind.CallExpression)[0]
+    .getChildrenOfKind(ts.SyntaxKind.Identifier)[0]
+
+  const createWithEdgeSpecCall = withRouteSpecIdentifier
+    .getDefinitionNodes()[0]
+    .getChildrenOfKind(ts.SyntaxKind.CallExpression)[0]
+
+  const createWithEdgeSpecCallSignature = project
+    .getTypeChecker()
+    .getResolvedSignature(createWithEdgeSpecCall)
+  if (!createWithEdgeSpecCallSignature) {
+    throw new Error("foo")
+  }
+
+  const globalRouteSpec = createWithEdgeSpecCallSignature?.getParameters()?.[0]
+  if (!globalRouteSpec) {
+    throw new Error("foo")
+  }
+  const globalRouteSpecType = project
+    .getTypeChecker()
+    .getTypeOfSymbolAtLocation(
+      globalRouteSpec,
+      globalRouteSpec.getValueDeclarationOrThrow()
+    )
+
   const filteredRoutes = routes.filter(Boolean) as Exclude<
     (typeof routes)[number],
     undefined
@@ -139,6 +183,7 @@ export const extractRouteSpecsFromAST = async ({
 
   return {
     routes: filteredRoutes,
+    globalRouteSpecType,
     renderType,
     project,
   }
