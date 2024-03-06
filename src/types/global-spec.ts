@@ -19,7 +19,6 @@ export type GlobalSpec = {
   }
 
   shouldValidateResponses?: boolean
-  shouldValidateGetRequestBody?: boolean
   supportedArrayFormats?: QueryArrayFormats
 
   /**

@@ -75,7 +75,6 @@ export const createWithEdgeSpec = <const GS extends GlobalSpec>(
           queryParams: routeSpec.queryParams,
           routeParams: routeSpec.routeParams,
           urlEncodedFormData: routeSpec.urlEncodedFormData,
-          shouldValidateGetRequestBody: globalSpec.shouldValidateGetRequestBody,
         }),
         // this serializes responses that are returned by the route function,
         // validating them against the routeSpec
