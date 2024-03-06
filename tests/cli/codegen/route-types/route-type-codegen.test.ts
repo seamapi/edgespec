@@ -42,7 +42,7 @@ test("CLI codegen route-types command produces the expected route types", async 
     "tests.ts",
     `
     import { expectTypeOf } from "expect-type"
-    import {Routes} from "./routes"
+    import {Routes, RouteResponse, RouteRequestBody, RouteRequestParams} from "./routes"
 
     type ExpectedRoutes = {
       // Basic smoke test
@@ -125,9 +125,21 @@ test("CLI codegen route-types command produces the expected route types", async 
           foo_id: string
         }
       }
+      // Query params
+      "/query-params": {
+        route: "/query-params"
+        method: "GET"
+        queryParams: {
+          foo_id: string
+        }
+      }
     }
 
     expectTypeOf<Routes>().toEqualTypeOf<ExpectedRoutes>()
+
+    expectTypeOf<RouteResponse<"/param-transform">>().toEqualTypeOf<{ok: boolean}>()
+    expectTypeOf<RouteRequestBody<"/param-transform">>().toEqualTypeOf<{foo_id: string}>()
+    expectTypeOf<RouteRequestParams<"/query-params">>().toEqualTypeOf<{foo_id: string}>()
   `
   )
 

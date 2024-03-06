@@ -172,7 +172,14 @@ ${filteredNodes
     }
   )
   .join("\n")}
-  }`
+  }
+
+  type ExtractOrUnknown<T, Key extends string> = Key extends keyof T ? T[Key] : unknown;
+
+  export type RouteResponse<Path extends keyof Routes> = ExtractOrUnknown<Routes[Path], "jsonResponse">
+  export type RouteRequestBody<Path extends keyof Routes> = ExtractOrUnknown<Routes[Path], "jsonBody"> & ExtractOrUnknown<Routes[Path], "commonParams">
+  export type RouteRequestParams<Path extends keyof Routes> = ExtractOrUnknown<Routes[Path], "queryParams"> & ExtractOrUnknown<Routes[Path], "commonParams">
+  `
     )
 
     const result = project.emitToMemory({ emitOnlyDtsFiles: true })
