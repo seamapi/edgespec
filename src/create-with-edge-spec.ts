@@ -1,7 +1,9 @@
 import { z } from "zod"
 import type { GlobalSpec } from "./types/global-spec.js"
-import { Middleware, MiddlewareChain } from "./middleware/types.js"
-import { CreateWithRouteSpecFn, RouteSpec } from "./types/route-spec.js"
+import type { Middleware, MiddlewareChain } from "./middleware/types.js"
+import type { CreateWithRouteSpecFn, RouteSpec } from "./types/route-spec.js"
+import type { ResponseTypeToContext } from "./types/context.js"
+import type { InferRecordKey } from "./types/util.js"
 import {
   EdgeSpecMultiPartFormDataResponse,
   EdgeSpecJsonResponse,
@@ -15,76 +17,94 @@ import { withMethods } from "./middleware/with-methods.js"
 import { withInputValidation } from "./middleware/with-input-validation.js"
 import { withUnhandledExceptionHandling } from "./middleware/with-unhandled-exception-handling.js"
 import { ResponseValidationError } from "./middleware/http-exceptions.js"
-import { ResponseTypeToContext } from "./types/context.js"
+
+const attachMetadataToRouteFn = <
+  const GS extends GlobalSpec,
+  const RS extends RouteSpec<InferRecordKey<GS["authMiddleware"]>>,
+>(
+  { globalSpec, routeSpec }: { globalSpec: GS; routeSpec: RS },
+  routeFn: EdgeSpecRouteFn
+) => {
+  routeFn._globalSpec = globalSpec
+  routeFn._routeSpec = routeSpec
+  return routeFn
+}
 
 export const createWithEdgeSpec = <const GS extends GlobalSpec>(
   globalSpec: GS
 ): CreateWithRouteSpecFn<GS> => {
-  return (routeSpec) => (routeFn) => async (request, ctx) => {
-    const onMultipleAuthMiddlewareFailures =
-      globalSpec.onMultipleAuthMiddlewareFailures ??
-      routeSpec.onMultipleAuthMiddlewareFailures
+  return (routeSpec) => (routeFn) =>
+    attachMetadataToRouteFn(
+      {
+        globalSpec,
+        routeSpec,
+      },
+      async (request, ctx) => {
+        const onMultipleAuthMiddlewareFailures =
+          globalSpec.onMultipleAuthMiddlewareFailures ??
+          routeSpec.onMultipleAuthMiddlewareFailures
 
-    const supportedAuthMiddlewares = new Set<string>(
-      routeSpec.auth == null || routeSpec.auth === "none"
-        ? []
-        : Array.isArray(routeSpec.auth)
-          ? routeSpec.auth
-          : [routeSpec.auth]
-    )
+        const supportedAuthMiddlewares = new Set<string>(
+          routeSpec.auth == null || routeSpec.auth === "none"
+            ? []
+            : Array.isArray(routeSpec.auth)
+              ? routeSpec.auth
+              : [routeSpec.auth]
+        )
 
-    const authMiddlewares = Object.entries(globalSpec.authMiddleware)
-      .filter(([k, _]) => supportedAuthMiddlewares.has(k))
-      .map(([_, v]) => v)
+        const authMiddlewares = Object.entries(globalSpec.authMiddleware)
+          .filter(([k, _]) => supportedAuthMiddlewares.has(k))
+          .map(([_, v]) => v)
 
-    return await wrapMiddlewares(
-      [
-        // Injected into the VM when running in WinterCG emulation mode
-        // @ts-expect-error
-        ...(typeof _injectedEdgeSpecMiddleware !== "undefined"
-          ? // @ts-expect-error
-            _injectedEdgeSpecMiddleware
-          : []),
-        withUnhandledExceptionHandling,
-        // this serializes responses that are returned by middleware WITHOUT
-        // validating them against the routeSpec
-        //
-        // this allows returning EdgeSpecResponse.json or ctx.json in a
-        // middleware, instead of having to return a raw Response
-        //
-        // this is needed, for instance, when an error middleware returns an
-        // error response that does not match the routeSpec's response shape
-        serializeResponse(globalSpec, routeSpec, false),
-        ...(globalSpec.beforeAuthMiddleware ?? []),
-        firstAuthMiddlewareThatSucceeds(
-          authMiddlewares,
-          onMultipleAuthMiddlewareFailures
-        ),
-        ...(globalSpec.afterAuthMiddleware ?? []),
-        ...(routeSpec.middleware ?? []),
-        withMethods(routeSpec.methods),
-        withInputValidation({
-          supportedArrayFormats: globalSpec.supportedArrayFormats ?? [
-            "brackets",
-            "comma",
-            "repeat",
+        return await wrapMiddlewares(
+          [
+            // Injected into the VM when running in WinterCG emulation mode
+            // @ts-expect-error
+            ...(typeof _injectedEdgeSpecMiddleware !== "undefined"
+              ? // @ts-expect-error
+                _injectedEdgeSpecMiddleware
+              : []),
+            withUnhandledExceptionHandling,
+            // this serializes responses that are returned by middleware WITHOUT
+            // validating them against the routeSpec
+            //
+            // this allows returning EdgeSpecResponse.json or ctx.json in a
+            // middleware, instead of having to return a raw Response
+            //
+            // this is needed, for instance, when an error middleware returns an
+            // error response that does not match the routeSpec's response shape
+            serializeResponse(globalSpec, routeSpec, false),
+            ...(globalSpec.beforeAuthMiddleware ?? []),
+            firstAuthMiddlewareThatSucceeds(
+              authMiddlewares,
+              onMultipleAuthMiddlewareFailures
+            ),
+            ...(globalSpec.afterAuthMiddleware ?? []),
+            ...(routeSpec.middleware ?? []),
+            withMethods(routeSpec.methods),
+            withInputValidation({
+              supportedArrayFormats: globalSpec.supportedArrayFormats ?? [
+                "brackets",
+                "comma",
+                "repeat",
+              ],
+              commonParams: routeSpec.commonParams,
+              formData: routeSpec.multiPartFormData,
+              jsonBody: routeSpec.jsonBody,
+              queryParams: routeSpec.queryParams,
+              routeParams: routeSpec.routeParams,
+              urlEncodedFormData: routeSpec.urlEncodedFormData,
+            }),
+            // this serializes responses that are returned by the route function,
+            // validating them against the routeSpec
+            serializeResponse(globalSpec, routeSpec),
           ],
-          commonParams: routeSpec.commonParams,
-          formData: routeSpec.multiPartFormData,
-          jsonBody: routeSpec.jsonBody,
-          queryParams: routeSpec.queryParams,
-          routeParams: routeSpec.routeParams,
-          urlEncodedFormData: routeSpec.urlEncodedFormData,
-        }),
-        // this serializes responses that are returned by the route function,
-        // validating them against the routeSpec
-        serializeResponse(globalSpec, routeSpec),
-      ],
-      routeFn,
-      request,
-      ctx
+          routeFn,
+          request,
+          ctx
+        )
+      }
     )
-  }
 }
 
 /**

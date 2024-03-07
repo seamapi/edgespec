@@ -8,14 +8,17 @@ import getPort from "@ava/get-port"
 import pRetry from "p-retry"
 import axios from "axios"
 import { once } from "node:events"
+import { resolveConfig } from "src/config/utils.js"
 
 test.serial("test bundle with Node adapter", async (t) => {
   const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 
-  const bundled = await bundle({
-    routesDirectory: path.join(currentDirectory, "api"),
-    rootDirectory: currentDirectory,
-  })
+  const bundled = await bundle(
+    resolveConfig({
+      routesDirectory: path.join(currentDirectory, "api"),
+      rootDirectory: currentDirectory,
+    })
+  )
 
   const port = await getPort()
 
@@ -87,10 +90,12 @@ test.serial(
   async (t) => {
     const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 
-    const bundled = await bundle({
-      routesDirectory: path.join(currentDirectory, "api"),
-      rootDirectory: currentDirectory,
-    })
+    const bundled = await bundle(
+      resolveConfig({
+        routesDirectory: path.join(currentDirectory, "api"),
+        rootDirectory: currentDirectory,
+      })
+    )
 
     const port = await getPort()
 

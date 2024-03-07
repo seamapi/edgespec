@@ -3,6 +3,8 @@ import { EdgeSpecRouteBundle } from "./edge-spec.js"
 import { Primitive } from "type-fest"
 import { z } from "zod"
 import { ResponseTypeToContext } from "./context.js"
+import type { RouteSpec } from "./route-spec.js"
+import type { GlobalSpec } from "./global-spec.js"
 
 export type HTTPMethods =
   | "GET"
@@ -166,10 +168,13 @@ export type EdgeSpecRouteFn<
   RequestOptions = EdgeSpecRequestOptions,
   ResponseType extends SerializableToResponse | Response = Response,
   Context = ResponseTypeToContext<ResponseType>,
-> = (
+> = ((
   req: EdgeSpecRequest<RequestOptions>,
   ctx: Context
-) => ResponseType | Promise<ResponseType>
+) => ResponseType | Promise<ResponseType>) & {
+  _globalSpec?: GlobalSpec
+  _routeSpec?: RouteSpec<any>
+}
 
 export type EdgeSpecFetchEvent = FetchEvent & {
   request: EdgeSpecRequest

@@ -2,7 +2,7 @@ import { createWithEdgeSpec } from "../../../../src/index.js"
 
 export const withEdgeSpec = createWithEdgeSpec({
   openapi: {
-    apiName: "hello-world",
+    apiName: "openapi-example",
     productionServerUrl: "https://example.com",
   },
   authMiddleware: {},

@@ -30,22 +30,7 @@ export class BundleCommand extends BaseCommand {
     const spinner = ora("Bundling...").start()
     const buildStartedAt = performance.now()
 
-    let platformBundleOptions: Partial<BundleOptions> = {}
-
-    if (config.platform === "node") {
-      platformBundleOptions = {
-        esbuild: {
-          platform: "node",
-          packages: "external",
-        },
-      }
-    }
-
-    const output = await bundle({
-      ...platformBundleOptions,
-      routesDirectory: config.routesDirectory,
-      rootDirectory: config.rootDirectory,
-    })
+    const output = await bundle(config)
 
     await fs.mkdir(path.dirname(this.outputPath), { recursive: true })
     await fs.writeFile(this.outputPath, output)
