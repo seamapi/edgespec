@@ -190,7 +190,6 @@ export interface RequestInput<
   formData?: FormData
   routeParams?: RouteParams
   urlEncodedFormData?: UrlEncodedFormData
-  shouldValidateGetRequestBody?: boolean
   supportedArrayFormats: QueryArrayFormats
 }
 
@@ -316,9 +315,9 @@ export const withInputValidation =
         ...(typeof jsonBody === "object" ? jsonBody : {}),
       }
 
-      const willValidateRequestBody = input.shouldValidateGetRequestBody
-        ? true
-        : req.method !== "GET" && req.method !== "DELETE"
+      const willValidateRequestBody = !["GET", "DELETE", "HEAD"].includes(
+        req.method
+      )
 
       if (Boolean(input.formData) && willValidateRequestBody) {
         req.multiPartFormData = input.formData?.parse(multiPartFormData)

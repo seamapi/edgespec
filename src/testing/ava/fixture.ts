@@ -30,7 +30,7 @@ const getWorker = async (initialData: InitialWorkerData) => {
 
   return registerSharedWorker({
     filename: new URL(
-      `file:${path.resolve(dirname, "ava/worker-wrapper.js")}#${key}`
+      `file:${path.resolve(dirname, "worker-wrapper.js")}#${key}`
     ),
     initialData: initialData as any,
     supportedProtocols: ["ava-4"],
