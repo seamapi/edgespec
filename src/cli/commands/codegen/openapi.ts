@@ -13,8 +13,6 @@ import { bundle } from "src/bundle/bundle.js"
 import { BaseCommand } from "src/cli/base-command.js"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.js"
 import { loadBundle } from "src/helpers.js"
-import { extractRouteSpecsFromAST } from "src/lib/codegen/extract-route-specs-from-ast.js"
-import { ts } from "ts-morph"
 import { generateSchema } from "@anatine/zod-openapi"
 import { ZodObject, ZodTypeAny } from "zod"
 import camelcase from "camelcase"
@@ -70,49 +68,26 @@ export class CodeGenOpenAPI extends BaseCommand {
     await fs.writeFile(tempBundlePath, await bundle(config))
     const runtimeBundle = await loadBundle(tempBundlePath)
 
-    const { project, globalRouteSpecType } = await extractRouteSpecsFromAST({
-      tsConfigFilePath: config.tsconfigPath,
-      routesDirectory: config.routesDirectory,
-    })
-
-    const openapiProperty = globalRouteSpecType.getProperty("openapi")
-    if (!openapiProperty) {
-      // todo: shouldn't error
+    const globalRouteSpec = Object.values(
+      runtimeBundle.routeMapWithHandlers
+    ).find((r) => Boolean(r._globalSpec))?._globalSpec
+    if (!globalRouteSpec) {
       throw new Error(
-        "Your createWithEdgespec() argument is missing the `openapi` parameter."
+        "You must have at least one route that uses the wrapper provided by createWithEdgeSpec()."
       )
     }
-
-    const openapiType = project
-      .getTypeChecker()
-      .getTypeOfSymbolAtLocation(
-        openapiProperty,
-        openapiProperty?.getValueDeclarationOrThrow()
-      )
-
-    const getStringLiteralPropertyFromOpenAPIDef = (propertyName: string) =>
-      openapiType
-        .getProperty(propertyName)
-        ?.getValueDeclarationOrThrow()
-        .getDescendantsOfKind(ts.SyntaxKind.StringLiteral)[0]
-        .getLiteralText()
-
-    const apiName = getStringLiteralPropertyFromOpenAPIDef("apiName")
-    const productionServerUrl = getStringLiteralPropertyFromOpenAPIDef(
-      "productionServerUrl"
-    )
 
     const builder = new OpenApiBuilder({
       openapi: "3.0.0",
       info: {
-        title: apiName ?? "EdgeSpec API",
+        title: globalRouteSpec.openapi?.apiName ?? "EdgeSpec API",
         version: "1.0.0", // todo
       },
-      ...(productionServerUrl
+      ...(globalRouteSpec.openapi?.productionServerUrl
         ? {
             servers: [
               {
-                url: productionServerUrl,
+                url: globalRouteSpec.openapi.productionServerUrl,
               },
             ],
           }
