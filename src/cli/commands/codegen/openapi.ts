@@ -1,12 +1,17 @@
 import { Option } from "clipanion"
+import { randomUUID } from "node:crypto"
 import fs from "node:fs/promises"
+import os from "node:os"
+import path from "node:path"
 import {
   OpenApiBuilder,
   OperationObject,
   ParameterObject,
 } from "openapi3-ts/oas31"
+import { bundle } from "src/bundle/bundle.js"
 import { BaseCommand } from "src/cli/base-command.js"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.js"
+import { loadBundle } from "src/helpers.js"
 import { extractRouteSpecsFromAST } from "src/lib/codegen/extract-route-specs-from-ast.js"
 import { ts } from "ts-morph"
 
@@ -19,6 +24,10 @@ export class CodeGenOpenAPI extends BaseCommand {
   })
 
   async run(config: ResolvedEdgeSpecConfig) {
+    const tempBundlePath = path.join(os.tmpdir(), `${randomUUID()}.js`)
+    await fs.writeFile(tempBundlePath, await bundle(config))
+    const runtimeBundle = await loadBundle(tempBundlePath)
+
     const { project, routes, globalRouteSpecType } =
       await extractRouteSpecsFromAST({
         tsConfigFilePath: config.tsconfigPath,
@@ -65,6 +74,19 @@ export class CodeGenOpenAPI extends BaseCommand {
           }
         : {}),
     })
+
+    for (const route of routes) {
+      const operation: OperationObject = {
+        description: route.route,
+        requestBody: {
+          content: {
+            "application/json": {
+              schema,
+            },
+          },
+        },
+      }
+    }
 
     await fs.writeFile(this.outputPath, builder.getSpecAsJson(undefined, 2))
   }
