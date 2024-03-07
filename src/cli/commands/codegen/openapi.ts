@@ -7,6 +7,7 @@ import {
   OpenApiBuilder,
   OperationObject,
   ParameterObject,
+  PathItemObject,
 } from "openapi3-ts/oas31"
 import { bundle } from "src/bundle/bundle.js"
 import { BaseCommand } from "src/cli/base-command.js"
@@ -15,7 +16,7 @@ import { loadBundle } from "src/helpers.js"
 import { extractRouteSpecsFromAST } from "src/lib/codegen/extract-route-specs-from-ast.js"
 import { ts } from "ts-morph"
 import { generateSchema } from "@anatine/zod-openapi"
-import { ZodTypeAny } from "zod"
+import { ZodObject, ZodTypeAny } from "zod"
 import camelcase from "camelcase"
 
 const replaceFirstCharToLowercase = (str: string) => {
@@ -54,17 +55,7 @@ const transformPathToOperationId = (path: string): string => {
   return replaceFirstCharToLowercase(transformedParts.join(""))
 }
 
-const omitRequestBodyIfUnsupported = (
-  method: string,
-  operation: OperationObject
-) => {
-  if (["get", "head"].includes(method.toLowerCase())) {
-    const { requestBody, ...rest } = operation
-    return rest
-  }
-
-  return operation
-}
+const HTTP_METHODS_WITHOUT_BODY = ["get", "head"]
 
 export class CodeGenOpenAPI extends BaseCommand {
   static paths = [[`codegen`, `openapi`]]
@@ -79,11 +70,10 @@ export class CodeGenOpenAPI extends BaseCommand {
     await fs.writeFile(tempBundlePath, await bundle(config))
     const runtimeBundle = await loadBundle(tempBundlePath)
 
-    const { project, routes, globalRouteSpecType } =
-      await extractRouteSpecsFromAST({
-        tsConfigFilePath: config.tsconfigPath,
-        routesDirectory: config.routesDirectory,
-      })
+    const { project, globalRouteSpecType } = await extractRouteSpecsFromAST({
+      tsConfigFilePath: config.tsconfigPath,
+      routesDirectory: config.routesDirectory,
+    })
 
     const openapiProperty = globalRouteSpecType.getProperty("openapi")
     if (!openapiProperty) {
@@ -136,93 +126,106 @@ export class CodeGenOpenAPI extends BaseCommand {
         continue
       }
 
-      let requestJsonBody: ZodTypeAny | null = null
-      if (_routeSpec.jsonBody) {
-        requestJsonBody = _routeSpec.jsonBody
-      }
+      const pathItemObject: PathItemObject = {}
 
-      if (_routeSpec.commonParams) {
-        requestJsonBody = requestJsonBody
-          ? requestJsonBody.and(_routeSpec.commonParams)
-          : _routeSpec.commonParams
-      }
+      for (const method of _routeSpec.methods) {
+        let { commonParams } = _routeSpec
+        const areCommonParamsRequiredInQuery =
+          HTTP_METHODS_WITHOUT_BODY.includes(method.toLowerCase())
+        if (!areCommonParamsRequiredInQuery) {
+          if (commonParams?._def.typeName === "ZodObject") {
+            commonParams = (commonParams as ZodObject<any>).partial()
+          } else {
+            commonParams = commonParams?.optional()
+          }
+        }
 
-      let requestQuery: ZodTypeAny | null = null
-      if (_routeSpec.queryParams) {
-        requestQuery = _routeSpec.queryParams
-      }
+        let requestJsonBody: ZodTypeAny | null = null
+        if (
+          _routeSpec.jsonBody &&
+          !HTTP_METHODS_WITHOUT_BODY.includes(method.toLowerCase())
+        ) {
+          requestJsonBody = _routeSpec.jsonBody
+        }
 
-      if (_routeSpec.commonParams) {
-        requestQuery = requestQuery
-          ? requestQuery.and(_routeSpec.commonParams)
-          : _routeSpec.commonParams
-      }
+        if (commonParams) {
+          requestJsonBody = requestJsonBody
+            ? requestJsonBody.and(commonParams)
+            : commonParams
+        }
 
-      const operation: OperationObject = {
-        summary: path,
-        responses: {
-          200: {
-            description: "OK",
-          },
-          400: {
-            description: "Bad Request",
-          },
-          // todo: omit when auth: "none"
-          401: {
-            description: "Unauthorized",
-          },
-        },
-      }
+        let requestQuery: ZodTypeAny | null = null
+        if (_routeSpec.queryParams) {
+          requestQuery = _routeSpec.queryParams
+        }
 
-      if (requestJsonBody) {
-        operation.requestBody = {
-          content: {
-            "application/json": {
-              schema: generateSchema(requestJsonBody),
+        if (commonParams) {
+          requestQuery = requestQuery
+            ? requestQuery.and(commonParams)
+            : commonParams
+        }
+
+        const operation: OperationObject = {
+          summary: path,
+          responses: {
+            200: {
+              description: "OK",
+            },
+            400: {
+              description: "Bad Request",
+            },
+            // todo: omit when auth: "none"
+            401: {
+              description: "Unauthorized",
             },
           },
         }
-      }
 
-      if (requestQuery) {
-        const schema = generateSchema(requestQuery)
-        if (schema.properties) {
-          const parameters: ParameterObject[] = Object.keys(
-            schema.properties
-          ).map((name) => ({
-            name,
-            in: "query",
-            schema: schema.properties?.[name],
-            required: schema.required?.includes(name),
-          }))
-
-          operation.parameters = parameters
+        if (requestJsonBody) {
+          operation.requestBody = {
+            content: {
+              "application/json": {
+                schema: generateSchema(requestJsonBody),
+              },
+            },
+          }
         }
-      }
 
-      if (_routeSpec.jsonResponse) {
-        // todo: responses other than 200
-        operation.responses[200].content = {
-          "application/json": {
-            schema: generateSchema(_routeSpec.jsonResponse),
-          },
+        if (requestQuery) {
+          const schema = generateSchema(requestQuery)
+          if (schema.properties) {
+            const parameters: ParameterObject[] = Object.keys(
+              schema.properties
+            ).map((name) => ({
+              name,
+              in: "query",
+              schema: schema.properties?.[name],
+              required: schema.required?.includes(name),
+            }))
+
+            operation.parameters = parameters
+          }
+        }
+
+        if (_routeSpec.jsonResponse) {
+          // todo: responses other than 200
+          operation.responses[200].content = {
+            "application/json": {
+              schema: generateSchema(_routeSpec.jsonResponse),
+            },
+          }
+        }
+
+        pathItemObject[method.toLowerCase() as keyof PathItemObject] = {
+          ...operation,
+          operationId: `${transformPathToOperationId(path)}${camelcase(method, {
+            pascalCase: true,
+          })}`,
         }
       }
 
       // Handle routes with multiple methods
-      builder.addPath(path, {
-        ..._routeSpec.methods
-          .map((method) => ({
-            [method.toLowerCase()]: {
-              ...omitRequestBodyIfUnsupported(method, operation),
-              operationId: `${transformPathToOperationId(path)}${camelcase(
-                method,
-                { pascalCase: true }
-              )}`,
-            },
-          }))
-          .reduceRight((acc, cur) => ({ ...acc, ...cur }), {}),
-      })
+      builder.addPath(path, pathItemObject)
     }
 
     await fs.writeFile(this.outputPath, builder.getSpecAsJson(undefined, 2))
