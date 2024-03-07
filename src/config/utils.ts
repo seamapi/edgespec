@@ -36,7 +36,7 @@ export interface ResolvedEdgeSpecConfig extends EdgeSpecConfig {
 /**
  * Resolves relative paths and sets defaults for any missing values.
  */
-const resolveConfig = (
+export const resolveConfig = (
   config: SetRequired<EdgeSpecConfig, "rootDirectory">
 ): ResolvedEdgeSpecConfig => {
   const { rootDirectory, tsconfigPath, routesDirectory, ...rest } =
