@@ -64,7 +64,7 @@ export class CodeGenOpenAPI extends BaseCommand {
   })
 
   async run(config: ResolvedEdgeSpecConfig) {
-    const tempBundlePath = path.join(os.tmpdir(), `${randomUUID()}.js`)
+    const tempBundlePath = path.join(os.tmpdir(), `${randomUUID()}.mjs`)
     await fs.writeFile(tempBundlePath, await bundle(config))
     const runtimeBundle = await loadBundle(tempBundlePath)
 
