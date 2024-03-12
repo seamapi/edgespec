@@ -50,3 +50,12 @@ test("path params are available", async (t) => {
     userId: "123",
   })
 })
+
+test("can call root route", async (t) => {
+  const { axios } = await getTestServer(t, import.meta.url)
+
+  const response = await axios.get(`/`)
+  t.deepEqual(response.data, {
+    ok: true,
+  })
+})
