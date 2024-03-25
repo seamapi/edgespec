@@ -5,6 +5,7 @@ import { EdgeSpecResponse } from "src/types/web-handler.js"
 import { z } from "zod"
 import { Middleware } from "src/middleware/index.js"
 import { getDefaultContext } from "src/types/context.js"
+import { AccumulateMiddlewareChainResultOptions } from "src/middleware/types.js"
 
 const withSessionToken: Middleware<
   {},
@@ -325,4 +326,32 @@ test.skip("urlEncodedFormData can be .refine()ed", () => {
     expectTypeOf(req.urlEncodedFormData.id).toBeNumber()
     return new Response()
   })({} as any, {} as any)
+})
+
+test.skip("cascading partial middlewares", () => {
+  const withEdgeSpec = createWithEdgeSpec({
+    beforeAuthMiddleware: [
+      {} as unknown as Middleware<{ a: string }, { a: string }>,
+      {} as unknown as Middleware<{ a?: string }, { a: string }>,
+    ],
+    authMiddleware: {},
+  })
+
+  withEdgeSpec({
+    auth: "none",
+    methods: ["GET"],
+    urlEncodedFormData: z
+      .object({
+        id: z.number(),
+      })
+      .refine((v) => v.id > 0, "id must be positive"),
+  })((_, ctx) => {
+    expectTypeOf(ctx.a).toBeString()
+    return new Response("")
+  })({} as any, {} as any)
+
+  type m1 = Middleware<{ a: string }, { a: string }>
+  type m2 = Middleware<{ a?: string }, { b: string }>
+
+  type m3 = AccumulateMiddlewareChainResultOptions<[m1, m2], "intersection">
 })
