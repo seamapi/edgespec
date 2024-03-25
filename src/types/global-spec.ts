@@ -8,7 +8,7 @@ export type QueryArrayFormats = readonly QueryArrayFormat[]
 
 export type GlobalSpec = {
   authMiddleware: Record<string, Middleware<any, any>>
-  beforeAuthMiddleware?: readonly Middleware<unknown, unknown, {}>[]
+  beforeAuthMiddleware?: readonly Middleware<any, any, {}>[]
   afterAuthMiddleware?: readonly Middleware<any, any>[]
 
   openapi?: {
