@@ -3,6 +3,7 @@ import type {
   AccumulateMiddlewareChainResultOptions,
   MiddlewareChain,
   MapMiddlewares,
+  Middleware,
 } from "../middleware/types.js"
 import type {
   GetAuthMiddlewaresFromGlobalSpec,
