@@ -15,14 +15,14 @@
       "types": "./dist/index.d.ts"
     },
     "./config": {
-      "import": "./dist/config.js",
-      "require": "./dist/config.js",
-      "types": "./dist/config/config.d.ts"
+      "import": "./dist/config/index.js",
+      "require": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
     },
     "./dev": {
-      "import": "./dist/dev.js",
-      "require": "./dist/dev.js",
-      "types": "./dist/dev.d.ts"
+      "import": "./dist/dev/index.js",
+      "require": "./dist/dev/index.js",
+      "types": "./dist/dev/index.d.ts"
     },
     "./middleware": {
       "import": "./dist/middleware/index.js",

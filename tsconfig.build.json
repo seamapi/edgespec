@@ -5,7 +5,7 @@
     "src/middleware/index.ts",
     "src/adapters/node.ts",
     "src/adapters/wintercg-minimal.ts",
-    "src/dev/dev.ts",
+    "src/dev/index.ts",
     "src/config/index.ts",
     "src/testing/ava/index.ts",
     "src/testing/ava/worker-wrapper.ts",
