@@ -60,7 +60,7 @@
     "example:hello-world": "node --loader=tsx --no-warnings ./src/cli/cli.js serve ./examples/hello-world/routes"
   },
   "bin": {
-    "edgespec": "./dist/cjs/esm/cli/cli.js"
+    "edgespec": "./dist/esm/cli/cli.js"
   },
   "keywords": [
     "☃️",
