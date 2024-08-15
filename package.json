@@ -18,32 +18,32 @@
     "./config": {
       "types": "./dist/types/config/index.d.ts",
       "import": "./dist/esm/config/index.js",
-      "require": "./dist/esm/config/index.js"
+      "require": "./dist/cjs/index.cjs"
     },
     "./dev": {
       "types": "./dist/types/dev/index.d.ts",
       "import": "./dist/esm/dev/index.js",
-      "require": "./dist/esm/dev/index.js"
+      "require": "./dist/cjs/index.cjs"
     },
     "./middleware": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/middleware/index.js",
-      "require": "./dist/esm/middleware/index.js"
+      "require": "./dist/cjs/index.cjs"
     },
     "./adapters/node": {
       "types": "./dist/types/adapters/node.d.ts",
       "import": "./dist/esm/adapters/node.js",
-      "require": "./dist/esm/adapters/node.js"
+      "require": "./dist/cjs/index.cjs"
     },
     "./adapters/wintercg-minimal": {
       "types": "./dist/types/adapters/wintercg-minimal.d.ts",
       "import": "./dist/esm/adapters/wintercg-minimal.js",
-      "require": "./dist/esm/adapters/wintercg-minimal.js"
+      "require": "./dist/cjs/index.cjs"
     },
     "./testing/ava": {
       "types": "./dist/types/testing/ava/index.d.ts",
       "import": "./dist/esm/testing/ava/index.js",
-      "require": "./dist/esm/testing/ava/index.js"
+      "require": "./dist/cjs/index.cjs"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",
