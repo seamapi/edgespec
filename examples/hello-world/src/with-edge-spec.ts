@@ -1,5 +1,5 @@
-import { createWithEdgeSpec } from "dist"
-import { withDefaultExceptionHandling } from "dist/middleware"
+import { createWithEdgeSpec } from "dist/esm"
+import { withDefaultExceptionHandling } from "dist/esm/middleware"
 
 export const withEdgeSpec = createWithEdgeSpec({
   apiName: "hello-world",
