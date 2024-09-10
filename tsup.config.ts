@@ -2,7 +2,7 @@ import { defineConfig } from "tsup"
 
 export default defineConfig({
   tsconfig: "tsconfig.build.cjs.json",
-  entry: ["src/commonjs.ts"],
+  entry: ["src/index.ts"],
   format: ["cjs"],
   outDir: "dist/cjs",
   treeshake: true,

@@ -7,43 +7,43 @@
     "dist"
   ],
   "module": "./dist/esm/index.js",
-  "main": "./dist/cjs/commonjs.cjs",
+  "main": "./dist/cjs/index.cjs",
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "require": "./dist/cjs/index.cjs"
     },
     "./config": {
       "types": "./dist/types/config/index.d.ts",
       "import": "./dist/esm/config/index.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "require": "./dist/esm/config/index.js"
     },
     "./dev": {
       "types": "./dist/types/dev/dev.d.ts",
       "import": "./dist/esm/dev/dev.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "require": "./dist/esm/dev/dev.js"
     },
     "./middleware": {
       "types": "./dist/types/middleware/index.d.ts",
       "import": "./dist/esm/middleware/index.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "require": "./dist/esm/middleware/index.js"
     },
     "./adapters/node": {
       "types": "./dist/types/adapters/node.d.ts",
       "import": "./dist/esm/adapters/node.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "require": "./dist/esm/adapters/node.js"
     },
     "./adapters/wintercg-minimal": {
       "types": "./dist/types/adapters/wintercg-minimal.d.ts",
       "import": "./dist/esm/adapters/wintercg-minimal.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "require": "./dist/esm/adapters/wintercg-minimal.js"
     },
     "./testing/ava": {
       "types": "./dist/types/testing/ava/index.d.ts",
       "import": "./dist/esm/testing/ava/index.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "require": "./dist/esm/testing/ava/index.js"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",
