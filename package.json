@@ -6,49 +6,49 @@
   "files": [
     "dist"
   ],
-  "module": "./dist/esm/index.js",
-  "main": "./dist/cjs/commonjs.cjs",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/commonjs.cjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./config": {
-      "types": "./dist/types/config/index.d.ts",
-      "import": "./dist/esm/config/index.js",
-      "require": "./dist/esm/config/index.js"
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js",
+      "require": "./dist/config/index.cjs"
     },
     "./dev": {
-      "types": "./dist/types/dev/dev.d.ts",
-      "import": "./dist/esm/dev/dev.js",
-      "require": "./dist/esm/dev/dev.js"
+      "types": "./dist/dev/dev.d.ts",
+      "import": "./dist/dev/dev.js",
+      "require": "./dist/dev/dev.cjs"
     },
     "./middleware": {
-      "types": "./dist/types/middleware/index.d.ts",
-      "import": "./dist/esm/middleware/index.js",
-      "require": "./dist/esm/middleware/index.js"
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js",
+      "require": "./dist/middleware/index.cjs"
     },
     "./adapters/node": {
-      "types": "./dist/types/adapters/node.d.ts",
-      "import": "./dist/esm/adapters/node.js",
-      "require": "./dist/esm/adapters/node.js"
+      "types": "./dist/adapters/node.d.ts",
+      "import": "./dist/adapters/node.js",
+      "require": "./dist/adapters/node.cjs"
     },
     "./adapters/wintercg-minimal": {
-      "types": "./dist/types/adapters/wintercg-minimal.d.ts",
-      "import": "./dist/esm/adapters/wintercg-minimal.js",
-      "require": "./dist/esm/adapters/wintercg-minimal.js"
+      "types": "./dist/adapters/wintercg-minimal.d.ts",
+      "import": "./dist/adapters/wintercg-minimal.js",
+      "require": "./dist/adapters/wintercg-minimal.cjs"
     },
     "./testing/ava": {
-      "types": "./dist/types/testing/ava/index.d.ts",
-      "import": "./dist/esm/testing/ava/index.js",
-      "require": "./dist/esm/testing/ava/index.js"
+      "types": "./dist/testing/ava/index.d.ts",
+      "import": "./dist/testing/ava/index.js",
+      "require": "./dist/testing/ava/index.cjs"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
-    "build": "tsup && tsc -p tsconfig.build.esm.json && tsc-alias -p tsconfig.build.esm.json && tsc -p tsconfig.build.types.json && tsc-alias -p tsconfig.build.types.json",
+    "build": "tsup",
     "prebuild": "del dist",
     "pretest": "npm run build",
     "test": "ava",

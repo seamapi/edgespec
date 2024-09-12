@@ -13,8 +13,8 @@
   ],
   "compilerOptions": {
     "outDir": "./dist",
-    "noEmit": false,
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "esModuleInterop": true,
   },
   "exclude": ["tests", "examples", "dist"]
 }
