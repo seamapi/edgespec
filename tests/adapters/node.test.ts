@@ -31,7 +31,7 @@ test.serial("test bundle with Node adapter", async (t) => {
   await fs.writeFile(
     bundleEntrypointPath,
     `
-    import {startServer} from "../../dist/esm/adapters/node.js"
+    import {startServer} from "../../dist/adapters/node.js"
     import bundle from "./bundled.js"
 
     const fooMiddleware = (req, ctx, next) => {
@@ -110,7 +110,7 @@ test.serial(
       `
     import http from "node:http"
 
-    import {getNodeHandler} from "../../dist/esm/adapters/node.js"
+    import {getNodeHandler} from "../../dist/adapters/node.js"
     import bundle from "./bundled.js"
 
     const fooMiddleware = (req, ctx, next) => {

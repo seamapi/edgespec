@@ -14,7 +14,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "exclude": ["tests", "examples", "dist"]
 }
