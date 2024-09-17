@@ -6,48 +6,49 @@
   "files": [
     "dist"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     },
     "./config": {
+      "types": "./dist/config/index.d.ts",
       "import": "./dist/config/index.js",
-      "require": "./dist/config/index.js",
-      "types": "./dist/config/index.d.ts"
+      "require": "./dist/config/index.cjs"
     },
     "./dev": {
-      "import": "./dist/dev/index.js",
-      "require": "./dist/dev/index.js",
-      "types": "./dist/dev/index.d.ts"
+      "types": "./dist/dev/dev.d.ts",
+      "import": "./dist/dev/dev.js",
+      "require": "./dist/dev/dev.cjs"
     },
     "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
       "import": "./dist/middleware/index.js",
-      "require": "./dist/middleware/index.js",
-      "types": "./dist/middleware/index.d.ts"
+      "require": "./dist/middleware/index.cjs"
     },
     "./adapters/node": {
+      "types": "./dist/adapters/node.d.ts",
       "import": "./dist/adapters/node.js",
-      "require": "./dist/adapters/node.js",
-      "types": "./dist/adapters/node.d.ts"
+      "require": "./dist/adapters/node.cjs"
     },
     "./adapters/wintercg-minimal": {
+      "types": "./dist/adapters/wintercg-minimal.d.ts",
       "import": "./dist/adapters/wintercg-minimal.js",
-      "require": "./dist/adapters/wintercg-minimal.js",
-      "types": "./dist/adapters/wintercg-minimal.d.ts"
+      "require": "./dist/adapters/wintercg-minimal.cjs"
     },
     "./testing/ava": {
+      "types": "./dist/testing/ava/index.d.ts",
       "import": "./dist/testing/ava/index.js",
-      "require": "./dist/testing/ava/index.js",
-      "types": "./dist/testing/ava/index.d.ts"
+      "require": "./dist/testing/ava/index.cjs"
     }
   },
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsup",
     "prebuild": "del dist",
     "pretest": "npm run build",
     "test": "ava",
@@ -94,6 +95,7 @@
     "pg": "^8.11.3",
     "prettier": "^3.1.0",
     "tsc-alias": "^1.8.8",
+    "tsup": "^8.2.4",
     "tsx": "^4.7.0",
     "type-fest": "^4.10.0",
     "typed-emitter": "^2.1.0",
