@@ -44,7 +44,13 @@
       "types": "./dist/testing/ava/index.d.ts",
       "import": "./dist/testing/ava/index.js",
       "require": "./dist/testing/ava/index.cjs"
-    }
+    },
+    "./dist/config/index.cjs": "./dist/config/index.cjs",
+    "./dist/dev/dev.cjs": "./dist/dev/dev.cjs",
+    "./dist/middleware/index.cjs": "./dist/middleware/index.cjs",
+    "./dist/adapters/node.cjs": "./dist/adapters/node.cjs",
+    "./dist/adapters/wintercg-minimal.cjs": "./dist/adapters/wintercg-minimal.cjs",
+    "./dist/testing/ava/index.cjs": "./dist/testing/ava/index.cjs"
   },
   "repository": "git@github.com:seamapi/edgespec.git",
   "scripts": {
