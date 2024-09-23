@@ -11,39 +11,74 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./config": {
-      "types": "./dist/config/index.d.ts",
-      "import": "./dist/config/index.js",
-      "require": "./dist/config/index.cjs"
+      "import": {
+        "types": "./dist/config/index.d.ts",
+        "default": "./dist/config/index.js"
+      },
+      "require": {
+        "types": "./dist/config/index.d.cts",
+        "default": "./dist/config/index.cjs"
+      }
     },
     "./dev": {
-      "types": "./dist/dev/dev.d.ts",
-      "import": "./dist/dev/dev.js",
-      "require": "./dist/dev/dev.cjs"
+      "import": {
+        "types": "./dist/dev/dev.d.ts",
+        "default": "./dist/dev/dev.js"
+      },
+      "require": {
+        "types": "./dist/dev/dev.d.cts",
+        "default": "./dist/dev/dev.cjs"
+      }
     },
     "./middleware": {
-      "types": "./dist/middleware/index.d.ts",
-      "import": "./dist/middleware/index.js",
-      "require": "./dist/middleware/index.cjs"
+      "import": {
+        "types": "./dist/middleware/index.d.ts",
+        "default": "./dist/middleware/index.js"
+      },
+      "require": {
+        "types": "./dist/middleware/index.d.cts",
+        "default": "./dist/middleware/index.cjs"
+      }
     },
     "./adapters/node": {
-      "types": "./dist/adapters/node.d.ts",
-      "import": "./dist/adapters/node.js",
-      "require": "./dist/adapters/node.cjs"
+      "import": {
+        "types": "./dist/adapters/node.d.ts",
+        "default": "./dist/adapters/node.js"
+      },
+      "require": {
+        "types": "./dist/adapters/node.d.cts",
+        "default": "./dist/adapters/node.cjs"
+      }
     },
     "./adapters/wintercg-minimal": {
-      "types": "./dist/adapters/wintercg-minimal.d.ts",
-      "import": "./dist/adapters/wintercg-minimal.js",
-      "require": "./dist/adapters/wintercg-minimal.cjs"
+      "import": {
+        "types": "./dist/adapters/wintercg-minimal.d.ts",
+        "default": "./dist/adapters/wintercg-minimal.js"
+      },
+      "require": {
+        "types": "./dist/adapters/wintercg-minimal.d.cts",
+        "default": "./dist/adapters/wintercg-minimal.cjs"
+      }
     },
     "./testing/ava": {
-      "types": "./dist/testing/ava/index.d.ts",
-      "import": "./dist/testing/ava/index.js",
-      "require": "./dist/testing/ava/index.cjs"
+      "import": {
+        "types": "./dist/testing/ava/index.d.ts",
+        "default": "./dist/testing/ava/index.js"
+      },
+      "require": {
+        "types": "./dist/testing/ava/index.d.cts",
+        "default": "./dist/testing/ava/index.cjs"
+      }
     },
     "./dist/config/index.cjs": "./dist/config/index.cjs",
     "./dist/dev/dev.cjs": "./dist/dev/dev.cjs",
