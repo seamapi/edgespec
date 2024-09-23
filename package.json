@@ -80,6 +80,7 @@
         "default": "./dist/testing/ava/index.cjs"
       }
     },
+    "./dist/index.cjs": "./dist/index.cjs",
     "./dist/config/index.cjs": "./dist/config/index.cjs",
     "./dist/dev/dev.cjs": "./dist/dev/dev.cjs",
     "./dist/middleware/index.cjs": "./dist/middleware/index.cjs",
