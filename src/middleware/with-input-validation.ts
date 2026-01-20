@@ -10,6 +10,28 @@ import {
   InvalidQueryParamsError,
 } from "./http-exceptions.js"
 
+/**
+ * Get the type identifier from a Zod schema definition.
+ * Supports both Zod 3 (_def.typeName) and Zod 4 (_def.type).
+ */
+const getZodTypeIdentifier = (def: any): string | undefined => {
+  // Zod 4 uses _def.type (lowercase string like "string", "boolean", "optional")
+  // Zod 3 uses _def.typeName (ZodFirstPartyTypeKind enum values)
+  return def.type ?? def.typeName
+}
+
+/**
+ * Check if a type identifier matches a specific Zod type.
+ * Supports both Zod 3 (ZodFirstPartyTypeKind) and Zod 4 (lowercase strings).
+ */
+const isZodType = (
+  typeIdentifier: string | undefined,
+  zod3Kind: (typeof ZodFirstPartyTypeKind)[keyof typeof ZodFirstPartyTypeKind],
+  zod4Type: string
+): boolean => {
+  return typeIdentifier === zod3Kind || typeIdentifier === zod4Type
+}
+
 const getZodObjectSchemaFromZodEffectSchema = (
   isZodEffect: boolean,
   schema: z.ZodTypeAny
@@ -18,10 +40,21 @@ const getZodObjectSchemaFromZodEffectSchema = (
     return schema as z.ZodObject<any>
   }
 
-  let currentSchema = schema
+  let currentSchema = schema as any
 
-  while (currentSchema instanceof z.ZodEffects) {
-    currentSchema = currentSchema._def.schema
+  // Handle both Zod 3 (ZodEffects with _def.schema) and Zod 4 (pipe with _def.in)
+  while (
+    currentSchema instanceof z.ZodEffects ||
+    getZodTypeIdentifier(currentSchema._def) === "pipe"
+  ) {
+    if (currentSchema instanceof z.ZodEffects) {
+      currentSchema = currentSchema._def.schema
+    } else if (currentSchema._def.in) {
+      // Zod 4 pipe structure
+      currentSchema = currentSchema._def.in
+    } else {
+      break
+    }
   }
 
   return currentSchema as z.ZodObject<any>
@@ -29,39 +62,53 @@ const getZodObjectSchemaFromZodEffectSchema = (
 
 /**
  * This function is used to get the correct schema from a ZodEffect | ZodDefault | ZodOptional schema.
- * TODO: this function should handle all special cases of ZodSchema and not just ZodEffect | ZodDefault | ZodOptional
+ * Supports both Zod 3 and Zod 4 internal structures.
  */
 const getZodDefFromZodSchemaHelpers = (schema: z.ZodTypeAny) => {
-  const special_zod_types = [
-    ZodFirstPartyTypeKind.ZodOptional,
-    ZodFirstPartyTypeKind.ZodDefault,
-    ZodFirstPartyTypeKind.ZodEffects,
-  ]
+  let currentSchema = schema as any
+  let typeId = getZodTypeIdentifier(currentSchema._def)
 
-  while (special_zod_types.includes(schema._def.typeName)) {
+  // Keep unwrapping optional, default, effects/pipe until we get to the base type
+  while (
+    isZodType(typeId, ZodFirstPartyTypeKind.ZodOptional, "optional") ||
+    isZodType(typeId, ZodFirstPartyTypeKind.ZodDefault, "default") ||
+    isZodType(typeId, ZodFirstPartyTypeKind.ZodEffects, "pipe")
+  ) {
     if (
-      schema._def.typeName === ZodFirstPartyTypeKind.ZodOptional ||
-      schema._def.typeName === ZodFirstPartyTypeKind.ZodDefault
+      isZodType(typeId, ZodFirstPartyTypeKind.ZodOptional, "optional") ||
+      isZodType(typeId, ZodFirstPartyTypeKind.ZodDefault, "default")
     ) {
-      schema = schema._def.innerType
-      continue
+      currentSchema = currentSchema._def.innerType
+    } else if (isZodType(typeId, ZodFirstPartyTypeKind.ZodEffects, "pipe")) {
+      // Zod 3 uses _def.schema, Zod 4 uses _def.in
+      currentSchema = currentSchema._def.schema ?? currentSchema._def.in
     }
 
-    if (schema._def.typeName === ZodFirstPartyTypeKind.ZodEffects) {
-      schema = schema._def.schema
-      continue
+    if (!currentSchema?._def) {
+      break
     }
+    typeId = getZodTypeIdentifier(currentSchema._def)
   }
-  return schema._def
+
+  return currentSchema._def
 }
 
 const tryGetZodSchemaAsObject = (
   schema: z.ZodTypeAny
 ): z.ZodObject<any> | undefined => {
-  const isZodEffect = schema._def.typeName === ZodFirstPartyTypeKind.ZodEffects
+  const typeId = getZodTypeIdentifier(schema._def)
+  const isZodEffect = isZodType(
+    typeId,
+    ZodFirstPartyTypeKind.ZodEffects,
+    "pipe"
+  )
   const safe_schema = getZodObjectSchemaFromZodEffectSchema(isZodEffect, schema)
-  const isZodObject =
-    safe_schema._def.typeName === ZodFirstPartyTypeKind.ZodObject
+  const safeTypeId = getZodTypeIdentifier(safe_schema._def)
+  const isZodObject = isZodType(
+    safeTypeId,
+    ZodFirstPartyTypeKind.ZodObject,
+    "object"
+  )
 
   if (!isZodObject) {
     return undefined
@@ -72,12 +119,14 @@ const tryGetZodSchemaAsObject = (
 
 const isZodSchemaArray = (schema: z.ZodTypeAny) => {
   const def = getZodDefFromZodSchemaHelpers(schema)
-  return def.typeName === ZodFirstPartyTypeKind.ZodArray
+  const typeId = getZodTypeIdentifier(def)
+  return isZodType(typeId, ZodFirstPartyTypeKind.ZodArray, "array")
 }
 
 const isZodSchemaBoolean = (schema: z.ZodTypeAny) => {
   const def = getZodDefFromZodSchemaHelpers(schema)
-  return def.typeName === ZodFirstPartyTypeKind.ZodBoolean
+  const typeId = getZodTypeIdentifier(def)
+  return isZodType(typeId, ZodFirstPartyTypeKind.ZodBoolean, "boolean")
 }
 
 const parseQueryParams = (

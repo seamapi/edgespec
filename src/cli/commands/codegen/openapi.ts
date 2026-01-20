@@ -108,7 +108,13 @@ export class CodeGenOpenAPI extends BaseCommand {
         const areCommonParamsRequiredInQuery =
           HTTP_METHODS_WITHOUT_BODY.includes(method.toLowerCase())
         if (!areCommonParamsRequiredInQuery) {
-          if (commonParams?._def.typeName === "ZodObject") {
+          // Support both Zod 3 (_def.typeName) and Zod 4 (_def.type)
+          const commonParamsType =
+            commonParams?._def.type ?? commonParams?._def.typeName
+          if (
+            commonParamsType === "ZodObject" ||
+            commonParamsType === "object"
+          ) {
             commonParams = (commonParams as ZodObject<any>).partial()
           } else {
             commonParams = commonParams?.optional()
