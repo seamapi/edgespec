@@ -1,14 +1,14 @@
 import { Command, Option } from "clipanion"
 import { bundle } from "src/bundle/bundle.js"
-import fs, { readFile } from "node:fs/promises"
+import fs from "node:fs/promises"
 import path from "node:path"
 import { durationFormatter, sizeFormatter } from "human-readable"
 import ora from "ora"
 import { BaseCommand } from "../base-command.js"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.js"
 
-import { BundleOptions } from "src/bundle/types.js"
-import { join as joinPath } from "node:path"
+import { bundleAndWatch } from "src/bundle/watch.js"
+import { formatMessages } from "esbuild"
 
 export class BundleCommand extends BaseCommand {
   static paths = [[`bundle`]]
@@ -26,7 +26,17 @@ export class BundleCommand extends BaseCommand {
     required: true,
   })
 
+  watchMode =
+    Option.Boolean("--watch,-w", {
+      description: "Watch for changes and rebuild",
+    }) ?? false
+
   async run(config: ResolvedEdgeSpecConfig) {
+    if (this.watchMode) {
+      await this.runInWatchMode(config)
+      return
+    }
+
     const spinner = ora("Bundling...").start()
     const buildStartedAt = performance.now()
 
@@ -37,11 +47,75 @@ export class BundleCommand extends BaseCommand {
 
     spinner.stopAndPersist({
       symbol: "☃️",
-      text: ` brr... bundled in ${durationFormatter({
-        allowMultiples: ["m", "s", "ms"],
-      })(performance.now() - buildStartedAt)} (${sizeFormatter()(
-        output.length
-      )})`,
+      text: ` brr... bundled in ${timeFormatter(
+        performance.now() - buildStartedAt
+      )} (${sizeFormatter()(output.length)})`,
+    })
+  }
+
+  async runInWatchMode(config: ResolvedEdgeSpecConfig) {
+    const watchingSpinner = ora({
+      hideCursor: false,
+      discardStdin: false,
+      text: "Watching...",
+    }).start()
+
+    const buildingSpinner = ora({
+      hideCursor: false,
+      discardStdin: false,
+      text: "Building...",
+    })
+
+    let buildStartedAt = performance.now()
+
+    await bundleAndWatch({
+      rootDirectory: config.rootDirectory,
+      routesDirectory: config.routesDirectory,
+      bundledAdapter:
+        config.platform === "wintercg-minimal" ? "wintercg-minimal" : undefined,
+      esbuild: {
+        platform: config.platform === "wintercg-minimal" ? "browser" : "node",
+        packages: config.platform === "node" ? "external" : undefined,
+        format: config.platform === "wintercg-minimal" ? "cjs" : "esm",
+        outfile: this.outputPath,
+        write: true,
+        plugins: [
+          {
+            name: "watch",
+            setup(build) {
+              build.onStart(async () => {
+                buildStartedAt = performance.now()
+                watchingSpinner.stop()
+                buildingSpinner.start()
+              })
+
+              build.onEnd(async (result) => {
+                if (result.errors.length === 0) {
+                  const durationMs = performance.now() - buildStartedAt
+                  buildingSpinner.succeed(
+                    `Built in ${timeFormatter(durationMs)}`
+                  )
+                } else {
+                  buildingSpinner.fail(
+                    "Build failed.\n" +
+                      (
+                        await formatMessages(result.errors, {
+                          kind: "error",
+                        })
+                      ).join("\n")
+                  )
+                }
+
+                watchingSpinner.start()
+              })
+            },
+          },
+        ],
+      },
     })
   }
 }
+
+const timeFormatter = durationFormatter({
+  allowMultiples: ["m", "s", "ms"],
+})
