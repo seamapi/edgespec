@@ -8,12 +8,13 @@ import {
   OperationObject,
   ParameterObject,
   PathItemObject,
+  SchemaObject,
 } from "openapi3-ts/oas31"
 import { bundle } from "src/bundle/bundle.js"
 import { BaseCommand } from "src/cli/base-command.js"
 import { ResolvedEdgeSpecConfig } from "src/config/utils.js"
 import { loadBundle } from "src/helpers.js"
-import { generateSchema } from "@anatine/zod-openapi"
+import { toJSONSchema } from "zod"
 import { ZodObject, ZodTypeAny } from "zod"
 import camelcase from "camelcase"
 
@@ -78,7 +79,7 @@ export class CodeGenOpenAPI extends BaseCommand {
     }
 
     const builder = new OpenApiBuilder({
-      openapi: "3.0.0",
+      openapi: "3.1.0",
       info: {
         title: globalRouteSpec.openapi?.apiName ?? "EdgeSpec API",
         version: "1.0.0", // todo
@@ -108,13 +109,8 @@ export class CodeGenOpenAPI extends BaseCommand {
         const areCommonParamsRequiredInQuery =
           HTTP_METHODS_WITHOUT_BODY.includes(method.toLowerCase())
         if (!areCommonParamsRequiredInQuery) {
-          // Support both Zod 3 (_def.typeName) and Zod 4 (_def.type)
-          const commonParamsType =
-            commonParams?._def.type ?? commonParams?._def.typeName
-          if (
-            commonParamsType === "ZodObject" ||
-            commonParamsType === "object"
-          ) {
+          const commonParamsType = commonParams?._def.type
+          if (commonParamsType === "object") {
             commonParams = (commonParams as ZodObject<any>).partial()
           } else {
             commonParams = commonParams?.optional()
@@ -166,14 +162,14 @@ export class CodeGenOpenAPI extends BaseCommand {
           operation.requestBody = {
             content: {
               "application/json": {
-                schema: generateSchema(requestJsonBody),
+                schema: generateSchema(requestJsonBody, "input"),
               },
             },
           }
         }
 
         if (requestQuery) {
-          const schema = generateSchema(requestQuery)
+          const schema = generateSchema(requestQuery, "input")
           if (schema.properties) {
             const parameters: ParameterObject[] = Object.keys(
               schema.properties
@@ -192,7 +188,7 @@ export class CodeGenOpenAPI extends BaseCommand {
           // todo: responses other than 200
           operation.responses[200].content = {
             "application/json": {
-              schema: generateSchema(_routeSpec.jsonResponse),
+              schema: generateSchema(_routeSpec.jsonResponse, "output"),
             },
           }
         }
@@ -212,3 +208,9 @@ export class CodeGenOpenAPI extends BaseCommand {
     await fs.writeFile(this.outputPath, builder.getSpecAsJson(undefined, 2))
   }
 }
+
+const generateSchema = (
+  schema: ZodTypeAny,
+  io: "input" | "output"
+): SchemaObject =>
+  toJSONSchema(schema, { target: "draft-2020-12", io }) as SchemaObject

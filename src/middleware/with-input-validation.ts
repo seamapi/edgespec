@@ -1,4 +1,4 @@
-import { z, ZodError, ZodFirstPartyTypeKind } from "zod"
+import { z, ZodError } from "zod"
 
 import type { QueryArrayFormats } from "src/types/global-spec.js"
 import { Middleware } from "src/middleware/index.js"
@@ -10,136 +10,40 @@ import {
   InvalidQueryParamsError,
 } from "./http-exceptions.js"
 
-/**
- * Get the type identifier from a Zod schema definition.
- * Supports both Zod 3 (_def.typeName) and Zod 4 (_def.type).
- */
-const getZodTypeIdentifier = (def: any): string | undefined => {
-  // Zod 4 uses _def.type (lowercase string like "string", "boolean", "optional")
-  // Zod 3 uses _def.typeName (ZodFirstPartyTypeKind enum values)
-  return def.type ?? def.typeName
-}
-
-/**
- * Check if a type identifier matches a specific Zod type.
- * Supports both Zod 3 (ZodFirstPartyTypeKind) and Zod 4 (lowercase strings).
- */
-const isZodType = (
-  typeIdentifier: string | undefined,
-  zod3Kind: (typeof ZodFirstPartyTypeKind)[keyof typeof ZodFirstPartyTypeKind],
-  zod4Type: string
-): boolean => {
-  return typeIdentifier === zod3Kind || typeIdentifier === zod4Type
-}
-
-const getZodObjectSchemaFromZodEffectSchema = (
-  isZodEffect: boolean,
-  schema: z.ZodTypeAny
-): z.ZodTypeAny | z.ZodObject<any> => {
-  if (!isZodEffect) {
-    return schema as z.ZodObject<any>
+const unwrapSchema = (schema: z.core.$ZodType): z.core.$ZodType => {
+  if (schema instanceof z.ZodOptional || schema instanceof z.ZodDefault) {
+    return unwrapSchema(schema.unwrap())
   }
-
-  let currentSchema = schema as any
-
-  // Handle both Zod 3 (ZodEffects with _def.schema) and Zod 4 (pipe with _def.in)
-  while (
-    currentSchema instanceof z.ZodEffects ||
-    getZodTypeIdentifier(currentSchema._def) === "pipe"
-  ) {
-    if (currentSchema instanceof z.ZodEffects) {
-      currentSchema = currentSchema._def.schema
-    } else if (currentSchema._def.in) {
-      // Zod 4 pipe structure
-      currentSchema = currentSchema._def.in
-    } else {
-      break
-    }
+  if (schema instanceof z.ZodPipe) {
+    return unwrapSchema(schema.in)
   }
-
-  return currentSchema as z.ZodObject<any>
-}
-
-/**
- * This function is used to get the correct schema from a ZodEffect | ZodDefault | ZodOptional schema.
- * Supports both Zod 3 and Zod 4 internal structures.
- */
-const getZodDefFromZodSchemaHelpers = (schema: z.ZodTypeAny) => {
-  let currentSchema = schema as any
-  let typeId = getZodTypeIdentifier(currentSchema._def)
-
-  // Keep unwrapping optional, default, effects/pipe until we get to the base type
-  while (
-    isZodType(typeId, ZodFirstPartyTypeKind.ZodOptional, "optional") ||
-    isZodType(typeId, ZodFirstPartyTypeKind.ZodDefault, "default") ||
-    isZodType(typeId, ZodFirstPartyTypeKind.ZodEffects, "pipe")
-  ) {
-    if (
-      isZodType(typeId, ZodFirstPartyTypeKind.ZodOptional, "optional") ||
-      isZodType(typeId, ZodFirstPartyTypeKind.ZodDefault, "default")
-    ) {
-      currentSchema = currentSchema._def.innerType
-    } else if (isZodType(typeId, ZodFirstPartyTypeKind.ZodEffects, "pipe")) {
-      // Zod 3 uses _def.schema, Zod 4 uses _def.in
-      currentSchema = currentSchema._def.schema ?? currentSchema._def.in
-    }
-
-    if (!currentSchema?._def) {
-      break
-    }
-    typeId = getZodTypeIdentifier(currentSchema._def)
-  }
-
-  return currentSchema._def
+  return schema
 }
 
 const tryGetZodSchemaAsObject = (
-  schema: z.ZodTypeAny
+  schema: z.ZodType<any>
 ): z.ZodObject<any> | undefined => {
-  const typeId = getZodTypeIdentifier(schema._def)
-  const isZodEffect = isZodType(
-    typeId,
-    ZodFirstPartyTypeKind.ZodEffects,
-    "pipe"
-  )
-  const safe_schema = getZodObjectSchemaFromZodEffectSchema(isZodEffect, schema)
-  const safeTypeId = getZodTypeIdentifier(safe_schema._def)
-  const isZodObject = isZodType(
-    safeTypeId,
-    ZodFirstPartyTypeKind.ZodObject,
-    "object"
-  )
-
-  if (!isZodObject) {
-    return undefined
-  }
-
-  return safe_schema as z.ZodObject<any>
+  const unwrappedSchema = unwrapSchema(schema)
+  return unwrappedSchema instanceof z.ZodObject ? unwrappedSchema : undefined
 }
 
-const isZodSchemaArray = (schema: z.ZodTypeAny) => {
-  const def = getZodDefFromZodSchemaHelpers(schema)
-  const typeId = getZodTypeIdentifier(def)
-  return isZodType(typeId, ZodFirstPartyTypeKind.ZodArray, "array")
-}
+const isZodSchemaArray = (schema: z.ZodType<any>) =>
+  unwrapSchema(schema) instanceof z.ZodArray
 
-const isZodSchemaBoolean = (schema: z.ZodTypeAny) => {
-  const def = getZodDefFromZodSchemaHelpers(schema)
-  const typeId = getZodTypeIdentifier(def)
-  return isZodType(typeId, ZodFirstPartyTypeKind.ZodBoolean, "boolean")
-}
+const isZodSchemaBoolean = (schema: z.ZodType<any>) =>
+  unwrapSchema(schema) instanceof z.ZodBoolean
 
-const parseQueryParams = (
-  schema: z.ZodTypeAny,
+const parseQueryParams = <Schema extends z.ZodType<any>>(
+  schema: Schema,
   input: Record<string, unknown>,
   supportedArrayFormats: QueryArrayFormats
-) => {
+): z.output<Schema> => {
   const parsed_input = Object.assign({}, input)
   const obj_schema = tryGetZodSchemaAsObject(schema)
 
   if (obj_schema) {
     for (const [key, value] of Object.entries(obj_schema.shape)) {
-      if (isZodSchemaArray(value as z.ZodTypeAny)) {
+      if (isZodSchemaArray(value as z.ZodType<any>)) {
         const array_input = input[key]
 
         if (
@@ -168,7 +72,7 @@ const parseQueryParams = (
         continue
       }
 
-      if (isZodSchemaBoolean(value as z.ZodTypeAny)) {
+      if (isZodSchemaBoolean(value as z.ZodType<any>)) {
         const boolean_input = input[key]
 
         if (typeof boolean_input === "string") {
@@ -183,7 +87,7 @@ const parseQueryParams = (
 
 const validateQueryParams = (
   inputUrl: string,
-  schema: z.ZodTypeAny,
+  schema: z.ZodType<any>,
   supportedArrayFormats: QueryArrayFormats
 ) => {
   const url = new URL(inputUrl, "http://dummy.com")
@@ -197,7 +101,7 @@ const validateQueryParams = (
 
   for (const key of url.searchParams.keys()) {
     for (const [schemaKey, value] of Object.entries(obj_schema.shape)) {
-      if (isZodSchemaArray(value as z.ZodTypeAny)) {
+      if (isZodSchemaArray(value as z.ZodType<any>)) {
         if (
           key === `${schemaKey}[]` &&
           !supportedArrayFormats.includes("brackets")
@@ -226,12 +130,12 @@ const validateQueryParams = (
 }
 
 export interface RequestInput<
-  JsonBody extends z.ZodTypeAny,
-  QueryParams extends z.ZodTypeAny,
-  CommonParams extends z.ZodTypeAny,
-  FormData extends z.ZodTypeAny,
-  UrlEncodedFormData extends z.ZodTypeAny,
-  RouteParams extends z.ZodTypeAny,
+  JsonBody extends z.ZodType<any>,
+  QueryParams extends z.ZodType<any>,
+  CommonParams extends z.ZodType<any>,
+  FormData extends z.ZodType<any>,
+  UrlEncodedFormData extends z.ZodType<any>,
+  RouteParams extends z.ZodType<any>,
 > {
   jsonBody?: JsonBody
   queryParams?: QueryParams
@@ -244,12 +148,12 @@ export interface RequestInput<
 
 export const withInputValidation =
   <
-    JsonBody extends z.ZodTypeAny,
-    QueryParams extends z.ZodTypeAny,
-    CommonParams extends z.ZodTypeAny,
-    FormData extends z.ZodTypeAny,
-    UrlEncodedFormData extends z.ZodTypeAny,
-    RouteParams extends z.ZodTypeAny,
+    JsonBody extends z.ZodType<any>,
+    QueryParams extends z.ZodType<any>,
+    CommonParams extends z.ZodType<any>,
+    FormData extends z.ZodType<any>,
+    UrlEncodedFormData extends z.ZodType<any>,
+    RouteParams extends z.ZodType<any>,
   >(
     input: RequestInput<
       JsonBody,
@@ -368,21 +272,21 @@ export const withInputValidation =
         req.method
       )
 
-      if (Boolean(input.formData) && willValidateRequestBody) {
-        req.multiPartFormData = input.formData?.parse(multiPartFormData)
+      if (input.formData && willValidateRequestBody) {
+        req.multiPartFormData = input.formData.parse(multiPartFormData)
       }
 
-      if (Boolean(input.jsonBody) && willValidateRequestBody) {
-        req.jsonBody = input.jsonBody?.parse(jsonBody)
+      if (input.jsonBody && willValidateRequestBody) {
+        req.jsonBody = input.jsonBody.parse(jsonBody)
       }
 
-      if (Boolean(input.urlEncodedFormData) && willValidateRequestBody) {
+      if (input.urlEncodedFormData && willValidateRequestBody) {
         req.urlEncodedFormData =
-          input.urlEncodedFormData?.parse(urlEncodedFormData)
+          input.urlEncodedFormData.parse(urlEncodedFormData)
       }
 
-      if (Boolean(input.routeParams) && "routeParams" in req) {
-        req.routeParams = input.routeParams?.parse(req.routeParams)
+      if (input.routeParams && "routeParams" in req) {
+        req.routeParams = input.routeParams.parse(req.routeParams)
       }
 
       if (input.queryParams) {

@@ -15,7 +15,7 @@ export type GlobalSpec = {
     apiName?: string
     productionServerUrl?: string
     securitySchemas?: Record<string, SecuritySchemeObject>
-    readonly globalSchemas?: Record<string, z.ZodTypeAny>
+    readonly globalSchemas?: Record<string, z.ZodType<any>>
   }
 
   shouldValidateResponses?: boolean

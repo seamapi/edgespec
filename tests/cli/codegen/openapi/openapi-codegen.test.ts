@@ -77,11 +77,7 @@ test("commonParams is handled correctly when paired with jsonBody", async (t) =>
   const postBody = post?.requestBody as RequestBodyObject
   const postBodySchema = postBody.content["application/json"]
     .schema as SchemaObject
-  t.true(
-    postBodySchema.allOf?.some(
-      (props) =>
-        !(props as SchemaObject).required &&
-        (props as SchemaObject).properties?.user_id
-    )
-  )
+  t.truthy(postBodySchema.properties?.user_id)
+  t.false(postBodySchema.required?.includes("user_id") ?? false)
+  t.true(postBodySchema.required?.includes("action"))
 })

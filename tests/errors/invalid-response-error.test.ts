@@ -31,7 +31,11 @@ test("sending an invalid response logs a verbose error", async (t) => {
   const logs = getLogs()
   const loggedError = logs.error.find((log) => log[0] instanceof Error)?.[0]
   t.truthy(loggedError)
-  t.true(loggedError.stack.includes("`a_valid_response_shape` is required"))
+  t.true(
+    loggedError.stack.includes(
+      'Invalid input: expected string, received undefined for "a_valid_response_shape"'
+    )
+  )
 })
 
 test("sending an invalid response logs a verbose error when using default exception middleware", async (t) => {
@@ -63,5 +67,9 @@ test("sending an invalid response logs a verbose error when using default except
   const logs = getLogs()
   const loggedError = logs.error.find((log) => Boolean(log[0]))?.[0]
   t.truthy(loggedError)
-  t.true(loggedError.includes("`a_valid_response_shape` is required"))
+  t.true(
+    loggedError.includes(
+      'Invalid input: expected string, received undefined for "a_valid_response_shape"'
+    )
+  )
 })
