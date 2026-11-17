@@ -35,7 +35,7 @@ export interface SerializableToResponse {
    * @throws z.ZodError if the response does not match the schema
    * @param schema - the schema to validate the response against
    */
-  serializeToResponse(schema: z.ZodTypeAny): Response
+  serializeToResponse(schema: z.ZodType<any>): Response
 
   statusCode(): number
 }
@@ -43,7 +43,7 @@ export interface SerializableToResponse {
 export type ValidFormDataValue = Primitive | Blob
 
 export abstract class EdgeSpecResponse implements SerializableToResponse {
-  abstract serializeToResponse(schema: z.ZodTypeAny): Response
+  abstract serializeToResponse(schema: z.ZodType<any>): Response
 
   statusCode(): number {
     return this.options.status ?? 200
@@ -104,7 +104,7 @@ export class EdgeSpecJsonResponse<T> extends EdgeSpecResponse {
     })
   }
 
-  override serializeToResponse(schema: z.ZodTypeAny) {
+  override serializeToResponse(schema: z.ZodType<any>) {
     return new Response(JSON.stringify(schema.parse(this.data)), this.options)
   }
 }
@@ -124,7 +124,7 @@ export class EdgeSpecCustomResponse<
     })
   }
 
-  serializeToResponse(schema: z.ZodTypeAny) {
+  serializeToResponse(schema: z.ZodType<any>) {
     return new Response(schema.parse(this.data), this.options)
   }
 }
@@ -152,7 +152,7 @@ export class EdgeSpecMultiPartFormDataResponse<
     })
   }
 
-  serializeToResponse(schema: z.ZodTypeAny) {
+  serializeToResponse(schema: z.ZodType<any>) {
     const formData = new FormData()
 
     for (const [key, value] of Object.entries(schema.parse(this.data))) {

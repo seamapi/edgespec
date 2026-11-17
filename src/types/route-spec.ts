@@ -21,16 +21,16 @@ import { ResponseTypeToContext } from "./context.js"
 export type RouteSpec<AuthMiddlewares extends string> = {
   methods: readonly HTTPMethods[]
 
-  jsonBody?: z.ZodTypeAny
-  multiPartFormData?: z.ZodTypeAny
-  queryParams?: z.ZodTypeAny
-  commonParams?: z.ZodTypeAny
-  urlEncodedFormData?: z.ZodTypeAny
-  routeParams?: z.ZodTypeAny
+  jsonBody?: z.ZodType<any>
+  multiPartFormData?: z.ZodType<any>
+  queryParams?: z.ZodType<any>
+  commonParams?: z.ZodType<any>
+  urlEncodedFormData?: z.ZodType<any>
+  routeParams?: z.ZodType<any>
 
-  jsonResponse?: z.ZodTypeAny
-  multipartFormDataResponse?: z.ZodTypeAny
-  customResponseMap?: Record<string, z.ZodTypeAny>
+  jsonResponse?: z.ZodType<any>
+  multipartFormDataResponse?: z.ZodType<any>
+  customResponseMap?: Record<string, z.ZodType<any>>
 
   auth?:
     | AuthMiddlewares
@@ -47,7 +47,7 @@ export type RouteSpec<AuthMiddlewares extends string> = {
 }
 
 type CustomResponseMapToEdgeSpecResponse<
-  M extends Record<string, z.ZodTypeAny>,
+  M extends Record<string, z.ZodType<any>>,
   K extends keyof M = keyof M,
 > = K extends keyof M & string
   ? EdgeSpecCustomResponse<z.output<M[K]>, K>
@@ -57,7 +57,7 @@ type GetRouteSpecResponseType<
   GS extends GlobalSpec,
   RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
 > =
-  | (RS["jsonResponse"] extends z.ZodTypeAny
+  | (RS["jsonResponse"] extends z.ZodType<any>
       ? EdgeSpecJsonResponse<z.output<RS["jsonResponse"]>>
       : never)
   | (RS["multipartFormDataResponse"] extends z.ZodObject<any>
@@ -65,7 +65,7 @@ type GetRouteSpecResponseType<
           z.output<RS["multipartFormDataResponse"]>
         >
       : never)
-  | (RS["customResponseMap"] extends Record<string, z.ZodTypeAny>
+  | (RS["customResponseMap"] extends Record<string, z.ZodType<any>>
       ? CustomResponseMapToEdgeSpecResponse<RS["customResponseMap"]>
       : never)
   | Response
@@ -82,22 +82,22 @@ type GetRouteSpecResponseType<
 type GetMiddlewareRequestOptions<
   GS extends GlobalSpec,
   RS extends RouteSpec<GetAuthMiddlewaresFromGlobalSpec<GS>>,
-> = (RS["jsonBody"] extends infer ZT extends z.ZodTypeAny
+> = (RS["jsonBody"] extends infer ZT extends z.ZodType<any>
   ? { jsonBody: z.output<ZT> }
   : {}) &
-  (RS["multiPartFormData"] extends infer ZT extends z.ZodTypeAny
+  (RS["multiPartFormData"] extends infer ZT extends z.ZodType<any>
     ? { multiPartFormData: z.output<ZT> }
     : {}) &
-  (RS["queryParams"] extends infer ZT extends z.ZodTypeAny
+  (RS["queryParams"] extends infer ZT extends z.ZodType<any>
     ? { query: z.output<ZT> }
     : {}) &
-  (RS["commonParams"] extends infer ZT extends z.ZodTypeAny
+  (RS["commonParams"] extends infer ZT extends z.ZodType<any>
     ? { commonParams: z.output<ZT> }
     : {}) &
-  (RS["urlEncodedFormData"] extends infer ZT extends z.ZodTypeAny
+  (RS["urlEncodedFormData"] extends infer ZT extends z.ZodType<any>
     ? { urlEncodedFormData: z.output<ZT> }
     : {}) &
-  (RS["routeParams"] extends infer ZT extends z.ZodTypeAny
+  (RS["routeParams"] extends infer ZT extends z.ZodType<any>
     ? { routeParams: z.output<ZT> }
     : { routeParams: EdgeSpecRouteParams })
 
