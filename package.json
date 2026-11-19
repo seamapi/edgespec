@@ -182,7 +182,6 @@
   },
   "overrides": {
     "tar": "^7.5.18",
-    "minimatch": "^11.0.1",
-    "esbuild": "$esbuild"
+    "minimatch": "^11.0.1"
   }
 }
